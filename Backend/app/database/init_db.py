@@ -10,7 +10,7 @@ def run_schema():
     engine = None
     while True:
         try:
-            logger.info(f"Connecting to {settings.db_name} at {settings.db_host}")
+            logger.info(f"Connecting to Database")
             engine = create_engine(settings.database_url, pool_pre_ping=True)
             with engine.connect() as conn:
                 conn.execute(text("SELECT 1"))

@@ -3,6 +3,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     database_url: str
     jwt_secret: str
+    resend_api: str
+    frontend_url: str = "http://localhost:3000"
     redis_url: str
     whatsapp_webhook_verify_token: str
     whatsapp_cloud_api_token: str

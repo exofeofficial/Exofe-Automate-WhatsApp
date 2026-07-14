@@ -1,4 +1,5 @@
 import { getToken } from "@/lib/auth";
+import { getAdminToken } from "@/lib/adminAuth";
 
 // Single place every fetch call to the backend goes through.
 // Swap NEXT_PUBLIC_API_URL in .env.local once the real API is up nothing
@@ -34,6 +35,29 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   }
 
   // some endpoints (like a bare 204) won't return a body
+  return res.status === 204 ? (undefined as T) : res.json();
+}
+
+// Same as request(), but sends the admin token instead of the business
+// owner token. Keep admin-only endpoints (POST /admin/...) on this one,
+// never the plain request() above, or an admin call would go out with
+// whatever business owner happens to be logged in on the same browser.
+async function adminRequest<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = getAdminToken();
+
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    ...options,
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new ApiError(body?.message ?? res.statusText, res.status, body?.errors);
+  }
+
   return res.status === 204 ? (undefined as T) : res.json();
 }
 
@@ -430,5 +454,20 @@ export function updateInteractiveMessage(id: string, payload: InteractiveMessage
 export function deleteInteractiveMessage(id: string) {
   return request<{ message: string }>(`/automation/interactive-messages/${id}`, {
     method: "DELETE",
+  });
+}
+
+// Exofe admin, separate login from the business owner one above. No
+// signup here on purpose, admin accounts only get created by someone
+// running a script on the server.
+export type AdminLoginPayload = { email: string; password: string };
+
+// Expected backend contract: POST /admin/auth/login { email, password } -> 200 { token }
+// Wrong credentials come back as a plain 401 with { message }, and on
+// purpose don't say whether the email exists or the password was wrong.
+export function adminLogin(payload: AdminLoginPayload) {
+  return adminRequest<{ token: string }>("/admin/auth/login", {
+    method: "POST",
+    body: JSON.stringify(payload),
   });
 }

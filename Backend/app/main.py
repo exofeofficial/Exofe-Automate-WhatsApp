@@ -3,13 +3,14 @@ from app.core.logger import get_logger
 from typing import Annotated
 from app.database.session import get_db
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 logger = get_logger(__name__)
 app = FastAPI()
 
 
 @app.get("/health")
-def health_check(session=Annotated[str, Depends(get_db)]):
+def health_check(session: Annotated[Session, Depends(get_db)]):
     logger.info("Health check endpoint hit")
     try:
         session.execute(text("SELECT 1"))

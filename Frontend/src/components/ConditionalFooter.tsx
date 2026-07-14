@@ -2,13 +2,12 @@
 
 import { usePathname } from "next/navigation";
 import Footer from "@/components/Footer";
-
-const HIDDEN_ON = ["/signup", "/login", "/demo"];
+import { HIDDEN_CHROME_ROUTES } from "@/lib/hidden-chrome-routes";
 
 export default function ConditionalFooter() {
   const pathname = usePathname();
 
-  if (HIDDEN_ON.some((path) => pathname.startsWith(path))) {
+  if (!pathname || HIDDEN_CHROME_ROUTES.some((path) => pathname.startsWith(path))) {
     return null;
   }
 

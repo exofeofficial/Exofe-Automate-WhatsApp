@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import DocsPage from "@/pages/DocsPage";
+import DocsPage from "@/views/DocsPage";
 
 export const metadata: Metadata = {
   title: "Documentation — Exofe",

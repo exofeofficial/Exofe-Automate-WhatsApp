@@ -19,6 +19,15 @@ body {
   font-family: var(--font-exo2);
 }
 
+/* Browsers default buttons to cursor: default, not pointer, unlike links */
+button:not(:disabled),
+[role="button"]:not(:disabled) {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
 /* Subtle dotted grid backdrop for hero */
 .bg-grid {
   background-image: radial-gradient(circle, rgba(91, 79, 233, 0.12) 1px, transparent 1px);

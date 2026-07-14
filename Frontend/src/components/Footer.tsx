@@ -29,6 +29,7 @@ const COMPANY_LINKS = [
   { label: "Support", href: "/support" },
   { label: "Terms of Service", href: "/terms" },
   { label: "Privacy Policy", href: "/privacy" },
+  { label: "Data Deletion", href: "/data-deletion" },
 ];
 
 const SOCIALS = [

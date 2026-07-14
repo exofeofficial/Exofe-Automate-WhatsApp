@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, type Variants } from "framer-motion";
-import { CheckCircle2, Eye, EyeOff, Loader2, Mail } from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
 import { ApiError, login, loginWithProvider, requestOtp, verifyOtp } from "@/lib/api";
+import { setToken } from "@/lib/auth";
+import { ensureUserProfile } from "@/lib/user";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -26,8 +29,9 @@ function isValidEmail(value: string) {
 }
 
 export default function LoginPage() {
+  const router = useRouter();
   const [mode, setMode] = useState<Mode>("password");
-  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [status, setStatus] = useState<"idle" | "loading">("idle");
   const [errors, setErrors] = useState<Errors>({});
   const [socialNotice, setSocialNotice] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -55,8 +59,10 @@ export default function LoginPage() {
     setStatus("loading");
     setErrors({});
     try {
-      await login({ email, password });
-      setStatus("done");
+      const { token } = await login({ email, password });
+      setToken(token);
+      ensureUserProfile(email);
+      router.push("/dashboard");
     } catch (err) {
       setStatus("idle");
       setErrors({
@@ -98,8 +104,10 @@ export default function LoginPage() {
     setStatus("loading");
     setErrors({});
     try {
-      await verifyOtp(email, code);
-      setStatus("done");
+      const { token } = await verifyOtp(email, code);
+      setToken(token);
+      ensureUserProfile(email);
+      router.push("/dashboard");
     } catch (err) {
       setStatus("idle");
       setErrors({
@@ -116,25 +124,6 @@ export default function LoginPage() {
       setSocialNotice(err instanceof ApiError ? err.message : "Something went wrong.");
     }
   };
-
-  if (status === "done") {
-    return (
-      <main className="flex min-h-[80vh] items-center justify-center px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: EASE }}
-          className="w-full max-w-md rounded-2xl border border-black/[.06] bg-white p-8 text-center shadow-xl shadow-indigo-900/10"
-        >
-          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
-            <CheckCircle2 className="h-7 w-7 text-emerald-500" strokeWidth={2} />
-          </span>
-          <h1 className="mt-5 text-xl font-bold text-foreground">Welcome back!</h1>
-          <p className="mt-2 text-sm text-foreground/60">You&apos;re logged in as {email}.</p>
-        </motion.div>
-      </main>
-    );
-  }
 
   return (
     <main className="flex min-h-[80vh] items-center justify-center bg-zinc-50 px-4 py-16">

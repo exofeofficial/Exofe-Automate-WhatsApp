@@ -74,3 +74,54 @@ At minimum, track:
 - Celery queue length, a growing queue means messages are not being processed fast enough
 
 A simple uptime checker plus application logs is enough to start, a full observability stack can come later once there is real traffic to monitor.
+
+## WhatsApp integration, production checklist
+
+The frontend's Connect WhatsApp flow (see FEATURES.md) is built and working against mock data. Everything below is what turns it into a real, multi tenant integration instead of a demo.
+
+### Meta setup, one time
+
+- A Business type app on Meta for Developers, with the WhatsApp product added
+- An Embedded Signup config created under App, WhatsApp, Embedded Signup. This gives you the `config_id` the frontend's `FB.login()` call needs
+- Request `whatsapp_business_management`, `whatsapp_business_messaging`, and `business_management` permissions, then submit for App Review to get Advanced Access. Until this is approved, only your own test numbers can connect, not real businesses. Start this early, review can take days
+- Business verification inside Meta Business Manager. Without it, messaging limits stay very low, around 250 conversations a day
+- A Privacy Policy URL and a Data Deletion Callback URL registered in the app settings, Meta requires both before review
+
+### Multi tenant architecture
+
+- Every WhatsApp connection, meaning the WABA ID, phone number ID, and access token, belongs to exactly one business in the database. Never share a connection across tenants
+- Incoming webhook payloads carry the phone number ID, use that to look up which business the message belongs to before doing anything else with it
+- Messaging limits and quality ratings are per WABA, so track usage per tenant. One business sending a lot of messages should never affect another business's limits or show up in their numbers
+
+### Queue based processing
+
+- The webhook endpoint should do only two things: verify the signature, then push the raw payload onto a queue and return 200 right away. Meta expects a fast response and will slow down or stop sending if the endpoint is slow
+- Outgoing messages go through a queue too, so a slow Graph API call never blocks a request a user is waiting on, like sending an order confirmation
+
+### Background workers
+
+- Celery workers, the `worker` service already in docker-compose, consume both the incoming and outgoing queues
+- Keep incoming and outgoing on separate queues, or at least separate priorities. A backlog of outgoing messages should never delay an incoming customer message from reaching the AI
+- Failed sends should retry with backoff, then get marked as failed after a fixed number of attempts. Do not retry forever
+
+### Comprehensive webhook event handling
+
+Subscribe to more than just incoming messages, each of these needs its own handler:
+
+- `messages`, incoming customer messages
+- `statuses`, delivery, read, and failed receipts for messages Exofe sent
+- `message_template_status_update`, fires when Meta approves or rejects a message template
+- `account_update` and account alerts, warns when a WABA gets restricted or flagged, this should immediately mark the tenant's connection as needing attention
+
+### Secret management
+
+- Per tenant access tokens should live encrypted in the database, application level encryption, not just relying on disk or volume encryption
+- The Meta App Secret and the platform level `WHATSAPP_WEBHOOK_VERIFY_TOKEN` are shared across all of Exofe, separate from each tenant's own access token, do not mix these up
+- Use a secrets manager for platform level secrets, AWS Secrets Manager, HashiCorp Vault, or a simpler self hosted option like Infisical, rather than raw values sitting in a `.env` file long term
+- Support rotating the App Secret without downtime by accepting two valid secrets during the rotation window
+
+### Automated reconnect and health checks
+
+- Access tokens can expire or get revoked, a business owner can remove Exofe's access from their end, or a WABA can get restricted. Run a scheduled job that checks each connected tenant's token against the Graph API
+- If a check fails, mark that tenant as disconnected in the database right away, that is what drives the "Your WhatsApp connection has expired" banner on the Integrations page
+- Try a silent token refresh first if Meta allows it for the flow being used, only show the reconnect banner to the business owner once a silent refresh is not possible

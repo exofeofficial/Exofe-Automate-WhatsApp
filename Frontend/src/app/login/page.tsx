@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import LoginPage from "@/pages/LoginPage";
+import LoginPage from "@/views/LoginPage";
 
 export const metadata: Metadata = {
   title: "Log in — Exofe",

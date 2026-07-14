@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Exo_2, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
+import ConditionalNavbar from "@/components/ConditionalNavbar";
 import ConditionalFooter from "@/components/ConditionalFooter";
 
 const exo2 = Exo_2({
@@ -34,7 +34,7 @@ export default function RootLayout({
         <meta name="color-scheme" content="light" />
       </head>
       <body className="min-h-full flex flex-col bg-white" suppressHydrationWarning>
-        <Navbar />
+        <ConditionalNavbar />
         {children}
         <ConditionalFooter />
       </body>

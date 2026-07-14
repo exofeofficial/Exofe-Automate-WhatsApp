@@ -6,6 +6,7 @@ import { motion, type Variants } from "framer-motion";
 import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
 import { ApiError, signUp, signUpWithProvider, type SignUpPayload } from "@/lib/api";
 import { COUNTRIES, PHONE_PLACEHOLDER } from "@/lib/countries";
+import { setUserProfile } from "@/lib/user";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -114,6 +115,7 @@ export default function SignupPage() {
 
     try {
       await signUp(payload);
+      setUserProfile({ firstName: payload.firstName, lastName: payload.lastName, email: payload.email });
       setStatus("done");
     } catch (err) {
       setStatus("idle");

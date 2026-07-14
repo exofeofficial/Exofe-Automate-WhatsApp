@@ -1,7 +1,7 @@
 # repositories/marketing_repository.py
-# Raw SQL for the waitlist and demo_leads tables. Every value goes in as a
-# bound parameter, never string-formatted into the query, so this stays
-# safe from SQL injection regardless of what a caller sends.
+# Plain SQL for the waitlist and demo_leads tables. We always use bound
+# params (the :name style below), never build the query with string
+# formatting, so this can't be broken with SQL injection.
 
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
@@ -9,10 +9,10 @@ from sqlalchemy.orm import Session
 
 
 def add_to_waitlist(db: Session, email: str) -> None:
-    """Insert an email into the waitlist. Signing up twice with the same
-    email is not an error, the caller should treat this as always
-    succeeding, that's friendlier than telling someone "you're already on
-    the list" and it avoids confirming an email exists in our system."""
+    """Add an email to the waitlist. If it's already there, we don't
+    error out, we just treat it as a success. Feels better for the user
+    and we don't end up telling people whether an email is already in
+    our system."""
     try:
         db.execute(
             text("INSERT INTO waitlist (email) VALUES (:email)"),

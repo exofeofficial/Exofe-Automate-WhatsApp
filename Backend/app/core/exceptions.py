@@ -1,10 +1,9 @@
 # core/exceptions.py
-# One error shape for the whole API: {"message": str, "errors": {field: msg} | null}.
-# This matches the ApiError class the frontend already has (see
-# frontend/src/lib/api.ts), which reads body.message and body.errors off
-# every non-2xx response. Raise AppError from route handlers instead of
-# FastAPI's HTTPException directly, so every error, expected or not, comes
-# back in this same shape.
+# Keeps one error format for the whole API: {"message": str, "errors": {field: msg} or null}.
+# The frontend's ApiError class already expects this shape (see
+# frontend/src/lib/api.ts), it reads message and errors off every error
+# response. So use AppError below instead of FastAPI's HTTPException,
+# that way every error we send back looks the same.
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -60,8 +59,8 @@ def register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-        # Full detail goes to the log, never to the client, an unhandled
-        # exception could easily be a DB error carrying a connection string.
+        # Log the real error, but never send the details back to the
+        # client. Could easily leak something like a DB connection string.
         logger.exception("Unhandled error on %s %s", request.method, request.url.path)
         return JSONResponse(
             status_code=500,

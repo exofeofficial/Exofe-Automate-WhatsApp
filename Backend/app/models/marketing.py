@@ -1,9 +1,8 @@
 # models/marketing.py
-# Pydantic request/response schemas for the waitlist and demo booking
-# endpoints. Field names on DemoBookingRequest use camelCase aliases
-# because that's what the frontend actually sends (see DemoBookingPayload
-# in frontend/src/lib/api.ts) — populate_by_name lets the code use
-# snake_case internally while still accepting the camelCase JSON body.
+# Request/response schemas for the waitlist and demo booking endpoints.
+# The frontend sends camelCase fields like billingCountry and countryCode
+# (check DemoBookingPayload in frontend/src/lib/api.ts), so we use aliases
+# to accept that JSON but still work with normal snake_case names in code.
 
 from typing import Literal
 

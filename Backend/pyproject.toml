@@ -6,6 +6,10 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.18.5",
+    # passlib is unmaintained and breaks on bcrypt 4.1+ (it calls a module
+    # attribute that got removed), pin bcrypt below that until we swap to
+    # something like argon2-cffi or a maintained bcrypt wrapper.
+    "bcrypt<4.1",
     "email-validator>=2.3.0",
     "fastapi>=0.139.0",
     "httpx>=0.28.1",
@@ -14,6 +18,7 @@ dependencies = [
     "pydantic-settings>=2.14.2",
     "python-dotenv>=1.2.2",
     "python-jose[cryptography]>=3.5.0",
+    "resend>=2.33.0",
     "slowapi>=0.1.10",
     "sqlmodel>=0.0.39",
     "supabase>=2.31.0",

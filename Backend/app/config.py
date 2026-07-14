@@ -3,11 +3,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     database_url: str
 
-    # Everything below this line is required by features that aren't built
-    # yet (auth, WhatsApp, file uploads, AI). Optional for now so the app
-    # can boot and serve the endpoints that ARE implemented (waitlist, demo
-    # booking) without needing every integration configured. Make these
-    # required again as each feature actually starts using them.
+    # These are for features that aren't built yet (auth, WhatsApp, file
+    # uploads, AI). Made them optional so the app can still start and run
+    # waitlist/demo booking without needing every single one configured.
+    # Once each feature actually gets built, make its variable required.
     jwt_secret: str | None = None
     redis_url: str | None = None
     whatsapp_webhook_verify_token: str | None = None
@@ -17,9 +16,19 @@ class Settings(BaseSettings):
     r2_bucket_name: str | None = None
     ai_api_key: str | None = None
 
-    # Comma separated list of origins allowed to call this API from a
-    # browser, e.g. "http://localhost:3000,https://app.exofe.com".
+    # Comma separated list of frontend URLs allowed to call this API,
+    # e.g. "http://localhost:3000,https://app.exofe.com".
     cors_origins: str = "http://localhost:3000"
+
+    # Resend, used for waitlist/demo confirmation emails for now, auth
+    # verification emails will use this too once auth gets built. Optional
+    # for the same reason as the settings above, no key means email sending
+    # just gets skipped instead of crashing the app.
+    resend_api_key: str | None = None
+    # Resend's own onboarding@resend.dev works without verifying a domain,
+    # but it can only send to the email you signed up to Resend with.
+    # Switch this once a real domain is verified in the Resend dashboard.
+    email_from: str = "Exofe <onboarding@resend.dev>"
 
     model_config = SettingsConfigDict(
         env_file=".env",

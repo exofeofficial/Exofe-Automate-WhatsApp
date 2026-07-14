@@ -8,7 +8,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.api.v1 import marketing
+from app.api.v1 import admin, marketing
 from app.config import settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logger import get_logger
@@ -43,6 +43,7 @@ app.add_middleware(
 )
 
 app.include_router(marketing.router)
+app.include_router(admin.router)
 
 
 @app.get("/health")

@@ -112,8 +112,9 @@ def update_user_fields(db: Session, user_id: str, **fields) -> None:
     params = {**fields, "id": user_id}
     db.execute(
         text(f"UPDATE users SET {set_clause}, updated_at = NOW() WHERE id = :id"),
-        params,
+        params
     )
+    db.commit()
 
 
 # ── Businesses ───────────────────────────────────────────────────────────────

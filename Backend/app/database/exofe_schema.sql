@@ -139,17 +139,21 @@ CREATE TABLE categories (
 -- ============================================================
 
 CREATE TABLE products (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    business_id UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
-    category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
-    name        TEXT NOT NULL,
-    description TEXT,
-    price       NUMERIC(10,2) NOT NULL CHECK (price >= 0),
-    stock       INTEGER NOT NULL DEFAULT -1,   -- -1 = unlimited / untracked
-    is_active   BOOLEAN NOT NULL DEFAULT TRUE, -- FALSE = hidden from AI, history preserved
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_id       UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+    category_id       UUID REFERENCES categories(id) ON DELETE SET NULL,
+    name              TEXT NOT NULL,
+    sku               TEXT NOT NULL DEFAULT '',
+    description       TEXT NOT NULL DEFAULT '',
+    price             NUMERIC(10,2) NOT NULL CHECK (price >= 0),
+    compare_at_price  NUMERIC(10,2) CHECK (compare_at_price >= 0),
+    stock             INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
+    status            TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('active', 'draft')),
+    has_variants      BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ 
 
 -- ============================================================
 -- PRODUCT IMAGES
@@ -162,6 +166,40 @@ CREATE TABLE product_images (
     product_id  UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     url         TEXT NOT NULL,      -- Cloudflare R2 URL
     sort_order  INTEGER NOT NULL DEFAULT 0
+);
+
+
+-- ============================================================
+-- PRODUCT OPTIONS
+-- "Size", "Color", or a custom option name, with the values it can
+-- take (e.g. name="Size", values=["S","M","L"]). Max 2 per product,
+-- enforced at the app layer (MAX_OPTIONS in ProductFormPage.tsx).
+-- ============================================================
+
+CREATE TABLE product_options (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    product_id  UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    name        TEXT NOT NULL,
+    values      TEXT[] NOT NULL DEFAULT '{}',
+    sort_order  INTEGER NOT NULL DEFAULT 0
+);
+
+
+-- ============================================================
+-- PRODUCT VARIANTS
+-- One row per option-value combination (e.g. ["S","Red"]), each with
+-- its own SKU/price/stock. option_values is ordered to match the
+-- product's product_options order.
+-- ============================================================
+ 
+CREATE TABLE product_variants (
+    id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    product_id     UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    option_values  TEXT[] NOT NULL,
+    sku            TEXT NOT NULL DEFAULT '',
+    price          NUMERIC(10,2) NOT NULL CHECK (price >= 0),
+    stock          INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ============================================================
@@ -350,11 +388,16 @@ CREATE INDEX idx_payments_business ON payments(business_id);
 CREATE INDEX idx_categories_business ON categories(business_id);
 
 -- products
-CREATE INDEX idx_products_business   ON products(business_id);
-CREATE INDEX idx_products_active     ON products(business_id, is_active);  -- AI catalog query
+CREATE INDEX idx_products_business_id ON products(business_id);
+CREATE INDEX idx_products_category_id ON products(category_id);
+CREATE INDEX idx_products_active ON products(business_id, is_active);
 
 -- product_images
 CREATE INDEX idx_product_images_product ON product_images(product_id);
+
+-- product options and variants
+CREATE INDEX idx_product_options_product_id ON product_options(product_id);
+CREATE INDEX idx_product_variants_product_id ON product_variants(product_id);
 
 -- customers
 -- Combined index: used on every inbound webhook to look up the sender
@@ -442,6 +485,9 @@ ALTER TABLE ai_settings            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE faqs                   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_logs             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE feature_flags          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE product_options  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE product_variants ENABLE ROW LEVEL SECURITY;
+ 
 
 -- ============================================================
 -- POLICIES
@@ -559,6 +605,37 @@ CREATE POLICY "products: own business only"
         )
     );
 
+CREATE POLICY "product_options: own business only"
+    ON product_options FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM users u
+            WHERE u.id = auth.uid()
+              AND u.role = 'admin'
+              AND u.business_id IS NULL
+        )
+        OR
+        product_id IN (
+            SELECT id FROM products
+            WHERE business_id = (SELECT business_id FROM users WHERE id = auth.uid())
+        )
+    );
+ 
+CREATE POLICY "product_variants: own business only"
+    ON product_variants FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM users u
+            WHERE u.id = auth.uid()
+              AND u.role = 'admin'
+              AND u.business_id IS NULL
+        )
+        OR
+        product_id IN (
+            SELECT id FROM products
+            WHERE business_id = (SELECT business_id FROM users WHERE id = auth.uid())
+        )
+    );
 -- ── product_images ───────────────────────────────────────────
 -- No direct business_id column — join through products.
 -- This is a read-heavy table, so the join cost is acceptable.

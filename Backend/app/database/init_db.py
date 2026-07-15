@@ -23,8 +23,8 @@ def run_schema():
             logger.info(f"DB not ready, retrying in {wait_seconds}s...")
             time.sleep(wait_seconds)
 
-    logger.info("Running exofe_schema.sql...")
-    with open("app/database/exofe_schema.sql", "r", encoding="utf-8") as f:
+    logger.info("Running product_schema_patch.sql...")
+    with open("app/database/product_schema_patch.sql", "r", encoding="utf-8") as f:
         sql = f.read()
     with engine.begin() as conn:
         conn.execute(text(sql))

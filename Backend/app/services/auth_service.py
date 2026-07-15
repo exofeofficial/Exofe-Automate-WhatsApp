@@ -1,11 +1,3 @@
-"""
-Authentication business logic.
-
-Sits between the route layer (api/v1/auth.py) and the repository layer
-(repositories/user_repository.py).  Routes should never touch the DB
-directly — they call service functions, which call repositories.
-"""
-
 import secrets
 from datetime import datetime, timedelta, timezone
 import hmac

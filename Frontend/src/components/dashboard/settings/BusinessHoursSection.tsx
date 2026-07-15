@@ -56,34 +56,37 @@ export default function BusinessHoursSection({
     >
       <div className="flex flex-col divide-y divide-black/[.05] rounded-xl border border-black/[.06]">
         {rows.map((row) => (
-          <div key={row.day} className="flex flex-wrap items-center gap-3 px-4 py-3">
-            <span className="w-24 shrink-0 text-sm font-medium text-foreground/75">{DAY_LABELS[row.day]}</span>
-            <label className="flex shrink-0 items-center gap-1.5 text-xs text-foreground/50">
-              <input
-                type="checkbox"
-                checked={row.closed}
-                onChange={(e) => updateRow(row.day, { closed: e.target.checked })}
-                className="h-4 w-4 rounded border-black/[.2] text-[#5B4FE9] focus:ring-[#5B4FE9]/30"
-              />
-              Closed
-            </label>
-            {!row.closed && (
-              <div className="flex flex-1 items-center gap-2">
+          <div key={row.day} className="flex flex-col gap-2.5 px-4 py-3 sm:flex-row sm:items-center sm:gap-3">
+            <span className="text-sm font-medium text-foreground/75 sm:w-24 sm:shrink-0">{DAY_LABELS[row.day]}</span>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="flex shrink-0 items-center gap-1.5 text-xs text-foreground/50">
                 <input
-                  type="time"
-                  value={row.open}
-                  onChange={(e) => updateRow(row.day, { open: e.target.value })}
-                  className="rounded-lg border border-black/[.12] px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                  type="checkbox"
+                  checked={row.closed}
+                  onChange={(e) => updateRow(row.day, { closed: e.target.checked })}
+                  className="h-4 w-4 rounded border-black/[.2] text-[#5B4FE9] focus:ring-[#5B4FE9]/30"
                 />
-                <span className="text-xs text-foreground/35">to</span>
-                <input
-                  type="time"
-                  value={row.close}
-                  onChange={(e) => updateRow(row.day, { close: e.target.value })}
-                  className="rounded-lg border border-black/[.12] px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
-                />
-              </div>
-            )}
+                Closed
+              </label>
+              {!row.closed && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    type="time"
+                    value={row.open}
+                    onChange={(e) => updateRow(row.day, { open: e.target.value })}
+                    className="w-[124px] rounded-lg border border-black/[.12] px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                  />
+                  <span className="text-xs text-foreground/35">to</span>
+                  <input
+                    type="time"
+                    value={row.close}
+                    onChange={(e) => updateRow(row.day, { close: e.target.value })}
+                    className="w-[124px] rounded-lg border border-black/[.12] px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                  />
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </div>

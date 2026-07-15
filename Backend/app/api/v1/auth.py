@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.database.session import get_db
 from app.models.auth import (
     ForgotPasswordRequest,
+    GoogleAuthRequest,
     LoginRequest,
     MessageResponse,
     OtpRequestBody,
@@ -70,6 +71,18 @@ def login(body: LoginRequest, db: DbSession):
     return TokenResponse(token=token)
 
 
+# ── POST /auth/google ────────────────────────────────────────────────────────
+
+@router.post("/google", response_model=TokenResponse)
+def google_auth(body: GoogleAuthRequest, db: DbSession):
+    try:
+        token = auth_service.google_login(db, id_token=body.id_token)
+    except AuthError as exc:
+        raise _handle_auth_error(exc)
+
+    return TokenResponse(token=token)
+
+
 # ── POST /auth/otp/request ───────────────────────────────────────────────────
 
 @router.post("/otp/request", response_model=MessageResponse)
@@ -119,7 +132,7 @@ def reset_password(body: ResetPasswordRequest, db: DbSession):
 @router.post("/verify-email", response_model=MessageResponse)
 def verify_email(body: VerifyEmailRequest, db: DbSession):
     try:
-        auth_service.verify_email(db, token=body.token)
+        auth_service.verify_email(db, email=body.email, code=body.code)
     except AuthError as exc:
         raise _handle_auth_error(exc)
 

@@ -5,9 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, type Variants } from "framer-motion";
 import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
-import { ApiError, login, loginWithProvider, requestOtp, verifyOtp } from "@/lib/api";
+import { ApiError, googleAuth, login, requestOtp, verifyOtp } from "@/lib/api";
 import { setToken } from "@/lib/auth";
-import { ensureUserProfile } from "@/lib/user";
+import { ensureUserProfile, setUserProfile } from "@/lib/user";
+import { decodeGoogleIdToken } from "@/lib/google";
+import BrandLogo from "@/components/BrandLogo";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -116,17 +119,22 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogle = async () => {
+  const handleGoogleCredential = async (idToken: string) => {
     setSocialNotice(null);
     try {
-      await loginWithProvider("google");
+      const { token } = await googleAuth(idToken);
+      setToken(token);
+      const info = decodeGoogleIdToken(idToken);
+      if (info) setUserProfile(info);
+      router.push("/dashboard");
     } catch (err) {
       setSocialNotice(err instanceof ApiError ? err.message : "Something went wrong.");
     }
   };
 
   return (
-    <main className="flex min-h-[80vh] items-center justify-center bg-zinc-50 px-4 py-16">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-4 py-10">
+      <BrandLogo className="mb-8" />
       <motion.div
         initial="hidden"
         animate="show"
@@ -302,20 +310,9 @@ export default function LoginPage() {
               <span className="h-px flex-1 bg-black/[.08]" />
             </motion.div>
 
-            <motion.button
-              variants={item}
-              type="button"
-              onClick={handleGoogle}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-black/[.1] py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-black/[.03]"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M23.5 12.3c0-.8-.07-1.6-.2-2.3H12v4.4h6.5c-.28 1.5-1.13 2.8-2.4 3.6v3h3.9c2.28-2.1 3.6-5.2 3.6-8.7Z" />
-                <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.9l-3.9-3c-1.08.73-2.47 1.16-4.05 1.16-3.11 0-5.75-2.1-6.69-4.92H1.28v3.09C3.25 21.3 7.3 24 12 24Z" />
-                <path fill="#FBBC05" d="M5.31 14.34a7.2 7.2 0 0 1 0-4.62V6.63H1.28a12 12 0 0 0 0 10.8l4.03-3.09Z" />
-                <path fill="#EA4335" d="M12 4.75c1.76 0 3.34.6 4.58 1.79l3.44-3.44C17.95 1.19 15.24 0 12 0 7.3 0 3.25 2.7 1.28 6.63l4.03 3.09C6.25 6.9 8.89 4.75 12 4.75Z" />
-              </svg>
-              Login with Google
-            </motion.button>
+            <motion.div variants={item} className="mt-4">
+              <GoogleSignInButton onCredential={handleGoogleCredential} text="signin_with" />
+            </motion.div>
 
             {socialNotice && <p className="mt-3 text-center text-xs text-amber-600">{socialNotice}</p>}
 

@@ -30,6 +30,13 @@ class Settings(BaseSettings):
     # Switch this once a real domain is verified in the Resend dashboard.
     email_from: str = "Exofe <onboarding@resend.dev>"
 
+    # "Continue with Google" — the frontend sends us the ID token Google
+    # Identity Services hands it after sign-in, and we verify it against
+    # this client ID. GOOGLE_CLIENT_SECRET isn't used by that flow, kept
+    # only for a possible future server-side OAuth flow.
+    google_client_id: str | None = None
+    google_client_secret: str | None = None
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8"

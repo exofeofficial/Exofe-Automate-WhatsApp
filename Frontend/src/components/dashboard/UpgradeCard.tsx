@@ -2,14 +2,12 @@
 
 import Link from "next/link";
 import { Crown } from "lucide-react";
-import { MOCK_TRIAL_STATUS } from "@/lib/trial";
+import type { TrialStatus } from "@/lib/trial";
 
-// Only shown while the account is still on the trial plan. Backend
-// developer: swap MOCK_TRIAL_STATUS for the real trial-status fetch (see
-// the comment in src/lib/trial.ts), this card should disappear the moment
-// currentPlan is a paid plan.
-export default function UpgradeCard() {
-  if (MOCK_TRIAL_STATUS.currentPlan !== "trial") return null;
+// Only shown while the account is still on the trial plan, disappears the
+// moment currentPlan is a paid plan.
+export default function UpgradeCard({ trial }: { trial: TrialStatus }) {
+  if (trial.currentPlan !== "trial") return null;
 
   return (
     <div className="relative mb-3 overflow-hidden rounded-2xl bg-gradient-to-br from-[#4a3fd6] via-[#5B4FE9] to-[#7C6FF5] p-4">

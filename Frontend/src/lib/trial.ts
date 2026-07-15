@@ -1,15 +1,14 @@
-// Trial status and onboarding checklist for the dashboard.
+// Trial status shape (now backed by GET /billing/trial-status, see
+// src/lib/api.ts) and the onboarding checklist for the dashboard.
 //
-// For backend developer: this whole file is a stand-in for real data.
-// Replace MOCK_TRIAL_STATUS and MOCK_ONBOARDING_TASKS with a fetch to
-// something like GET /billing/trial-status once that endpoint exists
-// (see API_CONTRACT.md). The shape below is what the dashboard UI expects,
-// so keep the response matching TrialStatus and OnboardingTask.
+// For backend developer: MOCK_ONBOARDING_TASKS is still a stand-in.
+// Replace it with a fetch once there's an endpoint to track which setup
+// steps a business has completed.
 //
 // Business rule from the PRD: every new signup gets a 7 day free trial.
-// Once trialLengthDays is used up and no plan is picked, isExpired should
-// flip to true and the dashboard shows a lock screen until the user picks
-// a plan from Billing.
+// Once trialLengthDays is used up and no plan is picked, isExpired flips
+// to true and the dashboard shows a lock screen until the user picks a
+// plan from Billing.
 
 export type TrialStatus = {
   isTrialing: boolean;
@@ -24,15 +23,6 @@ export type OnboardingTask = {
   label: string;
   href: string;
   completed: boolean;
-};
-
-// A brand new account, day one of the trial, nothing set up yet.
-export const MOCK_TRIAL_STATUS: TrialStatus = {
-  isTrialing: true,
-  daysLeft: 7,
-  trialLengthDays: 7,
-  isExpired: false,
-  currentPlan: "trial",
 };
 
 export const MOCK_ONBOARDING_TASKS: OnboardingTask[] = [

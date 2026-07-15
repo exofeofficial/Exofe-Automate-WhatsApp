@@ -31,6 +31,25 @@ def get_user_by_id(db: Session, user_id: str) -> dict | None:
     return dict(row._mapping) if row else None
 
 
+def list_users(db: Session) -> list[dict]:
+    """All business owner/staff users (never admins), newest first.
+
+    Joined with the business name for the admin panel's Users table.
+    """
+    rows = db.execute(
+        text("""
+            SELECT u.id, u.first_name, u.last_name, u.email, u.role, u.phone,
+                   u.country_code, u.email_verified_at, u.created_at,
+                   b.name AS business_name
+            FROM users u
+            LEFT JOIN businesses b ON b.id = u.business_id
+            WHERE u.role != 'admin'
+            ORDER BY u.created_at DESC
+        """)
+    ).fetchall()
+    return [dict(row._mapping) for row in rows]
+
+
 def create_user(
     db: Session,
     *,
@@ -113,5 +132,50 @@ def create_business(
             RETURNING *
         """),
         {"owner_id": owner_id, "name": name},
+    ).fetchone()
+    return dict(row._mapping)
+
+
+def get_business_by_id(db: Session, business_id: str) -> dict | None:
+    """Fetch one business by primary key. Used for trial-date calculations."""
+    row = db.execute(
+        text("SELECT * FROM businesses WHERE id = :id"),
+        {"id": business_id},
+    ).fetchone()
+    return dict(row._mapping) if row else None
+
+
+_BUSINESS_ALLOWED_FIELDS = frozenset({
+    "name", "industry", "description", "support_email", "support_phone",
+    "logo_url", "whatsapp_number", "whatsapp_connected_at",
+    "delivery_charge", "delivery_areas", "delivery_estimated_time",
+    "cash_on_delivery", "pickup_available",
+    "tax_rate", "tax_name", "prices_include_tax",
+    "language",
+})
+
+
+def update_business_fields(db: Session, business_id: str, **fields) -> dict:
+    """Update arbitrary columns on the one existing business row.
+
+    Always an UPDATE, never an INSERT — a business is created once at
+    signup, every settings save from here on just fills in that same row.
+    """
+    invalid = set(fields) - _BUSINESS_ALLOWED_FIELDS
+    if invalid:
+        raise ValueError(f"Disallowed fields: {invalid}")
+
+    if not fields:
+        return get_business_by_id(db, business_id)
+
+    set_clause = ", ".join(f"{key} = :{key}" for key in fields)
+    row = db.execute(
+        text(f"""
+            UPDATE businesses
+            SET {set_clause}, updated_at = NOW()
+            WHERE id = :business_id
+            RETURNING *
+        """),
+        {**fields, "business_id": business_id},
     ).fetchone()
     return dict(row._mapping)

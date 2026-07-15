@@ -46,19 +46,31 @@ CREATE TABLE users (
 
 CREATE TABLE businesses (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    owner_id                UUID NOT NULL REFERENCES users(id),
+    owner_id                UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name                    TEXT NOT NULL,
-    industry                TEXT                   -- clothing | restaurant | bakery |
-                                                   -- gift shop | cosmetics | mobile shop | home business
+    industry                TEXT                   -- matches the category dropdown in
+                                                   -- Settings > Business Profile on the frontend
                                 CHECK (industry IN (
-                                    'clothing', 'restaurant', 'bakery',
-                                    'gift shop', 'cosmetics', 'mobile shop', 'home business'
+                                    'Fashion and Apparel', 'Food and Beverage', 'Electronics',
+                                    'Beauty and Cosmetics', 'Home and Living', 'Grocery',
+                                    'Services', 'Other'
                                 )),
+    description             TEXT,                  -- shown to customers and Meta
+    support_email           TEXT,
+    support_phone           TEXT,
     logo_url                TEXT,                  -- stored in Cloudflare R2
     whatsapp_number         TEXT,                  -- NULL until connected
     whatsapp_connected_at   TIMESTAMPTZ,           -- NULL until first successful connection
     delivery_charge         NUMERIC(10,2) NOT NULL DEFAULT 0,   -- flat fee per order
+    delivery_areas          TEXT,
+    delivery_estimated_time TEXT,
+    cash_on_delivery        BOOLEAN NOT NULL DEFAULT TRUE,
+    pickup_available        BOOLEAN NOT NULL DEFAULT FALSE,
     tax_rate                NUMERIC(5,2) NOT NULL DEFAULT 0,    -- percentage (e.g. 17.00 = 17%)
+    tax_name                TEXT,
+    prices_include_tax      BOOLEAN NOT NULL DEFAULT FALSE,
+    language                TEXT NOT NULL DEFAULT 'en'
+                                CHECK (language IN ('en', 'ur', 'ko', 'ar')),
     created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -73,13 +85,21 @@ ALTER TABLE users
 -- Tracks which Exofe plan a business is on.
 -- ============================================================
 
+-- One row per business, created the moment they sign up (plan='trial',
+-- status='trialing', amount=0). Once they pick a paid plan, that same row
+-- is updated in place — plan/status/amount/current_period_end all get
+-- filled in, no second row.
 CREATE TABLE subscriptions (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     business_id         UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+    business_name       TEXT,                          -- denormalized copy of businesses.name,
+                                                        -- so this row is readable at a glance
+                                                        -- without joining businesses
     plan                TEXT NOT NULL
-                            CHECK (plan IN ('starter', 'growth', 'business')),
+                            CHECK (plan IN ('trial', 'starter', 'growth', 'business')),
     status              TEXT NOT NULL
-                            CHECK (status IN ('active', 'past_due', 'canceled')),
+                            CHECK (status IN ('trialing', 'active', 'past_due', 'canceled')),
+    amount              NUMERIC(10,2) NOT NULL DEFAULT 0,   -- 0 while trialing
     current_period_end  TIMESTAMPTZ NOT NULL,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -206,7 +226,7 @@ CREATE TABLE orders (
 CREATE TABLE order_items (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     order_id    UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-    product_id  UUID NOT NULL REFERENCES products(id),
+    product_id  UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     quantity    INTEGER NOT NULL CHECK (quantity > 0),
     unit_price  NUMERIC(10,2) NOT NULL   -- price at the moment the order was placed
 );

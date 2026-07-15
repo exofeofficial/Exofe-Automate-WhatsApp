@@ -51,7 +51,7 @@ export default function Topbar({ onMenuClick, title }: { onMenuClick: () => void
   const initial = profile?.firstName?.[0]?.toUpperCase() ?? "?";
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-b border-black/[.06] bg-white/90 px-4 backdrop-blur sm:px-6">
+    <header className="relative z-20 flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
       <div className="flex items-center gap-3">
         <button type="button" onClick={onMenuClick} aria-label="Open menu" className="lg:hidden">
           <Menu className="h-5 w-5 text-foreground/60" />

@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { CheckCircle2 } from "lucide-react";
+import { PLANS, yearlyEquivalent } from "@/lib/plans";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -19,57 +20,11 @@ const cardIn: Variants = {
   show: { y: 0, opacity: 1, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
-function yearlyEquivalent(monthly: number) {
-  // ~17% off (2 months free) when billed yearly
-  return Math.round((monthly * 10) / 12 / 10) * 10;
-}
-
-const PLANS = [
-  {
-    name: "Starter",
-    monthly: 2499,
-    desc: "Home businesses & Instagram sellers.",
-    popular: false,
-    className: "from-zinc-50 to-white",
-    features: [
-      "WhatsApp order automation",
-      "Basic AI replies",
-      "1,000 conversations/month",
-      "Order notifications",
-      "Email support",
-    ],
-  },
-  {
-    name: "Growth",
-    monthly: 4999,
-    desc: "Small brands, restaurants & clothing stores.",
-    popular: true,
-    className: "from-indigo-50 to-white",
-    features: [
-      "Everything in Starter",
-      "Unlimited products",
-      "AI order taking",
-      "Google Sheets integration",
-      "Multiple team members",
-      "5,000 conversations/month",
-    ],
-  },
-  {
-    name: "Business",
-    monthly: 9999,
-    desc: "High order volume businesses.",
-    popular: false,
-    className: "from-zinc-50 to-white",
-    features: [
-      "Everything in Growth",
-      "Unlimited conversations",
-      "Priority support",
-      "Custom integrations",
-      "Analytics dashboard",
-      "API access",
-    ],
-  },
-];
+const CARD_TINTS: Record<string, string> = {
+  starter: "from-zinc-50 to-white",
+  growth: "from-indigo-50 to-white",
+  business: "from-zinc-50 to-white",
+};
 
 export default function Pricing() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -191,7 +146,7 @@ export default function Pricing() {
                   </span>
                 )}
 
-                <div className={`bg-gradient-to-br p-6 ${p.className}`}>
+                <div className={`bg-gradient-to-br p-6 ${CARD_TINTS[p.id]}`}>
                   <p className="text-lg font-bold text-foreground">{p.name}</p>
                   <p className="mt-1 text-sm text-foreground/55">{p.desc}</p>
                   <div className="mt-5 flex items-end gap-1.5">

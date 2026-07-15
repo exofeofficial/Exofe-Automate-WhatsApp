@@ -8,20 +8,36 @@ import Topbar from "@/components/dashboard/Topbar";
 import PendingTasksWidget from "@/components/dashboard/PendingTasksWidget";
 import TrialLockOverlay from "@/components/dashboard/TrialLockOverlay";
 import { getToken } from "@/lib/auth";
-import { MOCK_TRIAL_STATUS } from "@/lib/trial";
+import { getTrialStatus } from "@/lib/api";
+import type { TrialStatus } from "@/lib/trial";
+
+// Fail-open default: if the trial-status fetch errors out (a network
+// hiccup, the backend being briefly down), don't lock a paying customer
+// out of their own dashboard over it.
+const SAFE_DEFAULT_TRIAL: TrialStatus = {
+  isTrialing: true,
+  daysLeft: 7,
+  trialLengthDays: 7,
+  isExpired: false,
+  currentPlan: "trial",
+};
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [checked, setChecked] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [trial, setTrial] = useState<TrialStatus>(SAFE_DEFAULT_TRIAL);
 
   useEffect(() => {
     if (!getToken()) {
       router.replace("/login");
       return;
     }
-    setChecked(true);
+    getTrialStatus()
+      .then(setTrial)
+      .catch(() => {})
+      .finally(() => setChecked(true));
   }, [router]);
 
   // close the mobile drawer whenever the route changes
@@ -30,21 +46,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [pathname]);
 
   if (!checked) {
-    return <div className="flex min-h-screen items-center justify-center bg-white" />;
+    return <div className="flex min-h-screen items-center justify-center bg-[#F1F0FA]" />;
   }
 
   const title = getPageTitle(pathname);
-
-  // Backend developer: swap MOCK_TRIAL_STATUS for the real trial-status
-  // fetch, see the comment in src/lib/trial.ts for the expected shape.
-  const trial = MOCK_TRIAL_STATUS;
   const isBillingPage = pathname === "/dashboard/billing";
   const showLock = trial.isExpired && !isBillingPage;
 
   return (
-    <div className="flex min-h-screen bg-zinc-50">
+    <div className="flex min-h-screen bg-[#F1F0FA]">
       <div className="hidden lg:block">
-        <Sidebar />
+        <Sidebar trial={trial} />
       </div>
 
       <AnimatePresence>
@@ -64,7 +76,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
               className="fixed inset-y-0 left-0 z-50 lg:hidden"
             >
-              <Sidebar onClose={() => setMobileOpen(false)} />
+              <Sidebar trial={trial} onClose={() => setMobileOpen(false)} />
             </motion.div>
           </>
         )}
@@ -75,7 +87,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <main className="flex-1 p-4 sm:p-6">{children}</main>
       </div>
 
-      {!showLock && <PendingTasksWidget />}
+      {!showLock && <PendingTasksWidget trial={trial} />}
       {showLock && <TrialLockOverlay trial={trial} />}
     </div>
   );

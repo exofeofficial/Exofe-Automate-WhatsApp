@@ -5,6 +5,7 @@ import { motion, type Variants } from "framer-motion";
 import { Check, CheckCircle2, Loader2 } from "lucide-react";
 import { ApiError, bookDemo, type DemoBookingPayload } from "@/lib/api";
 import { COUNTRIES, PHONE_PLACEHOLDER } from "@/lib/countries";
+import Dropdown from "@/components/ui/Dropdown";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -152,7 +153,7 @@ export default function DemoPage() {
   }
 
   return (
-    <main className="bg-white px-4 py-16 sm:px-6 lg:py-20">
+    <main className="bg-white px-4 py-10 sm:px-6 sm:py-16 lg:py-20">
       <div className="mx-auto w-full max-w-4xl">
         <motion.div initial="hidden" animate="show" variants={container}>
           <motion.div variants={item} className="flex items-center gap-3">
@@ -236,22 +237,15 @@ export default function DemoPage() {
             <label className="text-sm font-semibold text-foreground">
               Country Origin / Billing Country<span className="text-red-500">*</span>
             </label>
-            <select
-              value={form.billingCountry}
-              onChange={(e) => setField("billingCountry", e.target.value)}
-              className={`mt-1.5 w-full rounded-lg border bg-zinc-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
-                errors.billingCountry ? "border-red-400" : "border-black/[.1]"
-              } ${form.billingCountry ? "text-foreground" : "text-foreground/40"}`}
-            >
-              <option value="" disabled>
-                Please Select
-              </option>
-              {BILLING_COUNTRIES.map((c) => (
-                <option key={c} value={c} className="text-foreground">
-                  {c}
-                </option>
-              ))}
-            </select>
+            <div className="mt-1.5">
+              <Dropdown
+                value={form.billingCountry}
+                onChange={(v) => setField("billingCountry", v)}
+                options={BILLING_COUNTRIES.map((c) => ({ value: c, label: c }))}
+                placeholder="Please Select"
+                error={!!errors.billingCountry}
+              />
+            </div>
             {errors.billingCountry && <p className="mt-1 text-xs text-red-500">{errors.billingCountry}</p>}
           </div>
 
@@ -259,18 +253,15 @@ export default function DemoPage() {
             <label className="text-sm font-semibold text-foreground">
               Your WhatsApp Number we&apos;ll reach out to you here<span className="text-red-500">*</span>
             </label>
-            <div className="mt-1.5 flex gap-2">
-              <select
-                value={form.countryCode}
-                onChange={(e) => setField("countryCode", e.target.value as FormState["countryCode"])}
-                className="w-32 shrink-0 rounded-lg border border-black/[.1] bg-zinc-50 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
-              >
-                {COUNTRIES.map((c) => (
-                  <option key={c.code} value={c.code}>
-                    {c.flag} {c.label}
-                  </option>
-                ))}
-              </select>
+            <div className="mt-1.5 flex flex-col gap-2 sm:flex-row">
+              <div className="w-full shrink-0 sm:w-36">
+                <Dropdown
+                  value={form.countryCode}
+                  onChange={(v) => setField("countryCode", v as FormState["countryCode"])}
+                  options={COUNTRIES.map((c) => ({ value: c.code, label: `${c.flag} ${c.label}` }))}
+                  placeholder="Country"
+                />
+              </div>
               <input
                 type="tel"
                 inputMode="numeric"
@@ -291,7 +282,7 @@ export default function DemoPage() {
             </label>
             <div
               role="radiogroup"
-              className={`mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 ${
+              className={`mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3 ${
                 errors.team ? "rounded-xl ring-1 ring-red-300" : ""
               }`}
             >
@@ -306,7 +297,9 @@ export default function DemoPage() {
                     onClick={() => setField("team", t)}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    className={`relative rounded-xl border px-3.5 py-2.5 text-left text-sm font-medium transition-colors duration-200 ${
+                    className={`relative rounded-xl border py-2.5 pl-3.5 text-left text-sm font-medium transition-colors duration-200 ${
+                      selected ? "pr-9" : "pr-3.5"
+                    } ${
                       selected
                         ? "border-[#5B4FE9] bg-[#5B4FE9] text-white shadow-md shadow-indigo-900/20"
                         : "border-black/[.1] bg-zinc-50 text-foreground/70 hover:border-[#5B4FE9]/40 hover:bg-white"
@@ -337,15 +330,17 @@ export default function DemoPage() {
                 }}
                 className="mt-0.5 h-4 w-4 shrink-0 rounded border-black/[.2] text-[#5B4FE9] focus:ring-[#5B4FE9]/30"
               />
-              By submitting, you agree to Exofe&apos;s{" "}
-              <a href="/terms" className="font-medium text-[#5B4FE9] underline underline-offset-2">
-                Terms & Conditions
-              </a>{" "}
-              and{" "}
-              <a href="/privacy" className="font-medium text-[#5B4FE9] underline underline-offset-2">
-                Privacy Policy
-              </a>
-              , and consent to receive communications from Exofe.
+              <span>
+                By submitting, you agree to Exofe&apos;s{" "}
+                <a href="/terms" className="font-medium text-[#5B4FE9] underline underline-offset-2">
+                  Terms & Conditions
+                </a>{" "}
+                and{" "}
+                <a href="/privacy" className="font-medium text-[#5B4FE9] underline underline-offset-2">
+                  Privacy Policy
+                </a>
+                , and consent to receive communications from Exofe.
+              </span>
             </label>
             {errors.terms && <p className="mt-1 text-xs text-red-500">{errors.terms}</p>}
           </div>

@@ -4,17 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronRight, Circle, CircleCheck, Clock, ListChecks, X } from "lucide-react";
-import { MOCK_ONBOARDING_TASKS, MOCK_TRIAL_STATUS } from "@/lib/trial";
+import { MOCK_ONBOARDING_TASKS, type TrialStatus } from "@/lib/trial";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 // Floating, dismissible checklist. This is on purpose not a blocking modal,
 // login should never force a "connect your account" step, this widget just
 // nudges the user while they're already using the dashboard normally.
-export default function PendingTasksWidget() {
+export default function PendingTasksWidget({ trial }: { trial: TrialStatus }) {
   const [open, setOpen] = useState(false);
   const tasks = MOCK_ONBOARDING_TASKS;
-  const trial = MOCK_TRIAL_STATUS;
 
   const doneCount = tasks.filter((t) => t.completed).length;
   const remaining = tasks.length - doneCount;
@@ -22,7 +21,7 @@ export default function PendingTasksWidget() {
   if (remaining === 0 && !trial.isTrialing) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-5 sm:right-5">
       <AnimatePresence>
         {open && (
           <motion.div
@@ -30,9 +29,9 @@ export default function PendingTasksWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.96 }}
             transition={{ duration: 0.2, ease: EASE }}
-            className="w-[320px] overflow-hidden rounded-2xl border border-black/[.06] bg-white shadow-xl"
+            className="flex max-h-[min(70vh,28rem)] w-[calc(100vw-2rem)] max-w-[320px] flex-col overflow-hidden rounded-2xl border border-black/[.06] bg-white shadow-xl"
           >
-            <div className="flex items-start justify-between gap-3 border-b border-black/[.06] px-5 py-4">
+            <div className="flex shrink-0 items-start justify-between gap-3 border-b border-black/[.06] px-5 py-4">
               <div>
                 <p className="text-sm font-bold text-foreground">Finish setting up Exofe</p>
                 <p className="mt-0.5 text-xs text-foreground/50">
@@ -50,7 +49,7 @@ export default function PendingTasksWidget() {
             </div>
 
             {trial.isTrialing && (
-              <div className="flex items-center gap-2 border-b border-black/[.06] bg-indigo-50/60 px-5 py-3">
+              <div className="flex shrink-0 items-center gap-2 border-b border-black/[.06] bg-indigo-50/60 px-5 py-3">
                 <Clock className="h-4 w-4 shrink-0 text-[#5B4FE9]" strokeWidth={2} />
                 <p className="text-xs font-medium text-[#5B4FE9]">
                   {trial.daysLeft} of {trial.trialLengthDays} trial days left
@@ -58,7 +57,7 @@ export default function PendingTasksWidget() {
               </div>
             )}
 
-            <div className="flex flex-col divide-y divide-black/[.05] px-2 py-2">
+            <div className="flex min-h-0 flex-col divide-y divide-black/[.05] overflow-y-auto px-2 py-2">
               {tasks.map((task) => (
                 <Link
                   key={task.id}
@@ -82,7 +81,7 @@ export default function PendingTasksWidget() {
               ))}
             </div>
 
-            <div className="border-t border-black/[.06] px-5 py-3.5">
+            <div className="shrink-0 border-t border-black/[.06] px-5 py-3.5">
               <Link
                 href="/dashboard/billing"
                 className="text-xs font-semibold text-[#5B4FE9] hover:underline"

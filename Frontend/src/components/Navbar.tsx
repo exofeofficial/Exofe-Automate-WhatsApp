@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
-import { Play } from "lucide-react";
+import { Menu, Play, X } from "lucide-react";
+import BrandLogo from "@/components/BrandLogo";
 
 const NAV_LINKS = [
   { label: "Home", href: "#home" },
@@ -15,39 +16,19 @@ const NAV_LINKS = [
 
 const NAVBAR_OFFSET = 84; // fixed header height + a little breathing room
 
-function Logo() {
-  return (
-    <Link href="/" className="flex items-center gap-2">
-      <svg
-        width="32"
-        height="32"
-        viewBox="0 0 32 32"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M4 18L12 10L16 14L20 10L28 18"
-          stroke="#5B4FE9"
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M4 24L12 16L16 20L20 16L28 24"
-          stroke="#5B4FE9"
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity="0.5"
-        />
-      </svg>
-      <span className="text-xl font-bold tracking-tight text-foreground">Exofe</span>
-    </Link>
-  );
-}
-
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Locks background scroll while the mobile menu is open, otherwise the
+  // page behind the fixed header still scrolls/bounces underneath it.
+  useEffect(() => {
+    if (!isOpen) return;
+    const { overflow } = document.body.style;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = overflow;
+    };
+  }, [isOpen]);
 
   const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
@@ -92,7 +73,7 @@ export default function Navbar() {
         }`}
       >
         <nav className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-6">
-        <Logo />
+        <BrandLogo />
 
         <ul className="hidden items-center gap-9 lg:flex">
           {NAV_LINKS.map((link) => (
@@ -143,23 +124,33 @@ export default function Navbar() {
           aria-label={isOpen ? "Close menu" : "Open menu"}
           aria-expanded={isOpen}
           onClick={() => setIsOpen((prev) => !prev)}
-          className="relative z-50 flex h-9 w-9 flex-col items-center justify-center gap-1.5 lg:hidden"
+          className="relative z-50 flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-black/[.04] lg:hidden"
         >
-          <motion.span
-            animate={isOpen ? { rotate: 45, y: 6.5 } : { rotate: 0, y: 0 }}
-            transition={{ duration: 0.25 }}
-            className="h-0.5 w-6 rounded-full bg-foreground"
-          />
-          <motion.span
-            animate={isOpen ? { opacity: 0 } : { opacity: 1 }}
-            transition={{ duration: 0.2 }}
-            className="h-0.5 w-6 rounded-full bg-foreground"
-          />
-          <motion.span
-            animate={isOpen ? { rotate: -45, y: -6.5 } : { rotate: 0, y: 0 }}
-            transition={{ duration: 0.25 }}
-            className="h-0.5 w-6 rounded-full bg-foreground"
-          />
+          <AnimatePresence mode="wait" initial={false}>
+            {isOpen ? (
+              <motion.span
+                key="close"
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex"
+              >
+                <X className="h-5 w-5 text-foreground" strokeWidth={2} />
+              </motion.span>
+            ) : (
+              <motion.span
+                key="open"
+                initial={{ rotate: 90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: -90, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex"
+              >
+                <Menu className="h-5 w-5 text-foreground" strokeWidth={2} />
+              </motion.span>
+            )}
+          </AnimatePresence>
         </button>
       </nav>
 

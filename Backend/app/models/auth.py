@@ -53,6 +53,16 @@ class LoginRequest(_CamelModel):
         return _validate_email(v)
 
 
+class AdminLoginRequest(_CamelModel):
+    email: str
+    password: str = Field(..., min_length=1)
+
+    @field_validator("email")
+    @classmethod
+    def check_email(cls, v: str) -> str:
+        return _validate_email(v)
+
+
 class OtpRequestBody(_CamelModel):
     email: str
 
@@ -87,7 +97,20 @@ class ResetPasswordRequest(_CamelModel):
 
 
 class VerifyEmailRequest(_CamelModel):
-    token: str
+    email: str
+    code: str = Field(..., min_length=6, max_length=6)
+
+    @field_validator("email")
+    @classmethod
+    def check_email(cls, v: str) -> str:
+        return _validate_email(v)
+
+
+class GoogleAuthRequest(_CamelModel):
+    # The ID token Google Identity Services hands the frontend after
+    # sign-in — verified server-side against Google's public keys, never
+    # trusted as-is.
+    id_token: str = Field(..., min_length=1)
 
 
 # ── Responses ────────────────────────────────────────────────────────────────

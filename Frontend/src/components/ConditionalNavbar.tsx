@@ -2,11 +2,12 @@
 
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import { HIDDEN_CHROME_ROUTES } from "@/lib/hidden-chrome-routes";
 
 export default function ConditionalNavbar() {
   const pathname = usePathname();
 
-  if (pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin")) {
+  if (HIDDEN_CHROME_ROUTES.some((route) => pathname?.startsWith(route))) {
     return null;
   }
 

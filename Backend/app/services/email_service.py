@@ -79,23 +79,24 @@ def send_password_reset_email(to: str, token: str) -> None:
     _send(to=to, subject="Reset your Exofe password", html=html)
 
 
-def send_verification_email(to: str, token: str) -> None:
-    """Send an email-verification token after signup."""
+def send_verification_email(to: str, code: str) -> None:
+    """Send a 6-digit email-verification code after signup."""
     html = _base_html(
         "Verify your email",
         f"""
         <p style="margin:16px 0 0;font-size:14px;color:#3f3f46;">
-          Thanks for signing up! Use the token below to verify your email address.
+          Thanks for signing up! Enter this code to verify your email address.
+          It expires in 30 minutes.
         </p>
         <div style="margin:24px 0;padding:16px;background:#f4f4f5;border-radius:8px;
-                    text-align:center;font-size:14px;font-family:monospace;word-break:break-all;color:#18181b;">
-          {token}
+                    text-align:center;font-size:32px;font-weight:700;letter-spacing:8px;color:#18181b;">
+          {code}
         </div>
         <p style="margin:0;font-size:12px;color:#a1a1aa;">
           If you didn't create an Exofe account, you can safely ignore this email.
         </p>""",
     )
-    _send(to=to, subject="Verify your Exofe email", html=html)
+    _send(to=to, subject=f"Your Exofe verification code: {code}", html=html)
 
 
 def send_waitlist_email(to: str) -> None:

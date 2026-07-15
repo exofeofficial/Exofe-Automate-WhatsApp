@@ -1,5 +1,6 @@
 import { getToken } from "@/lib/auth";
 import { getAdminToken } from "@/lib/adminAuth";
+import type { TrialStatus } from "@/lib/trial";
 
 // Single place every fetch call to the backend goes through.
 // Swap NEXT_PUBLIC_API_URL in .env.local once the real API is up nothing
@@ -89,9 +90,8 @@ export function signUp(payload: SignUpPayload) {
   });
 }
 
-// Google/Facebook buttons are wired to these so the click flow already exists —
-// backend just needs to swap this for the real OAuth redirect/popup when it's ready.
-export function signUpWithProvider(_provider: "google" | "facebook"): Promise<never> {
+// Facebook isn't wired up yet — Google uses googleAuth() below instead.
+export function signUpWithProvider(_provider: "facebook"): Promise<never> {
   return Promise.reject(new ApiError("Social sign-up isn't set up yet.", 501));
 }
 
@@ -106,8 +106,13 @@ export function login(payload: LoginPayload) {
   });
 }
 
-export function loginWithProvider(_provider: "google"): Promise<never> {
-  return Promise.reject(new ApiError("Social login isn't set up yet.", 501));
+// The idToken comes from Google Identity Services (see GoogleSignInButton).
+// Expected backend contract: POST /auth/google { idToken } -> 200 { token }
+export function googleAuth(idToken: string) {
+  return request<{ token: string }>("/auth/google", {
+    method: "POST",
+    body: JSON.stringify({ idToken }),
+  });
 }
 
 // OTP login is two calls: request a code, then verify it.
@@ -122,6 +127,15 @@ export function requestOtp(email: string) {
 // Expected: POST /auth/otp/verify { email, code } -> 200 { token }
 export function verifyOtp(email: string, code: string) {
   return request<{ token: string }>("/auth/otp/verify", {
+    method: "POST",
+    body: JSON.stringify({ email, code }),
+  });
+}
+
+// Confirms the 6-digit code sent to a new signup's inbox.
+// Expected: POST /auth/verify-email { email, code } -> 200 { message }
+export function verifyEmail(email: string, code: string) {
+  return request<{ message: string }>("/auth/verify-email", {
     method: "POST",
     body: JSON.stringify({ email, code }),
   });
@@ -253,6 +267,68 @@ export async function importProductsCsv(file: File) {
   return res.json() as Promise<{ imported: number }>;
 }
 
+// ── Orders ───────────────────────────────────────────────────────────────────
+
+export type OrderStatus = "new" | "confirmed" | "shipped" | "delivered" | "canceled";
+export type PaymentMethod = "cod" | "jazzcash" | "easypaisa" | "stripe";
+
+export type OrderSummary = {
+  id: string;
+  customerName: string | null;
+  customerPhone: string;
+  status: OrderStatus;
+  paymentMethod: PaymentMethod;
+  total: number;
+  itemCount: number;
+  createdAt: string;
+};
+
+export type OrderItem = {
+  id: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+};
+
+export type OrderDetail = {
+  id: string;
+  customerName: string | null;
+  customerPhone: string;
+  status: OrderStatus;
+  paymentMethod: PaymentMethod;
+  subtotal: number;
+  deliveryCharge: number;
+  tax: number;
+  total: number;
+  deliveryAddress: string | null;
+  items: OrderItem[];
+  createdAt: string;
+};
+
+// Expected: GET /orders?status=&search= -> 200 { orders: OrderSummary[], counts: Record<OrderStatus, number> }
+export function getOrders(params?: { status?: OrderStatus; search?: string }) {
+  const query = new URLSearchParams();
+  if (params?.status) query.set("status", params.status);
+  if (params?.search) query.set("search", params.search);
+  const qs = query.toString();
+  return request<{ orders: OrderSummary[]; counts: Partial<Record<OrderStatus, number>> }>(
+    `/orders${qs ? `?${qs}` : ""}`
+  );
+}
+
+// Expected: GET /orders/:id -> 200 { order: OrderDetail }
+export function getOrder(id: string) {
+  return request<{ order: OrderDetail }>(`/orders/${id}`);
+}
+
+// Expected: PATCH /orders/:id/status { status } -> 200 { order: OrderDetail }
+export function updateOrderStatus(id: string, status: OrderStatus) {
+  return request<{ order: OrderDetail }>(`/orders/${id}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
 // Settings, split into sections so each one saves independently instead
 // of forcing a save-everything-at-once form.
 export type BusinessProfile = {
@@ -301,6 +377,21 @@ export type Settings = {
 // Expected backend contract: GET /settings -> 200 { settings: Settings }
 export function getSettings() {
   return request<{ settings: Settings }>("/settings");
+}
+
+// ── Billing ──────────────────────────────────────────────────────────────────
+
+// Expected backend contract: GET /billing/trial-status -> 200 TrialStatus
+export function getTrialStatus() {
+  return request<TrialStatus>("/billing/trial-status");
+}
+
+// Expected backend contract: POST /billing/subscribe { plan } -> 200 TrialStatus
+export function subscribeToPlan(plan: "starter" | "growth" | "business") {
+  return request<TrialStatus>("/billing/subscribe", {
+    method: "POST",
+    body: JSON.stringify({ plan }),
+  });
 }
 
 // Expected: PATCH /settings/profile { ...BusinessProfile } -> 200 { profile: BusinessProfile }
@@ -470,4 +561,22 @@ export function adminLogin(payload: AdminLoginPayload) {
     method: "POST",
     body: JSON.stringify(payload),
   });
+}
+
+export type AdminUser = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: "owner" | "staff";
+  phone: string | null;
+  countryCode: string | null;
+  businessName: string | null;
+  emailVerified: boolean;
+  createdAt: string;
+};
+
+// Expected backend contract: GET /admin/users -> 200 { users: AdminUser[] }
+export function getAdminUsers() {
+  return adminRequest<{ users: AdminUser[] }>("/admin/users");
 }

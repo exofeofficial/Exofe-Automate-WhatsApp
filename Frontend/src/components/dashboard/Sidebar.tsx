@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import UpgradeCard from "@/components/dashboard/UpgradeCard";
+import type { TrialStatus } from "@/lib/trial";
 
 type IconType = ComponentType<{ className?: string; strokeWidth?: number }>;
 type NavLink = { type: "link"; label: string; href: string; icon: IconType };
@@ -87,7 +88,7 @@ function LogoMark() {
   );
 }
 
-export default function Sidebar({ onClose }: { onClose?: () => void }) {
+export default function Sidebar({ onClose, trial }: { onClose?: () => void; trial: TrialStatus }) {
   const pathname = usePathname();
   const activeHref = getActiveNavHref(pathname);
 
@@ -97,15 +98,20 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
   });
 
   return (
-    <div className="sticky top-0 flex h-screen w-64 flex-col border-r border-black/[.06] bg-white">
+    <div className="sticky top-4 m-4 flex h-[calc(100vh-2rem)] w-64 shrink-0 flex-col rounded-3xl bg-white shadow-sm">
       <div className="flex items-center justify-between px-5 py-5">
         <Link href="/dashboard" className="flex items-center gap-2">
           <LogoMark />
           <span className="text-lg font-bold tracking-tight text-foreground">Exofe</span>
         </Link>
         {onClose && (
-          <button type="button" onClick={onClose} aria-label="Close menu" className="lg:hidden">
-            <X className="h-5 w-5 text-foreground/50" />
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close menu"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground/50 transition-colors hover:bg-black/[.04] hover:text-foreground lg:hidden"
+          >
+            <X className="h-[18px] w-[18px]" strokeWidth={2} />
           </button>
         )}
       </div>
@@ -187,7 +193,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
       </nav>
 
       <div className="border-t border-black/[.06] p-3">
-        <UpgradeCard />
+        <UpgradeCard trial={trial} />
       </div>
     </div>
   );

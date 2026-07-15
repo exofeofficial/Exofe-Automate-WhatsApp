@@ -1,0 +1,97 @@
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.alias_generators import to_camel
+
+
+class _CamelModel(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+
+# ── Business Profile ─────────────────────────────────────────────────────────
+
+CATEGORIES = (
+    "Fashion and Apparel", "Food and Beverage", "Electronics",
+    "Beauty and Cosmetics", "Home and Living", "Grocery", "Services", "Other",
+)
+
+
+class BusinessProfile(_CamelModel):
+    business_name: str = Field(..., min_length=1, max_length=200)
+    category: str = ""
+    description: str = ""
+    support_email: str = ""
+    support_phone: str = ""
+    logo: str | None = None
+
+
+class BusinessProfileWrapper(BaseModel):
+    profile: BusinessProfile
+
+
+# ── Business Hours ───────────────────────────────────────────────────────────
+
+DAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
+
+
+class BusinessHourRow(_CamelModel):
+    day: str = Field(..., pattern=r"^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$")
+    open: str = "09:00"
+    close: str = "18:00"
+    closed: bool = False
+
+
+class HoursUpdateRequest(_CamelModel):
+    hours: list[BusinessHourRow]
+
+
+class HoursWrapper(BaseModel):
+    hours: list[BusinessHourRow]
+
+
+# ── Delivery ─────────────────────────────────────────────────────────────────
+
+class DeliverySettings(_CamelModel):
+    areas: str = ""
+    charge: float = 0
+    estimated_time: str = ""
+    cash_on_delivery: bool = True
+    pickup_available: bool = False
+
+
+class DeliveryWrapper(BaseModel):
+    delivery: DeliverySettings
+
+
+# ── Tax ──────────────────────────────────────────────────────────────────────
+
+class TaxSettings(_CamelModel):
+    tax_name: str = ""
+    tax_rate: float = 0
+    prices_include_tax: bool = False
+
+
+class TaxWrapper(BaseModel):
+    tax: TaxSettings
+
+
+# ── Language ─────────────────────────────────────────────────────────────────
+
+class LanguageUpdateRequest(_CamelModel):
+    language: str = Field(..., pattern=r"^(en|ur|ko|ar)$")
+
+
+class LanguageWrapper(BaseModel):
+    language: str
+
+
+# ── GET /settings ────────────────────────────────────────────────────────────
+
+class SettingsResponse(_CamelModel):
+    profile: BusinessProfile
+    hours: list[BusinessHourRow]
+    delivery: DeliverySettings
+    tax: TaxSettings
+    language: str = "en"
+
+
+class SettingsWrapper(BaseModel):
+    settings: SettingsResponse

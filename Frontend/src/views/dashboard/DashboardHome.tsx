@@ -2,18 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, type Variants } from "framer-motion";
-import {
-  Bot,
-  CheckCircle2,
-  Clock,
-  Inbox,
-  MessageCircle,
-  Moon,
-  Package,
-  Sun,
-  SunMedium,
-  Wallet,
-} from "lucide-react";
+import { Bot, CheckCircle2, Clock, Inbox, MessageCircle, Package, Wallet } from "lucide-react";
 import { getUserProfile } from "@/lib/user";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -30,23 +19,55 @@ const item: Variants = {
 
 // Zero state on purpose, a real new account has no orders or revenue yet.
 // Backend developer: swap this for a real fetch to GET /dashboard/summary,
-// the shape is {label, value, change, icon, tint} per card, see API.md.
-const STATS = [
-  { label: "Today's Orders", value: "0", change: "No orders yet", icon: Package, tint: "from-indigo-500 to-violet-500" },
-  { label: "Pending Orders", value: "0", change: "Nothing to action", icon: Clock, tint: "from-amber-400 to-orange-500" },
-  { label: "Completed Orders", value: "0", change: "All time", icon: CheckCircle2, tint: "from-emerald-400 to-teal-500" },
-  { label: "Total Conversations", value: "0", change: "No chats yet", icon: MessageCircle, tint: "from-sky-400 to-blue-500" },
-  { label: "Revenue", value: "PKR 0", change: "This month", icon: Wallet, tint: "from-violet-500 to-fuchsia-500" },
-  { label: "AI Response Rate", value: "—", change: "Not enough data", icon: Bot, tint: "from-rose-400 to-pink-500" },
+// the shape is {label, value, subtitle, change, icon} per card, see
+// API.md. change is a signed percentage string like "+12%" or "-4%",
+// null when there isn't enough data yet to compare against.
+const STATS: {
+  label: string;
+  value: string;
+  subtitle: string;
+  change: string | null;
+  icon: typeof Package;
+}[] = [
+  { label: "Today's Orders", value: "0", subtitle: "vs last month", change: null, icon: Package },
+  { label: "Pending Orders", value: "0", subtitle: "needs action", change: null, icon: Clock },
+  { label: "Completed Orders", value: "0", subtitle: "all time", change: null, icon: CheckCircle2 },
+  { label: "Total Conversations", value: "0", subtitle: "vs last week", change: null, icon: MessageCircle },
+  { label: "Revenue", value: "PKR 0", subtitle: "this month", change: null, icon: Wallet },
+  { label: "AI Response Rate", value: "—", subtitle: "last 7 days", change: null, icon: Bot },
 ];
+
+function ChangeBadge({ change, onDark }: { change: string | null; onDark?: boolean }) {
+  if (!change) {
+    return (
+      <span
+        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+          onDark ? "bg-white/15 text-white/60" : "bg-black/[.04] text-foreground/35"
+        }`}
+      >
+        —
+      </span>
+    );
+  }
+  const isUp = change.startsWith("+");
+  return (
+    <span
+      className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+        isUp ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
+      }`}
+    >
+      {change}
+    </span>
+  );
+}
 
 // Same idea, empty by default until GET /dashboard/activity has real events.
 const ACTIVITY: { text: string; time: string; tag: string }[] = [];
 
 function getGreeting(hour: number) {
-  if (hour < 12) return { text: "Good morning", Icon: Sun };
-  if (hour < 17) return { text: "Good afternoon", Icon: SunMedium };
-  return { text: "Good evening", Icon: Moon };
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
 }
 
 export default function DashboardHome() {
@@ -60,51 +81,51 @@ export default function DashboardHome() {
     setNow(new Date());
   }, []);
 
-  const { text: greeting, Icon: GreetingIcon } = getGreeting(now?.getHours() ?? 9);
+  const greeting = getGreeting(now?.getHours() ?? 9);
   const dateLabel = now?.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }) ?? "";
 
   return (
     <motion.div initial="hidden" animate="show" variants={container} className="flex flex-col gap-6">
-      <motion.div
-        variants={item}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#4a3fd6] via-[#5B4FE9] to-[#7C6FF5] p-6 sm:p-8"
-      >
-        <span className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
-        <span className="pointer-events-none absolute -bottom-20 left-1/3 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
-
-        <div className="relative flex items-start justify-between gap-4">
-          <div>
-            {dateLabel && <p className="text-xs font-medium text-white/60">{dateLabel}</p>}
-            <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-              {greeting}, {firstName}
-            </h1>
-            <p className="mt-2 max-w-sm text-sm text-white/70">
-              Here is what is happening with your store today.
-            </p>
-          </div>
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
-            <GreetingIcon className="h-5 w-5" strokeWidth={2} />
-          </span>
-        </div>
+      <motion.div variants={item}>
+        {dateLabel && <p className="text-xs font-medium text-foreground/40">{dateLabel}</p>}
+        <h1 className="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+          {greeting}, {firstName}
+        </h1>
       </motion.div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {STATS.map((s) => {
+        {STATS.map((s, i) => {
           const Icon = s.icon;
+          const featured = i === 0;
           return (
             <motion.div
               key={s.label}
               variants={item}
               whileHover={{ y: -3 }}
               transition={{ duration: 0.2, ease: EASE }}
-              className="rounded-2xl border border-black/[.06] bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+              className={`rounded-2xl p-5 shadow-sm transition-shadow hover:shadow-md ${
+                featured
+                  ? "bg-gradient-to-br from-[#5B4FE9] to-[#4338CA] shadow-indigo-900/20"
+                  : "border border-black/[.06] bg-white"
+              }`}
             >
-              <span className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${s.tint} text-white shadow-sm`}>
-                <Icon className="h-5 w-5" strokeWidth={2} />
-              </span>
-              <p className="mt-4 text-2xl font-extrabold tracking-tight text-foreground">{s.value}</p>
-              <p className="mt-1 text-xs text-foreground/50">{s.label}</p>
-              <p className="mt-2 text-[11px] font-medium text-foreground/40">{s.change}</p>
+              <div className="flex items-center justify-between">
+                <span
+                  className={`flex h-9 w-9 items-center justify-center rounded-xl ${
+                    featured ? "bg-white/15 text-white" : "bg-black/[.04] text-foreground/60"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" strokeWidth={2} />
+                </span>
+                <ChangeBadge change={s.change} onDark={featured} />
+              </div>
+              <p className={`mt-4 text-xs ${featured ? "text-white/70" : "text-foreground/45"}`}>{s.label}</p>
+              <div className="mt-1 flex items-baseline gap-2">
+                <p className={`text-2xl font-extrabold tracking-tight ${featured ? "text-white" : "text-foreground"}`}>
+                  {s.value}
+                </p>
+                <p className={`text-[11px] ${featured ? "text-white/60" : "text-foreground/40"}`}>{s.subtitle}</p>
+              </div>
             </motion.div>
           );
         })}

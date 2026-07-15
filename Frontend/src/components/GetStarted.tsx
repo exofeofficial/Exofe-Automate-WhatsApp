@@ -41,17 +41,26 @@ const STEPS = [
 function StepCard({
   step,
   align,
+  distance = 40,
+  variant = "slide",
+  delay = 0,
 }: {
   step: (typeof STEPS)[number];
-  align: "left" | "right";
+  align?: "left" | "right";
+  distance?: number;
+  variant?: "slide" | "pop";
+  delay?: number;
 }) {
   const Icon = step.icon;
+  const motionProps =
+    variant === "pop"
+      ? { initial: { opacity: 0, scale: 0.92, y: 26 }, whileInView: { opacity: 1, scale: 1, y: 0 } }
+      : { initial: { opacity: 0, x: align === "left" ? -distance : distance }, whileInView: { opacity: 1, x: 0 } };
   return (
     <motion.div
-      initial={{ opacity: 0, x: align === "left" ? -40 : 40 }}
-      whileInView={{ opacity: 1, x: 0 }}
+      {...motionProps}
       viewport={{ once: true, amount: 0.5 }}
-      transition={{ duration: 0.6, ease: EASE }}
+      transition={{ duration: 0.55, delay, ease: EASE }}
       className="w-full rounded-2xl border border-black/[.06] bg-white p-5 shadow-sm"
     >
       <div className="flex items-start justify-between gap-3">
@@ -189,27 +198,11 @@ export default function GetStarted() {
           </div>
         </div>
 
-        {/* mobile / tablet: single-column timeline */}
-        <div className="relative mt-14 lg:hidden">
-          <div className="absolute bottom-6 left-6 top-6 w-px bg-black/[.1]" />
-          <div className="flex flex-col gap-8">
-            {STEPS.map((s, i) => (
-              <div key={s.title} className="relative flex gap-4 pl-0">
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  whileInView={{ scale: 1, opacity: 1 }}
-                  viewport={{ once: true, amount: 0.6 }}
-                  transition={{ duration: 0.4, ease: EASE }}
-                  className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-[#5B4FE9] bg-white text-sm font-bold text-[#5B4FE9] shadow-sm"
-                >
-                  {i + 1}
-                </motion.div>
-                <div className="flex-1 pb-1">
-                  <StepCard step={s} align="right" />
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* mobile / tablet: stacked cards, no step numbers */}
+        <div className="mt-14 flex flex-col gap-5 lg:hidden">
+          {STEPS.map((s, i) => (
+            <StepCard key={s.title} step={s} variant="pop" delay={i * 0.12} />
+          ))}
         </div>
       </div>
     </section>

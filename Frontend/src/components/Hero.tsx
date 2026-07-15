@@ -76,7 +76,7 @@ function HandArrow() {
         transition={{ duration: 1.2, delay: 0.9, ease: "easeInOut" }}
       />
       <motion.path
-        d="M32 82 L 44 89 L 46 75"
+        d="M 38 76 L 44 88 L 31 87"
         stroke="currentColor"
         strokeWidth="2.5"
         strokeLinecap="round"
@@ -289,7 +289,7 @@ export default function Hero() {
           variants={item}
           className="relative mt-9 flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row"
         >
-          <div className="absolute -left-2 top-[-70px] hidden md:-left-36 md:block">
+          <div className="absolute top-[-48px] hidden md:-left-44 md:block lg:-left-52">
             <HandArrow />
           </div>
           <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">

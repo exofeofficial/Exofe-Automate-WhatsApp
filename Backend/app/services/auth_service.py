@@ -10,15 +10,21 @@ import secrets
 from datetime import datetime, timedelta, timezone
 import hmac
 
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token as google_id_token
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.core.logger import get_logger
 from app.core.security import create_access_token, hash_password, verify_password
-from app.repositories import user_repository
+from app.repositories import subscription_repository, user_repository
 from app.services import email_service
 
 
 logger = get_logger(__name__)
+
+# Business rule from the PRD: every new signup gets a 7 day free trial.
+TRIAL_LENGTH_DAYS = 7
 
 
 class AuthError(Exception):
@@ -81,13 +87,20 @@ def signup(
         db, str(user["id"]), business_id=str(business["id"])
     )
 
+    # 4. Start the 7 day free trial — one subscriptions row per business,
+    # filled in later (plan/status/amount) once they activate a paid plan.
+    trial_ends_at = business["created_at"] + timedelta(days=TRIAL_LENGTH_DAYS)
+    subscription_repository.create_trial_subscription(
+        db, business_id=str(business["id"]), business_name=business["name"], trial_ends_at=trial_ends_at
+    )
+
     db.commit()
 
     logger.info("New signup: user=%s business=%s", user["id"], business["id"])
 
-    # 4. Send verification email (fire-and-forget, after commit)
-    verification_token = create_email_verification_token(str(user["id"]))
-    email_service.send_verification_email(to=email, token=verification_token)
+    # 5. Send verification email (fire-and-forget, after commit)
+    verification_code = create_email_verification_code(email)
+    email_service.send_verification_email(to=email, code=verification_code)
 
     return create_access_token(str(user["id"]),str(business["id"]),"owner")
 
@@ -113,6 +126,81 @@ def login(db: Session, *, email: str, password: str) -> str:
         str(user["business_id"]) if user["business_id"] else None,
         user["role"]
     )
+
+
+# ── Google sign-in ───────────────────────────────────────────────────────────
+
+def google_login(db: Session, *, id_token: str) -> str:
+    """Verify a Google ID token (from Google Identity Services on the
+    frontend) and log the user in — creating an account and a 7 day trial
+    on first sign-in, same as email/password signup.
+
+    Raises ``AuthError`` with 401 if the token is invalid, unverified, or
+    belongs to an admin account (admins only use the password login).
+    """
+    if not settings.google_client_id:
+        raise AuthError(message="Google sign-in isn't configured", status_code=501)
+
+    try:
+        payload = google_id_token.verify_oauth2_token(
+            id_token, google_requests.Request(), settings.google_client_id
+        )
+    except ValueError:
+        raise AuthError(message="Invalid Google sign-in", status_code=401)
+
+    if not payload.get("email_verified"):
+        raise AuthError(message="Your Google email isn't verified", status_code=401)
+
+    email = payload["email"].lower()
+    user = user_repository.get_user_by_email(db, email)
+
+    if user:
+        if user["role"] == "admin":
+            raise AuthError(message="Use the admin login instead", status_code=401)
+
+        logger.info("Google login: user=%s", user["id"])
+        return create_access_token(
+            str(user["id"]),
+            str(user["business_id"]) if user["business_id"] else None,
+            user["role"],
+        )
+
+    # First time seeing this email — create an account. Same shape as a
+    # normal signup, just with a random unusable password (they can set
+    # a real one later via forgot-password if they ever want email/password
+    # login too) and the email is already verified by Google.
+    first_name = payload.get("given_name") or (payload.get("name", "there").split(" ")[0])
+    last_name = payload.get("family_name") or ""
+
+    new_user = user_repository.create_user(
+        db,
+        role="owner",
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        password_hash=hash_password(secrets.token_urlsafe(32)),
+        phone=None,
+        country_code=None,
+    )
+    business = user_repository.create_business(
+        db, owner_id=str(new_user["id"]), name=f"{first_name}'s Business"
+    )
+    user_repository.update_user_fields(
+        db,
+        str(new_user["id"]),
+        business_id=str(business["id"]),
+        email_verified_at=datetime.now(timezone.utc).isoformat(),
+    )
+
+    trial_ends_at = business["created_at"] + timedelta(days=TRIAL_LENGTH_DAYS)
+    subscription_repository.create_trial_subscription(
+        db, business_id=str(business["id"]), business_name=business["name"], trial_ends_at=trial_ends_at
+    )
+
+    db.commit()
+    logger.info("New Google signup: user=%s business=%s", new_user["id"], business["id"])
+
+    return create_access_token(str(new_user["id"]), str(business["id"]), "owner")
 
 
 # ── OTP ──────────────────────────────────────────────────────────────────────
@@ -173,7 +261,7 @@ def verify_otp(db: Session, *, email: str, code: str) -> str:
 
     # Consume the OTP — single use
     del _OTP_STORE[key]
-    _OTP_ATTEMPTS.pop(key)
+    _OTP_ATTEMPTS.pop(key, None)
 
     user = user_repository.get_user_by_email(db, email)
     if not user:
@@ -251,44 +339,66 @@ def reset_password(db: Session, *, token: str, new_password: str) -> None:
 
 
 # ── Email verification ───────────────────────────────────────────────────────
+#
+# Same 6-digit-code approach as login OTP, so the user types a short code
+# instead of copy-pasting a long token.
 
-_VERIFY_STORE: dict[str, tuple[str, datetime]] = {}  # token → (user_id, expires_at)
-_VERIFY_TTL_SECONDS = 86400  # 24 hours
+_VERIFY_STORE: dict[str, tuple[str, datetime]] = {}  # email → (code, expires_at)
+_VERIFY_TTL_SECONDS = 1800  # 30 minutes
+_VERIFY_ATTEMPTS: dict[str, int] = {}
+_MAX_VERIFY_ATTEMPTS = 5
 
 
-def create_email_verification_token(user_id: str) -> str:
-    """Generate a verification token for a newly created user.
+def create_email_verification_code(email: str) -> str:
+    """Generate a 6-digit verification code for a newly created user.
 
-    Called automatically during signup.  The token is stored in-memory
-    with a 24-hour TTL and the verification email is sent by the caller.
+    Called automatically during signup.  The code is stored in-memory
+    with a 30-minute TTL and the verification email is sent by the caller.
     """
-    token = secrets.token_urlsafe(32)
+    code = f"{secrets.randbelow(1_000_000):06d}"
     expires_at = datetime.now(timezone.utc) + timedelta(seconds=_VERIFY_TTL_SECONDS)
-    _VERIFY_STORE[token] = (user_id, expires_at)
-    logger.info("Email verification token for user %s: %s", user_id, token)
-    return token
+    _VERIFY_STORE[email.lower()] = (code, expires_at)
+    logger.info("Email verification code for %s: %s", email, code)
+    return code
 
 
-def verify_email(db: Session, *, token: str) -> None:
+def verify_email(db: Session, *, email: str, code: str) -> None:
     """Mark a user's email as verified.
 
-    Raises ``AuthError`` with 400 if the token is invalid or expired.
+    Raises ``AuthError`` with 400 if the code is wrong, expired, or was
+    never issued.
     """
-    stored = _VERIFY_STORE.get(token)
-    if not stored:
-        raise AuthError(message="Invalid verification link", status_code=400)
+    key = email.lower()
+    stored = _VERIFY_STORE.get(key)
 
-    user_id, expires_at = stored
-    if datetime.now(timezone.utc) > expires_at:
-        del _VERIFY_STORE[token]
-        raise AuthError(message="Verification link has expired", status_code=400)
+    if not stored:
+        raise AuthError(message="Invalid or expired code", status_code=400)
+
+    attempts = _VERIFY_ATTEMPTS.get(key, 0)
+    if attempts >= _MAX_VERIFY_ATTEMPTS:
+        del _VERIFY_STORE[key]
+        _VERIFY_ATTEMPTS.pop(key, None)
+        logger.warning("Verification attempts exceeded for email: %s", email)
+        raise AuthError(message="Too many attempts. Request a new code.", status_code=429)
+
+    stored_code, expires_at = stored
+    if datetime.now(timezone.utc) > expires_at or not hmac.compare_digest(stored_code, code):
+        _VERIFY_ATTEMPTS[key] = attempts + 1
+        raise AuthError(message="Invalid or expired code", status_code=400)
+
+    # Consume the code — single use
+    del _VERIFY_STORE[key]
+    _VERIFY_ATTEMPTS.pop(key, None)
+
+    user = user_repository.get_user_by_email(db, email)
+    if not user:
+        raise AuthError(message="Invalid or expired code", status_code=400)
 
     user_repository.update_user_fields(
         db,
-        user_id,
+        str(user["id"]),
         email_verified_at=datetime.now(timezone.utc).isoformat(),
     )
     db.commit()
 
-    del _VERIFY_STORE[token]
-    logger.info("Email verified: user=%s", user_id)
+    logger.info("Email verified: user=%s", user["id"])

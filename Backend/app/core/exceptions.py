@@ -44,10 +44,11 @@ def register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(StarletteHTTPException)
     async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={"message": str(exc.detail)},
-        )
+        # Some routes raise HTTPException(detail={"message": ..., "errors": ...})
+        # to also carry field errors — pass that shape through as-is instead
+        # of stringifying it into a Python dict repr.
+        content = exc.detail if isinstance(exc.detail, dict) else {"message": str(exc.detail)}
+        return JSONResponse(status_code=exc.status_code, content=content)
 
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:

@@ -2,11 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, type Variants } from "framer-motion";
-import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
-import { ApiError, signUp, signUpWithProvider, type SignUpPayload } from "@/lib/api";
+import { CheckCircle2, Eye, EyeOff, Loader2, MailCheck } from "lucide-react";
+import { ApiError, googleAuth, signUp, signUpWithProvider, verifyEmail, type SignUpPayload } from "@/lib/api";
 import { COUNTRIES, PHONE_PLACEHOLDER } from "@/lib/countries";
+import { setToken } from "@/lib/auth";
 import { setUserProfile } from "@/lib/user";
+import { decodeGoogleIdToken } from "@/lib/google";
+import Dropdown from "@/components/ui/Dropdown";
+import BrandLogo from "@/components/BrandLogo";
+import CodeInput from "@/components/ui/CodeInput";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -79,11 +86,39 @@ function validate(form: FormState): Errors {
 }
 
 export default function SignupPage() {
+  const router = useRouter();
   const [form, setForm] = useState<FormState>(initialForm);
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
   const [showPassword, setShowPassword] = useState(false);
   const [socialNotice, setSocialNotice] = useState<string | null>(null);
+
+  const [pendingToken, setPendingToken] = useState<string | null>(null);
+  const [code, setCode] = useState("");
+  const [verifyStatus, setVerifyStatus] = useState<"idle" | "loading">("idle");
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!/^\d{6}$/.test(code)) {
+      setVerifyError("Enter the 6-digit code");
+      return;
+    }
+
+    setVerifyStatus("loading");
+    setVerifyError(null);
+    try {
+      await verifyEmail(form.email, code);
+      // Only now does the account actually become usable — the token from
+      // signup is withheld from storage until the email is confirmed.
+      if (pendingToken) setToken(pendingToken);
+      router.push("/dashboard");
+    } catch (err) {
+      setVerifyStatus("idle");
+      setCode("");
+      setVerifyError(err instanceof ApiError ? err.message : "That code didn't work. Please try again.");
+    }
+  };
 
   const setField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -114,7 +149,8 @@ export default function SignupPage() {
     };
 
     try {
-      await signUp(payload);
+      const { token } = await signUp(payload);
+      setPendingToken(token);
       setUserProfile({ firstName: payload.firstName, lastName: payload.lastName, email: payload.email });
       setStatus("done");
     } catch (err) {
@@ -129,7 +165,22 @@ export default function SignupPage() {
     }
   };
 
-  const handleSocial = async (provider: "google" | "facebook") => {
+  const handleGoogleCredential = async (idToken: string) => {
+    setSocialNotice(null);
+    try {
+      const { token } = await googleAuth(idToken);
+      // Google already verifies the email, so unlike the password signup
+      // flow there's no code-entry step — straight to the dashboard.
+      setToken(token);
+      const info = decodeGoogleIdToken(idToken);
+      if (info) setUserProfile(info);
+      router.push("/dashboard");
+    } catch (err) {
+      setSocialNotice(err instanceof ApiError ? err.message : "Something went wrong.");
+    }
+  };
+
+  const handleSocial = async (provider: "facebook") => {
     setSocialNotice(null);
     try {
       await signUpWithProvider(provider);
@@ -140,27 +191,66 @@ export default function SignupPage() {
 
   if (status === "done") {
     return (
-      <main className="flex min-h-[80vh] items-center justify-center px-4">
+      <main className="flex min-h-[80vh] flex-col items-center justify-center px-4">
+        <BrandLogo className="mb-8" />
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: EASE }}
-          className="w-full max-w-md rounded-2xl border border-black/[.06] bg-white p-8 text-center shadow-xl shadow-indigo-900/10"
+          className="w-full max-w-md overflow-hidden rounded-2xl border border-black/[.06] bg-white shadow-xl shadow-indigo-900/10"
         >
-          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
-            <CheckCircle2 className="h-7 w-7 text-emerald-500" strokeWidth={2} />
-          </span>
-          <h1 className="mt-5 text-xl font-bold text-foreground">You&apos;re in!</h1>
-          <p className="mt-2 text-sm text-foreground/60">
-            Check {form.email} to confirm your account and get started.
-          </p>
+          <div className="bg-gradient-to-br from-[#5B4FE9] to-[#4338CA] px-8 pb-8 pt-9 text-center">
+            <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/15 backdrop-blur">
+              <MailCheck className="h-7 w-7 text-white" strokeWidth={2} />
+            </span>
+            <h1 className="mt-4 text-xl font-bold text-white">Verify your email</h1>
+            <p className="mt-1.5 text-sm text-white/70">
+              Enter the 6-digit code we sent to
+              <br />
+              <span className="font-semibold text-white">{form.email}</span>
+            </p>
+          </div>
+
+          <div className="px-8 py-8">
+            <form onSubmit={handleVerify} noValidate className="flex flex-col items-center gap-5">
+              <CodeInput
+                value={code}
+                onChange={(v) => {
+                  setCode(v);
+                  if (verifyError) setVerifyError(null);
+                }}
+                error={!!verifyError}
+                disabled={verifyStatus === "loading"}
+              />
+              {verifyError && <p className="-mt-2 text-center text-xs font-medium text-red-500">{verifyError}</p>}
+
+              <motion.button
+                type="submit"
+                disabled={verifyStatus === "loading" || code.length !== 6}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#5B4FE9] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:bg-[#4a3fd6] disabled:opacity-50"
+              >
+                {verifyStatus === "loading" && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.4} />}
+                {verifyStatus === "loading" ? "Verifying..." : "Verify & Continue"}
+              </motion.button>
+            </form>
+
+            <p className="mt-5 text-center text-xs leading-relaxed text-foreground/45">
+              You need to verify your email before you can access your account.
+              Check your spam folder if it hasn&apos;t arrived.
+            </p>
+          </div>
         </motion.div>
       </main>
     );
   }
 
   return (
-    <main className="bg-zinc-50 px-4 py-16 sm:px-6 lg:py-20">
+    <main className="bg-zinc-50 px-4 py-10 sm:px-6 sm:py-16 lg:py-20">
+      <div className="mx-auto w-full max-w-6xl">
+        <BrandLogo className="mb-8 justify-center lg:justify-start" />
+      </div>
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-16">
         {/* form goes first in the DOM so it's what mobile users see immediately */}
         <motion.div
@@ -173,19 +263,7 @@ export default function SignupPage() {
           <p className="mt-1 text-sm text-foreground/55">Get started with a free Exofe account.</p>
 
           <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => handleSocial("google")}
-              className="flex items-center justify-center gap-2 rounded-xl border border-black/[.1] py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-black/[.03]"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M23.5 12.3c0-.8-.07-1.6-.2-2.3H12v4.4h6.5c-.28 1.5-1.13 2.8-2.4 3.6v3h3.9c2.28-2.1 3.6-5.2 3.6-8.7Z" />
-                <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.9l-3.9-3c-1.08.73-2.47 1.16-4.05 1.16-3.11 0-5.75-2.1-6.69-4.92H1.28v3.09C3.25 21.3 7.3 24 12 24Z" />
-                <path fill="#FBBC05" d="M5.31 14.34a7.2 7.2 0 0 1 0-4.62V6.63H1.28a12 12 0 0 0 0 10.8l4.03-3.09Z" />
-                <path fill="#EA4335" d="M12 4.75c1.76 0 3.34.6 4.58 1.79l3.44-3.44C17.95 1.19 15.24 0 12 0 7.3 0 3.25 2.7 1.28 6.63l4.03 3.09C6.25 6.9 8.89 4.75 12 4.75Z" />
-              </svg>
-              Google
-            </button>
+            <GoogleSignInButton onCredential={handleGoogleCredential} text="signup_with" />
             <button
               type="button"
               onClick={() => handleSocial("facebook")}
@@ -272,18 +350,14 @@ export default function SignupPage() {
 
             <div>
               <label className="text-xs font-semibold text-foreground/70">* Phone Number</label>
-              <div className="mt-1.5 flex gap-2">
-                <select
+              <div className="mt-1.5 flex flex-col gap-2 sm:flex-row">
+                <Dropdown
                   value={form.countryCode}
-                  onChange={(e) => setField("countryCode", e.target.value as FormState["countryCode"])}
-                  className="w-28 shrink-0 rounded-lg border border-black/[.12] px-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
-                >
-                  {COUNTRIES.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.flag} {c.dial}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) => setField("countryCode", v as FormState["countryCode"])}
+                  options={COUNTRIES.map((c) => ({ value: c.code, label: `${c.flag} ${c.dial}` }))}
+                  placeholder="Country"
+                  className="w-full shrink-0 sm:w-28"
+                />
                 <input
                   type="tel"
                   inputMode="numeric"
@@ -300,22 +374,14 @@ export default function SignupPage() {
 
             <div>
               <label className="text-xs font-semibold text-foreground/70">* How did you hear about Exofe?</label>
-              <select
+              <Dropdown
                 value={form.hearAbout}
-                onChange={(e) => setField("hearAbout", e.target.value)}
-                className={`mt-1.5 w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
-                  errors.hearAbout ? "border-red-400" : "border-black/[.12]"
-                } ${form.hearAbout ? "text-foreground" : "text-foreground/40"}`}
-              >
-                <option value="" disabled>
-                  Select
-                </option>
-                {HEAR_OPTIONS.map((opt) => (
-                  <option key={opt} value={opt} className="text-foreground">
-                    {opt}
-                  </option>
-                ))}
-              </select>
+                onChange={(v) => setField("hearAbout", v)}
+                options={HEAR_OPTIONS.map((opt) => ({ value: opt, label: opt }))}
+                placeholder="Select"
+                error={!!errors.hearAbout}
+                className="mt-1.5"
+              />
               {errors.hearAbout && <p className="mt-1 text-xs text-red-500">{errors.hearAbout}</p>}
             </div>
 
@@ -360,7 +426,7 @@ export default function SignupPage() {
           initial="hidden"
           animate="show"
           variants={container}
-          className="order-2 flex flex-col justify-center lg:order-1"
+          className="order-2 hidden flex-col justify-center lg:order-1 lg:flex"
         >
           <motion.h2 variants={item} className="text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-4xl">
             WhatsApp orders made simple,

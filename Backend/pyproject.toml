@@ -5,7 +5,6 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "alembic>=1.18.5",
     # passlib is unmaintained and breaks on bcrypt 4.1+ (it calls a module
     # attribute that got removed), pin bcrypt below that until we swap to
     # something like argon2-cffi or a maintained bcrypt wrapper.

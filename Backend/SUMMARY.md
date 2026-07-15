@@ -24,7 +24,7 @@ Full JWT-based auth matching `Frontend/docs/API_CONTRACT.md`. All 8 endpoints ar
 **Signup flow:**
 1. Validates input (Pydantic) — email regex, password min 8 chars, country code PK/KR/AE
 2. Checks for duplicate email → 422 with `{"message": "...", "errors": {"email": "..."}}`
-3. Creates `users` row (role=owner, password hashed with Argon2)
+3. Creates `users` row (role=owner, password hashed with bcrypt)
 4. Creates `businesses` row (owner_id → new user, name = "{firstName}'s Business")
 5. Back-fills `users.business_id` → the new business
 6. Issues JWT with claims: `sub` (user_id), `business_id`, `role`, `iat`, `exp`
@@ -41,7 +41,7 @@ Full JWT-based auth matching `Frontend/docs/API_CONTRACT.md`. All 8 endpoints ar
 ```
 Token expires in 1 hour. Algorithm: HS256. Secret: `JWT_SECRET` env var.
 
-**Password hashing:** Argon2id via `pwdlib[argon2]` (memory-hard, GPU-resistant).
+**Password hashing:** bcrypt via `passlib[bcrypt]`.
 
 **OTP / Reset / Verify tokens:** Currently stored in-memory (Python dicts). OTP codes, reset tokens, and verification tokens are sent via **Resend** transactional email (see `email_service.py`). Codes are also logged to console as a fallback.
 
@@ -63,7 +63,7 @@ Token expires in 1 hour. Algorithm: HS256. Secret: `JWT_SECRET` env var.
 | Schema | `app/database/exofe_schema.sql` | All 18 tables + indexes + full RLS policies (aligned with `Frontend/docs/DATABASE.md`) |
 | Schema init | `app/database/init_db.py` | Runs `schema.sql` against Supabase with retry loop |
 | Logger | `app/core/logger.py` | Rotating file handler (5MB, 5 backups) + console output |
-| Security | `app/core/security.py` | `hash_password`, `verify_password` (Argon2), `create_access_token`, `decode_access_token` (PyJWT) |
+| Security | `app/core/security.py` | `hash_password`, `verify_password` (bcrypt), `create_access_token`, `decode_access_token` (python-jose) |
 | Dependencies | `app/core/dependencies.py` | `get_current_user` — decodes Bearer JWT → `CurrentUser(user_id, business_id, role)` |
 | Main | `app/main.py` | FastAPI app, CORS, validation error handler (converts to frontend's expected error shape), health check |
 

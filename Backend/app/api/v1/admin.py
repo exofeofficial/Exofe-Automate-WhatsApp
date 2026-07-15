@@ -32,9 +32,6 @@ def admin_login(
 ) -> TokenResponse:
     user = user_repository.get_user_by_email(db, payload.email)
 
-    # Same error either way, whether the email doesn't exist, it's not an
-    # admin account, or the password is wrong. Never give away which one,
-    # that's how you let someone probe for valid admin emails.
     invalid = AppError(401, "Invalid email or password")
 
     if not user or user["role"] != "admin":

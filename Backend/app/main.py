@@ -8,7 +8,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.api.v1 import admin, marketing
+from app.api.v1 import router as api_v1_router
 from app.config import settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logger import get_logger
@@ -42,38 +42,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(marketing.router)
-app.include_router(admin.router)
+app.include_router(api_v1_router)
 
-
-# ── Validation error handler ────────────────────────────────────────────────
-# Converts FastAPI's default 422 shape into the
-# { "message": "...", "errors": { "field": "msg" } } shape the frontend expects.
-
-@app.exception_handler(RequestValidationError)
-async def validation_error_handler(_request: Request, exc: RequestValidationError):
-    errors: dict[str, str] = {}
-    for error in exc.errors():
-        # error["loc"] is a tuple like ("body", "firstName")
-        field = error["loc"][-1] if error["loc"] else "unknown"
-        errors[str(field)] = error["msg"]
-
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={"message": "Please fix the errors below", "errors": errors},
-    )
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(v1.router)
 
 @app.get("/health")
 def health_check(session: Annotated[Session, Depends(get_db)]):

@@ -1,10 +1,3 @@
-# core/exceptions.py
-# Keeps one error format for the whole API: {"message": str, "errors": {field: msg} or null}.
-# The frontend's ApiError class already expects this shape (see
-# frontend/src/lib/api.ts), it reads message and errors off every error
-# response. So use AppError below instead of FastAPI's HTTPException,
-# that way every error we send back looks the same.
-
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -26,7 +19,6 @@ class AppError(Exception):
 def _format_validation_errors(exc: RequestValidationError) -> dict[str, str]:
     errors: dict[str, str] = {}
     for err in exc.errors():
-        # loc looks like ("body", "email"), the field name is the last part
         field = str(err["loc"][-1])
         errors[field] = err["msg"]
     return errors

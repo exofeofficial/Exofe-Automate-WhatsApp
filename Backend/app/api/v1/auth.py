@@ -1,12 +1,3 @@
-"""
-Auth API routes.
-
-Every endpoint matches what the frontend expects in ``src/lib/api.ts``
-and ``Frontend/docs/API_CONTRACT.md``.  Routes are thin — they validate
-input via Pydantic, delegate to ``auth_service``, and translate
-``AuthError`` into the correct HTTP response.
-"""
-
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status

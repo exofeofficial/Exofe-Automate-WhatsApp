@@ -23,11 +23,15 @@ def verify_password(plain_password: str, password_hash: str) -> bool:
     return pwd_context.verify(plain_password, password_hash)
 
 
-def create_access_token(data: dict) -> str:
+def create_access_token(user_id: str, business_id: str | None, role: str) -> str:
     if not settings.jwt_secret:
         raise RuntimeError("JWT_SECRET is not set, can't create a login token")
 
-    to_encode = data.copy()
+    to_encode = {
+        "sub": user_id,
+        "business_id": business_id,
+        "role": role,
+    }
     to_encode["exp"] = datetime.now(timezone.utc) + timedelta(days=TOKEN_EXPIRE_DAYS)
     return jwt.encode(to_encode, settings.jwt_secret, algorithm=ALGORITHM)
 
@@ -35,7 +39,4 @@ def create_access_token(data: dict) -> str:
 def decode_access_token(token: str) -> dict | None:
     if not settings.jwt_secret:
         return None
-    try:
-        return jwt.decode(token, settings.jwt_secret, algorithms=[ALGORITHM])
-    except JWTError:
-        return None
+    return jwt.decode(token, settings.jwt_secret, algorithms=[ALGORITHM])

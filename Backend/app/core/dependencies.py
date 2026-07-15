@@ -9,7 +9,7 @@ get_current_user  – decodes the JWT from the Authorization header and returns
 from dataclasses import dataclass
 from typing import Annotated
 
-import jwt
+from jose import JWTError, ExpiredSignatureError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
@@ -45,13 +45,13 @@ def get_current_user(
 
     try:
         payload = decode_access_token(credentials.credentials)
-    except jwt.ExpiredSignatureError:
+    except ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    except jwt.InvalidTokenError:
+    except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication token",

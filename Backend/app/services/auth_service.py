@@ -89,12 +89,7 @@ def signup(
     verification_token = create_email_verification_token(str(user["id"]))
     email_service.send_verification_email(to=email, token=verification_token)
 
-    return create_access_token(
-        user_id=str(user["id"]),
-        business_id=str(business["id"]),
-        role="owner",
-    )
-
+    return create_access_token(str(user["id"]),str(business["id"]),"owner")
 
 # ── Login ────────────────────────────────────────────────────────────────────
 
@@ -114,9 +109,9 @@ def login(db: Session, *, email: str, password: str) -> str:
     logger.info("Login: user=%s", user["id"])
 
     return create_access_token(
-        user_id=str(user["id"]),
-        business_id=str(user["business_id"]) if user["business_id"] else None,
-        role=user["role"],
+        str(user["id"]),
+        str(user["business_id"]) if user["business_id"] else None,
+        user["role"]
     )
 
 
@@ -187,9 +182,9 @@ def verify_otp(db: Session, *, email: str, code: str) -> str:
     logger.info("OTP verified: user=%s", user["id"])
 
     return create_access_token(
-        user_id=str(user["id"]),
-        business_id=str(user["business_id"]) if user["business_id"] else None,
-        role=user["role"],
+        str(user["id"]),
+        str(user["business_id"]) if user["business_id"] else None,
+        user["role"]
     )
 
 

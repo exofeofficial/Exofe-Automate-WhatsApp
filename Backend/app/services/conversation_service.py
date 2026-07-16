@@ -2,8 +2,8 @@
 from sqlalchemy.orm import Session
 
 from app.ai import classify_intent, extract_order_update
-from app.repositories import ai_repository, draft_order_repository, order_repository, product_repository
-from app.services import ai_service
+from app.repositories import ai_repository, draft_order_repository, order_repository, product_repository, user_repository
+from app.services import ai_service, ai_usage_service
 
 def _active_catalog(db: Session, business_id: str) -> list[dict]:
     """Every active product, with full variant/stock detail. Deliberately
@@ -59,6 +59,9 @@ def _best_matching_faq(db: Session, business_id: str, message: str) -> dict | No
     return best if best_score > 0 else None
 
 def _finalize_order(db, business_id, customer_id, draft_id, result, merged_data) -> str:
+        payment_method = merged_data.get("payment_method")
+        payment_method = payment_method if payment_method in ("cod", "online") else "cod"
+
         try:
             order = order_repository.create_order(
                 db,
@@ -66,13 +69,14 @@ def _finalize_order(db, business_id, customer_id, draft_id, result, merged_data)
                 customer_id=customer_id,
                 items=_order_items_from_draft(result, merged_data),
                 delivery_address=merged_data.get("delivery_address", ""),
+                payment_method=payment_method,
             )
         except ValueError:
             draft_order_repository.mark_status(db, business_id, draft_id, "abandoned")
             return "Sorry, that item just went out of stock — someone from our team will follow up with you shortly."
- 
-        draft_order_repository.mark_status(db, business_id, draft_id, "completed", order_id=order["id"])
-        return f"Your order is ready. Total: PKR {order['total']:,.0f}. Reply CONFIRM to place it."
+
+        draft_order_repository.mark_status(db, business_id, draft_id, "confirmed", order_id=order["id"])
+        return result.next_question or f"Your order is confirmed! Total: PKR {order['total']:,.0f}."
 
 def _order_items_from_draft(result, merged_data: dict) -> list[dict]:
     item = {"product_id": result.matched_product_id, "quantity": int(merged_data.get("quantity", 1))}
@@ -81,7 +85,7 @@ def _order_items_from_draft(result, merged_data: dict) -> list[dict]:
     return [item]
 
 
-def _start_new_draft(db: Session, business_id: str, customer_id: str, message: str, settings: dict) -> str:
+def _start_new_draft(db: Session, business_id: str, business: dict, customer_id: str, message: str, settings: dict) -> str:
     catalog = _active_catalog(db, business_id)
     result = extract_order_update(
         message=message,
@@ -89,6 +93,8 @@ def _start_new_draft(db: Session, business_id: str, customer_id: str, message: s
         product_catalog=catalog,
         business_prompt=settings["business_prompt"],
         tone=settings["tone"],
+        delivery_charge=float(business.get("delivery_charge") or 0),
+        payment_details=business.get("payment_details") or "",
     )
 
     if result.out_of_stock:
@@ -98,15 +104,15 @@ def _start_new_draft(db: Session, business_id: str, customer_id: str, message: s
 
     missing = [] if result.is_complete else ["see next_question"]
     draft = draft_order_repository.create_draft(db, business_id, customer_id, result.updated_fields, missing)
- 
-    if result.is_complete:
+
+    if result.is_complete and result.confirmed:
         return _finalize_order(db, business_id, customer_id, draft["id"], result, result.updated_fields)
- 
+
     return result.next_question or "Got it — let's get your order sorted."
 
 
 def _continue_draft(
-    db: Session, business_id: str, customer_id: str, message: str, draft: dict, settings: dict
+    db: Session, business_id: str, business: dict, customer_id: str, message: str, draft: dict, settings: dict
 ) -> str:
     catalog = _active_catalog(db, business_id)
     result = extract_order_update(
@@ -115,6 +121,8 @@ def _continue_draft(
         product_catalog=catalog,
         business_prompt=settings["business_prompt"],
         tone=settings["tone"],
+        delivery_charge=float(business.get("delivery_charge") or 0),
+        payment_details=business.get("payment_details") or "",
     )
 
     merged_data = {**draft["data"], **result.updated_fields}
@@ -129,17 +137,28 @@ def _continue_draft(
     missing = [] if result.is_complete else ["see next_question"]
     draft_order_repository.update_draft(db, business_id, draft["id"], merged_data, missing)
 
+    if not (result.is_complete and result.confirmed):
+        return result.next_question or "Got it — anything else to add?"
+
     return _finalize_order(db, business_id, customer_id, draft["id"], result, merged_data)
 
-def handle_inbound_message(db: Session, business_id: str, customer_id: str, message: str) -> str:
+def handle_inbound_message(db: Session, business_id: str, customer_id: str, message: str) -> str | None:
     """The orchestrator. Returns the reply text (or, once Phase 8's
     button-sending exists, this becomes the trigger for an interactive
-    message instead of plain text). This is what the webhook calls."""
+    message instead of plain text). This is what the webhook calls.
+
+    Returns None when this business has hit its plan's monthly AI
+    conversation limit (see ai_usage_service) — no automated reply
+    should be sent, a human needs to pick this conversation up."""
+    if not ai_usage_service.check_and_increment(db, business_id):
+        return None
+
     settings = ai_service.get_settings(db, business_id)
+    business = user_repository.get_business_by_id(db, business_id)
     draft = draft_order_repository.get_active_draft(db, business_id, customer_id)
 
     if draft:
-        return _continue_draft(db, business_id, customer_id, message, draft, settings)
+        return _continue_draft(db, business_id, business, customer_id, message, draft, settings)
 
     intent = classify_intent(message, has_active_draft=False)
 
@@ -153,7 +172,7 @@ def handle_inbound_message(db: Session, business_id: str, customer_id: str, mess
         intent.kind = "unclear"
 
     if intent.kind == "order":
-        return _start_new_draft(db, business_id, customer_id, message, settings)
+        return _start_new_draft(db, business_id, business, customer_id, message, settings)
 
     if not settings["handover_enabled"]:
         return "Sorry, I didn't quite catch that — could you rephrase?"

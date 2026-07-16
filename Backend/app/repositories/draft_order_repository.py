@@ -34,7 +34,7 @@ def create_draft(
         text(
             """
             INSERT INTO draft_orders (business_id, customer_id, data, missing_fields)
-            VALUES (:business_id, :customer_id, :data::jsonb, :missing_fields)
+            VALUES (:business_id, :customer_id, CAST(:data AS jsonb), :missing_fields)
             RETURNING *
             """
         ),
@@ -54,7 +54,7 @@ def update_draft(db: Session, business_id: str, draft_id: str, data: dict, missi
         text(
             """
             UPDATE draft_orders
-            SET data = :data::jsonb, missing_fields = :missing_fields, updated_at = NOW()
+            SET data = CAST(:data AS jsonb), missing_fields = :missing_fields, updated_at = NOW()
             WHERE id = :draft_id AND business_id = :business_id
             RETURNING *
             """

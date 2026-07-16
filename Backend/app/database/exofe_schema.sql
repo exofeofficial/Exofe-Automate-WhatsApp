@@ -271,6 +271,7 @@ CREATE TABLE order_items (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     order_id    UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
     product_id  UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    product_variant_id UUID REFERENCES product_variants(id) ON DELETE SET NULL,
     quantity    INTEGER NOT NULL CHECK (quantity > 0),
     unit_price  NUMERIC(10,2) NOT NULL   -- price at the moment the order was placed
 );

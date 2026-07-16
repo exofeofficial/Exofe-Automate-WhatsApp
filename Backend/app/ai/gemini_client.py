@@ -4,8 +4,10 @@ from pydantic import BaseModel
 
 from app.config import settings
 
+
 _client: genai.Client | None = None
- 
+
+
 def _get_client() -> genai.Client:
     global _client
     if _client is None:

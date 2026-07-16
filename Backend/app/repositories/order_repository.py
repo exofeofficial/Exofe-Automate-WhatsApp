@@ -86,24 +86,58 @@ def create_order(
         resolved_items = []
  
         for item in items:
-            product = db.execute(
-                text(
-                    "SELECT id, name, price, stock FROM products "
-                    "WHERE id = :product_id AND business_id = :business_id"
-                ),
-                {"product_id": item["product_id"], "business_id": business_id},
-            ).fetchone()
-            if not product:
-                raise ValueError(f"Product {item['product_id']} not found")
-            if product.stock < item["quantity"]:
-                raise ValueError(f"Not enough stock for {product.name}")
- 
-            unit_price = float(product.price)
-            subtotal += unit_price * item["quantity"]
-            resolved_items.append(
-                {"product_id": str(product.id), "quantity": item["quantity"], "unit_price": unit_price}
-            )
- 
+            variant_id = item.get("variant_id")
+    
+            if variant_id:
+                row = db.execute(
+                    text(
+                        """
+                        SELECT pv.id, pv.price, pv.stock, p.id AS product_id, p.name
+                        FROM product_variants pv
+                        JOIN products p ON p.id = pv.product_id
+                        WHERE pv.id = :variant_id AND p.business_id = :business_id
+                        """
+                    ),
+                    {"variant_id": variant_id, "business_id": business_id},
+                ).fetchone()
+                if not row:
+                    raise ValueError(f"Variant {variant_id} not found")
+                if row.stock < item["quantity"]:
+                    raise ValueError(f"Not enough stock for {row.name}")
+    
+                unit_price = float(row.price)
+                subtotal += unit_price * item["quantity"]
+                resolved_items.append(
+                    {
+                        "product_id": str(row.product_id),
+                        "product_variant_id": str(row.id),
+                        "quantity": item["quantity"],
+                        "unit_price": unit_price,
+                    }
+                )
+            else:
+                product = db.execute(
+                    text(
+                        "SELECT id, name, price, stock FROM products "
+                        "WHERE id = :product_id AND business_id = :business_id"
+                    ),
+                    {"product_id": item["product_id"], "business_id": business_id},
+                ).fetchone()
+                if not product:
+                    raise ValueError(f"Product {item['product_id']} not found")
+                if product.stock < item["quantity"]:
+                    raise ValueError(f"Not enough stock for {product.name}")
+    
+                unit_price = float(product.price)
+                subtotal += unit_price * item["quantity"]
+                resolved_items.append(
+                    {
+                        "product_id": str(product.id),
+                        "product_variant_id": None,
+                        "quantity": item["quantity"],
+                        "unit_price": unit_price,
+                    }
+                )
         business = db.execute(
             text("SELECT delivery_charge, tax_rate FROM businesses WHERE id = :business_id"),
             {"business_id": business_id},
@@ -141,8 +175,8 @@ def create_order(
         for item in resolved_items:
             db.execute(
                 text(
-                    "INSERT INTO order_items (order_id, product_id, quantity, unit_price) "
-                    "VALUES (:order_id, :product_id, :quantity, :unit_price)"
+                    "INSERT INTO order_items (order_id, product_id, product_variant_id, quantity, unit_price) "
+                    "VALUES (:order_id, :product_id, :product_variant_id, :quantity, :unit_price)"
                 ),
                 {"order_id": order_id, **item},
             )

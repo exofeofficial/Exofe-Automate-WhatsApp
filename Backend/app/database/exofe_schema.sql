@@ -398,6 +398,23 @@ CREATE TABLE interactive_messages (
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- ============================================================
+-- DRAFT ORDERS
+-- ============================================================
+
+CREATE TABLE draft_orders (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_id     UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+    customer_id     UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+    status          TEXT NOT NULL DEFAULT 'collecting'
+                        CHECK (status IN ('collecting', 'completed', 'confirmed', 'cancelled', 'abandoned')),
+    data            JSONB NOT NULL DEFAULT '{}',   -- the evolving Order Object
+    missing_fields  TEXT[] NOT NULL DEFAULT '{}',  -- what's still needed — drives the next question
+    order_id        UUID REFERENCES orders(id) ON DELETE SET NULL,  -- linked once finalized
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 
 -- ============================================================
 -- INDEXES
@@ -468,6 +485,11 @@ CREATE INDEX idx_feature_flags_business ON feature_flags(business_id);
 
 -- interactive messages
 CREATE INDEX idx_interactive_messages_business_id ON interactive_messages(business_id);
+
+-- draft orders
+CREATE INDEX idx_draft_orders_business_id ON draft_orders(business_id);
+CREATE UNIQUE INDEX idx_draft_orders_active_per_customer
+    ON draft_orders(customer_id) WHERE status = 'collecting';
 
 -- ============================================================
 -- ROW-LEVEL SECURITY (RLS)
@@ -879,6 +901,19 @@ CREATE POLICY "interactive_messages: own business only"
         business_id = (SELECT business_id FROM users WHERE id = auth.uid())
     );
  
+CREATE POLICY "draft_orders: own business only"
+    ON draft_orders FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM users u
+            WHERE u.id = auth.uid()
+              AND u.role = 'admin'
+              AND u.business_id IS NULL
+        )
+        OR
+        business_id = (SELECT business_id FROM users WHERE id = auth.uid())
+    );
+
 -- ============================================================
 -- END OF SCHEMA
 -- ============================================================

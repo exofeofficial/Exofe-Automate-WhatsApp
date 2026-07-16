@@ -375,6 +375,31 @@ CREATE TABLE demo_leads (
 );
 
 -- ============================================================
+-- INTERACTIVE MESSAGES
+-- ============================================================
+
+CREATE TABLE interactive_messages (
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_id         UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+    template            TEXT NOT NULL
+                            CHECK (template IN ('order_confirmation', 'payment_reminder',
+                                                 'delivery_update', 'welcome_message', 'custom')),
+    prompt              TEXT NOT NULL DEFAULT '',
+    body_text           TEXT NOT NULL DEFAULT '',
+    kind                TEXT NOT NULL CHECK (kind IN ('buttons', 'list')),
+    buttons             JSONB NOT NULL DEFAULT '[]',       -- [{id, text}], max 3 (WhatsApp's own limit)
+    list_button_label   TEXT NOT NULL DEFAULT '',
+    list_rows           JSONB NOT NULL DEFAULT '[]',       -- [{id, title}], max 10 (WhatsApp's own limit)
+    trigger             TEXT NOT NULL
+                            CHECK (trigger IN ('after_order_created', 'after_payment',
+                                                'after_shipping', 'manual')),
+    status              TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('active', 'draft')),
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+
+-- ============================================================
 -- INDEXES
 -- Index business_id on every tenant table — almost every query
 -- filters by the current business. Also index the two hot paths
@@ -441,6 +466,9 @@ CREATE UNIQUE INDEX idx_feature_flags_business_key
     ON feature_flags(key, business_id) WHERE business_id IS NOT NULL;
 CREATE INDEX idx_feature_flags_business ON feature_flags(business_id);
 
+-- interactive messages
+CREATE INDEX idx_interactive_messages_business_id ON interactive_messages(business_id);
+
 -- ============================================================
 -- ROW-LEVEL SECURITY (RLS)
 -- ============================================================
@@ -495,9 +523,9 @@ ALTER TABLE ai_settings            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE faqs                   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_logs             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE feature_flags          ENABLE ROW LEVEL SECURITY;
-ALTER TABLE product_options  ENABLE ROW LEVEL SECURITY;
-ALTER TABLE product_variants ENABLE ROW LEVEL SECURITY;
- 
+ALTER TABLE product_options        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE product_variants       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE interactive_messages   ENABLE ROW LEVEL SECURITY; 
 
 -- ============================================================
 -- POLICIES
@@ -835,6 +863,22 @@ CREATE POLICY "feature_flags: own business and global"
         business_id IS NULL
     );
 
+-- ── interactive_messages ─────────────────────────────────────
+-- Only the business that owns the interactive message can create or read it.
+
+CREATE POLICY "interactive_messages: own business only"
+    ON interactive_messages FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM users u
+            WHERE u.id = auth.uid()
+              AND u.role = 'admin'
+              AND u.business_id IS NULL
+        )
+        OR
+        business_id = (SELECT business_id FROM users WHERE id = auth.uid())
+    );
+ 
 -- ============================================================
 -- END OF SCHEMA
 -- ============================================================

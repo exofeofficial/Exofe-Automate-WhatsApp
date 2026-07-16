@@ -5,7 +5,6 @@ from app.ai import classify_intent, extract_order_update
 from app.repositories import ai_repository, draft_order_repository, order_repository, product_repository
 from app.services import ai_service
 
-
 def _active_catalog(db: Session, business_id: str) -> list[dict]:
     """Every active product, with full variant/stock detail. Deliberately
     NOT filtered to only in-stock items — the AI needs the real stock
@@ -44,7 +43,6 @@ def _active_catalog(db: Session, business_id: str) -> list[dict]:
             )
     return catalog
 
-
 def _best_matching_faq(db: Session, business_id: str, message: str) -> dict | None:
     faqs = ai_repository.list_faqs(db, business_id)
     if not faqs:
@@ -60,6 +58,21 @@ def _best_matching_faq(db: Session, business_id: str, message: str) -> dict | No
 
     return best if best_score > 0 else None
 
+def _finalize_order(db, business_id, customer_id, draft_id, result, merged_data) -> str:
+        try:
+            order = order_repository.create_order(
+                db,
+                business_id=business_id,
+                customer_id=customer_id,
+                items=_order_items_from_draft(result, merged_data),
+                delivery_address=merged_data.get("delivery_address", ""),
+            )
+        except ValueError:
+            draft_order_repository.mark_status(db, business_id, draft_id, "abandoned")
+            return "Sorry, that item just went out of stock — someone from our team will follow up with you shortly."
+ 
+        draft_order_repository.mark_status(db, business_id, draft_id, "completed", order_id=order["id"])
+        return f"Your order is ready. Total: PKR {order['total']:,.0f}. Reply CONFIRM to place it."
 
 def _order_items_from_draft(result, merged_data: dict) -> list[dict]:
     item = {"product_id": result.matched_product_id, "quantity": int(merged_data.get("quantity", 1))}
@@ -84,7 +97,11 @@ def _start_new_draft(db: Session, business_id: str, customer_id: str, message: s
         return result.next_question or "That item is out of stock right now — would you like something else?"
 
     missing = [] if result.is_complete else ["see next_question"]
-    draft_order_repository.create_draft(db, business_id, customer_id, result.updated_fields, missing)
+    draft = draft_order_repository.create_draft(db, business_id, customer_id, result.updated_fields, missing)
+ 
+    if result.is_complete:
+        return _finalize_order(db, business_id, customer_id, draft["id"], result, result.updated_fields)
+ 
     return result.next_question or "Got it — let's get your order sorted."
 
 
@@ -112,29 +129,7 @@ def _continue_draft(
     missing = [] if result.is_complete else ["see next_question"]
     draft_order_repository.update_draft(db, business_id, draft["id"], merged_data, missing)
 
-    if not result.is_complete:
-        return result.next_question
-
-    # Phase 6 — finalize into a real order. The stock/price check here is
-    # a SECOND check, not the first — the out_of_stock branch above is
-    # what normally catches this. This only fires on a genuine race
-    # (stock changed in the seconds between the AI's catalog snapshot
-    # and now), which should be rare.
-    try:
-        order = order_repository.create_order(
-            db,
-            business_id=business_id,
-            customer_id=customer_id,
-            items=_order_items_from_draft(result, merged_data),
-            delivery_address=merged_data.get("delivery_address", ""),
-        )
-    except ValueError:
-        draft_order_repository.mark_status(db, business_id, draft["id"], "abandoned")
-        return "Sorry, that item just went out of stock — someone from our team will follow up with you shortly."
-
-    draft_order_repository.mark_status(db, business_id, draft["id"], "completed", order_id=order["id"])
-    return f"Your order is ready. Total: PKR {order['total']:,.0f}. Reply CONFIRM to place it."
-
+    return _finalize_order(db, business_id, customer_id, draft["id"], result, merged_data)
 
 def handle_inbound_message(db: Session, business_id: str, customer_id: str, message: str) -> str:
     """The orchestrator. Returns the reply text (or, once Phase 8's

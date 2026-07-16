@@ -26,4 +26,6 @@ def generate_structured(prompt: str, schema: type[BaseModel]) -> BaseModel:
             temperature=0.2,
         ),
     )
+    if response.parsed is None:
+        raise RuntimeError(f"Gemini didn't return valid structured output for schema {schema.__name__}")
     return response.parsed

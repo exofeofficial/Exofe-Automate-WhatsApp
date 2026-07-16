@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.alias_generators import to_camel
 
 
@@ -21,6 +21,17 @@ class BusinessProfile(_CamelModel):
     support_email: str = ""
     support_phone: str = ""
     logo: str | None = None
+
+    @field_validator("category")
+    @classmethod
+    def check_category(cls, v: str) -> str:
+        # "" is allowed (industry is nullable) — anything else has to
+        # match the businesses.industry CHECK constraint exactly, or the
+        # UPDATE fails with a raw constraint-violation 500 instead of a
+        # clean validation error.
+        if v and v not in CATEGORIES:
+            raise ValueError(f"category must be one of {', '.join(CATEGORIES)}")
+        return v
 
 
 class BusinessProfileWrapper(BaseModel):

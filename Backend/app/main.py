@@ -44,6 +44,9 @@ app.add_middleware(
 
 app.include_router(api_v1_router)
 
+@app.get("/")
+def root():
+    return {"message": "Welcome to the Exofe Automate WhatsApp API"}
 
 @app.get("/health")
 def health_check(session: Annotated[Session, Depends(get_db)]):

@@ -71,6 +71,8 @@ CREATE TABLE businesses (
     prices_include_tax      BOOLEAN NOT NULL DEFAULT FALSE,
     language                TEXT NOT NULL DEFAULT 'en'
                                 CHECK (language IN ('en', 'ur', 'ko', 'ar')),
+    status                   TEXT NOT NULL DEFAULT 'active'
+                                CHECK (status IN ('active', 'suspended')),
     created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -342,7 +344,7 @@ CREATE TABLE admin_logs (
 
 CREATE TABLE feature_flags (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    key         TEXT NOT NULL UNIQUE,   -- e.g. 'voice_orders', 'instagram_dm'
+    key         TEXT NOT NULL UNIQUE,
     enabled     BOOLEAN NOT NULL DEFAULT FALSE,
     business_id UUID REFERENCES businesses(id) ON DELETE CASCADE  -- NULL = global flag
 );
@@ -429,6 +431,10 @@ CREATE INDEX idx_admin_logs_admin    ON admin_logs(admin_id);
 CREATE INDEX idx_admin_logs_business ON admin_logs(target_business_id);
 
 -- feature_flags
+CREATE UNIQUE INDEX idx_feature_flags_global_key
+    ON feature_flags(key) WHERE business_id IS NULL;
+CREATE UNIQUE INDEX idx_feature_flags_business_key
+    ON feature_flags(key, business_id) WHERE business_id IS NOT NULL;
 CREATE INDEX idx_feature_flags_business ON feature_flags(business_id);
 
 -- ============================================================

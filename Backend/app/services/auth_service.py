@@ -92,7 +92,7 @@ def signup(
 
     # 5. Send verification email (fire-and-forget, after commit)
     verification_code = create_email_verification_code(email)
-    email_service.send_verification_email(to=email, code=verification_code)
+    email_service.send_verification_email(email, verification_code)
 
     return create_access_token(str(user["id"]),str(business["id"]),"owner")
 

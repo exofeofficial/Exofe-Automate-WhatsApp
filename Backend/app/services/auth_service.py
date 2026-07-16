@@ -286,17 +286,21 @@ def verify_otp(db: Session, *, email: str, code: str) -> str:
 
 # ── Password reset ───────────────────────────────────────────────────────────
 #
-# Same in-memory approach as OTP for the MVP.
+# Same 6-digit-code approach as login OTP — the frontend has a single
+# CodeInput-based flow for both, so this needs to behave identically.
 
-_RESET_STORE: dict[str, tuple[str, datetime]] = {}  # token → (email, expires_at)
-_RESET_TTL_SECONDS = 3600  # 1 hour
+_RESET_STORE: dict[str, tuple[str, datetime]] = {}  # email → (code, expires_at)
+_RESET_TTL_SECONDS = 300  # 5 minutes
+_RESET_ATTEMPTS: dict[str, int] = {}
+_MAX_RESET_ATTEMPTS = 5
 
 
 def forgot_password(db: Session, *, email: str) -> None:
-    """Generate a password-reset token and send it via email.
+    """Generate a 6-digit password-reset code and send it via email.
 
     Always returns without error — never reveals whether the email exists.
-    Invalidates any previously issued reset tokens for this email.
+    Overwriting the store entry invalidates any previously issued code for
+    this email.
     """
     user = user_repository.get_user_by_email(db, email)
     if not user:
@@ -304,47 +308,54 @@ def forgot_password(db: Session, *, email: str) -> None:
         logger.warning("Password reset requested for non-existent email: %s", email)
         return
 
-    # Invalidate any existing reset tokens for this email
-    stale_keys = [k for k, v in _RESET_STORE.items() if v[0] == email.lower()]
-    for k in stale_keys:
-        del _RESET_STORE[k]
-
-    token = secrets.token_urlsafe(32)
+    key = email.lower()
+    code = f"{secrets.randbelow(1_000_000):06d}"
     expires_at = datetime.now(timezone.utc) + timedelta(seconds=_RESET_TTL_SECONDS)
-    _RESET_STORE[token] = (email.lower(), expires_at)
+    _RESET_STORE[key] = (code, expires_at)
 
     if settings.resend_api_key:
-        logger.info("Password reset token issued for %s", email)
+        logger.info("Password reset code issued for %s", email)
     else:
-        logger.info("[dev] Password reset token for %s: %s", email, token)
-    email_service.send_password_reset_email(to=email, token=token)
+        logger.info("[dev] Password reset code for %s: %s", email, code)
+    email_service.send_password_reset_email(to=email, code=code)
 
 
-def reset_password(db: Session, *, token: str, new_password: str) -> None:
-    """Set a new password using a previously issued reset token.
+def reset_password(db: Session, *, email: str, code: str, new_password: str) -> None:
+    """Set a new password using a previously issued 6-digit reset code.
 
-    Raises ``AuthError`` with 400 if the token is invalid or expired.
+    Raises ``AuthError`` with 400 if the code is wrong, expired, or was
+    never issued; 429 if too many wrong codes have been tried.
     """
-    stored = _RESET_STORE.get(token)
-    if not stored:
-        raise AuthError(message="Invalid or expired reset link", status_code=400)
+    key = email.lower()
+    stored = _RESET_STORE.get(key)
 
-    email, expires_at = stored
-    if datetime.now(timezone.utc) > expires_at:
-        del _RESET_STORE[token]
-        raise AuthError(message="Invalid or expired reset link", status_code=400)
+    if not stored:
+        raise AuthError(message="Invalid or expired code", status_code=400)
+
+    attempts = _RESET_ATTEMPTS.get(key, 0)
+    if attempts >= _MAX_RESET_ATTEMPTS:
+        del _RESET_STORE[key]
+        _RESET_ATTEMPTS.pop(key, None)
+        logger.warning("Reset code attempts exceeded for email: %s", email)
+        raise AuthError(message="Too many attempts. Request a new code.", status_code=429)
+
+    stored_code, expires_at = stored
+    if datetime.now(timezone.utc) > expires_at or not hmac.compare_digest(stored_code, code):
+        _RESET_ATTEMPTS[key] = attempts + 1
+        raise AuthError(message="Invalid or expired code", status_code=400)
 
     user = user_repository.get_user_by_email(db, email)
     if not user:
-        raise AuthError(message="Invalid or expired reset link", status_code=400)
+        raise AuthError(message="Invalid or expired code", status_code=400)
 
     user_repository.update_user_fields(
         db, str(user["id"]), password_hash=hash_password(new_password)
     )
     db.commit()
 
-    # Consume the token — single use
-    del _RESET_STORE[token]
+    # Consume the code — single use
+    del _RESET_STORE[key]
+    _RESET_ATTEMPTS.pop(key, None)
 
     logger.info("Password reset completed: user=%s", user["id"])
 

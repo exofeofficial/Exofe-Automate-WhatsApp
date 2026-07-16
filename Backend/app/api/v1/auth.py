@@ -117,7 +117,7 @@ def otp_verify(request: Request, body: OtpVerifyBody, db: DbSession):
 def forgot_password(request: Request, body: ForgotPasswordRequest, db: DbSession):
     auth_service.forgot_password(db, email=body.email)
     # Always return success — never reveal whether the email exists
-    return MessageResponse(message="If that email exists, a reset link has been sent")
+    return MessageResponse(message="If that email exists, a reset code has been sent")
 
 
 # ── POST /auth/reset-password ────────────────────────────────────────────────
@@ -127,7 +127,7 @@ def forgot_password(request: Request, body: ForgotPasswordRequest, db: DbSession
 def reset_password(request: Request, body: ResetPasswordRequest, db: DbSession):
     try:
         auth_service.reset_password(
-            db, token=body.token, new_password=body.new_password
+            db, email=body.email, code=body.code, new_password=body.new_password
         )
     except AuthError as exc:
         raise _handle_auth_error(exc)

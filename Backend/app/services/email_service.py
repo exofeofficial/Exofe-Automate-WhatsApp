@@ -59,18 +59,18 @@ def send_otp_email(to: str, code: str) -> None:
     _send(to=to, subject=f"Your Exofe login code: {code}", html=html)
 
 
-def send_password_reset_email(to: str, token: str) -> None:
-    """Send a password-reset token."""
+def send_password_reset_email(to: str, code: str) -> None:
+    """Send a 6-digit password-reset code."""
     html = _base_html(
         "Reset your password",
         f"""
         <p style="margin:16px 0 0;font-size:14px;color:#3f3f46;">
-          We received a request to reset your password. Use the token below
-          to complete the process. It expires in 1 hour.
+          We received a request to reset your password. Use this code to
+          complete the process. It expires in 5 minutes.
         </p>
         <div style="margin:24px 0;padding:16px;background:#f4f4f5;border-radius:8px;
-                    text-align:center;font-size:14px;font-family:monospace;word-break:break-all;color:#18181b;">
-          {token}
+                    text-align:center;font-size:32px;font-weight:700;letter-spacing:8px;color:#18181b;">
+          {code}
         </div>
         <p style="margin:0;font-size:12px;color:#a1a1aa;">
           If you didn't request a password reset, you can safely ignore this email.

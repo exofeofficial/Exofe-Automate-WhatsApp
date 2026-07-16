@@ -92,8 +92,14 @@ class ForgotPasswordRequest(_CamelModel):
 
 
 class ResetPasswordRequest(_CamelModel):
-    token: str
+    email: str
+    code: str = Field(..., min_length=6, max_length=6)
     new_password: str = Field(..., min_length=8, max_length=128)
+
+    @field_validator("email")
+    @classmethod
+    def check_email(cls, v: str) -> str:
+        return _validate_email(v)
 
 
 class VerifyEmailRequest(_CamelModel):

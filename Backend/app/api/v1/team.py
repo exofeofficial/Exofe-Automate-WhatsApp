@@ -23,17 +23,23 @@ router = APIRouter(prefix="/team", tags=["team"])
 DbSession = Annotated[Session, Depends(get_db)]
 CurrentOwner = Annotated[CurrentUser, Depends(get_current_user)]
 
-def _require_team_manager(current: CurrentUser) -> str:
+def _require_business(current: CurrentUser) -> str:
     if not current.business_id:
         raise AppError(400, "No business on this account")
+    return current.business_id
+
+
+def _require_team_manager(current: CurrentUser) -> str:
+    business_id = _require_business(current)
     if current.role not in ("owner", "admin"):
         raise AppError(403, "Only owners and admins can manage the team")
-    return current.business_id
+    return business_id
 
 
 @router.get("", response_model=TeamMembersResponse)
 def list_members(db: DbSession, current: CurrentOwner) -> TeamMembersResponse:
-    business_id = _require_team_manager(current)
+    # Any business member can see the team roster; only managers can edit it.
+    business_id = _require_business(current)
     members = team_service.list_members(db, business_id)
     return TeamMembersResponse(members=[TeamMember(**m) for m in members])
 

@@ -37,11 +37,17 @@ from app.models.admin import (
     SetFeatureFlagRequest, 
     FeatureFlagResponse
 )
-router = APIRouter(prefix="/admin")
+router = APIRouter(tags=["Admin"], prefix="/admin")
 
 def require_admin(user: Annotated[CurrentUser, Depends(get_current_user)]) -> CurrentUser:
-    """Same as get_current_user, but 403s anyone who isn't Exofe staff."""
-    if user.role != "admin":
+    """Same as get_current_user, but 403s anyone who isn't Exofe platform staff.
+
+    role=="admin" alone isn't enough — a business owner can grant a tenant
+    team member the (business-scoped) "admin" role via /team/invite, and
+    that JWT would otherwise pass this check. Exofe platform staff are the
+    only "admin" accounts with business_id IS NULL, so both must hold.
+    """
+    if user.role != "admin" or user.business_id is not None:
         raise AppError(403, "Admin access required")
     return user
 

@@ -1,8 +1,9 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from app.core.rate_limit import limiter
 from app.database.session import get_db
 from app.models.auth import (
     ForgotPasswordRequest,
@@ -41,7 +42,8 @@ def _handle_auth_error(exc: AuthError) -> HTTPException:
     response_model=TokenResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def signup(body: SignupRequest, db: DbSession):
+@limiter.limit("5/hour")
+def signup(request: Request, body: SignupRequest, db: DbSession):
     try:
         token = auth_service.signup(
             db,
@@ -62,7 +64,8 @@ def signup(body: SignupRequest, db: DbSession):
 # ── POST /auth/login ─────────────────────────────────────────────────────────
 
 @router.post("/login", response_model=TokenResponse)
-def login(body: LoginRequest, db: DbSession):
+@limiter.limit("10/minute")
+def login(request: Request, body: LoginRequest, db: DbSession):
     try:
         token = auth_service.login(db, email=body.email, password=body.password)
     except AuthError as exc:
@@ -74,7 +77,8 @@ def login(body: LoginRequest, db: DbSession):
 # ── POST /auth/google ────────────────────────────────────────────────────────
 
 @router.post("/google", response_model=TokenResponse)
-def google_auth(body: GoogleAuthRequest, db: DbSession):
+@limiter.limit("20/hour")
+def google_auth(request: Request, body: GoogleAuthRequest, db: DbSession):
     try:
         token = auth_service.google_login(db, id_token=body.id_token)
     except AuthError as exc:
@@ -86,7 +90,8 @@ def google_auth(body: GoogleAuthRequest, db: DbSession):
 # ── POST /auth/otp/request ───────────────────────────────────────────────────
 
 @router.post("/otp/request", response_model=MessageResponse)
-def otp_request(body: OtpRequestBody, db: DbSession):
+@limiter.limit("5/hour")
+def otp_request(request: Request, body: OtpRequestBody, db: DbSession):
     auth_service.request_otp(db, email=body.email)
     # Always return success — never reveal whether the email exists
     return MessageResponse(message="Code sent")
@@ -95,7 +100,8 @@ def otp_request(body: OtpRequestBody, db: DbSession):
 # ── POST /auth/otp/verify ────────────────────────────────────────────────────
 
 @router.post("/otp/verify", response_model=TokenResponse)
-def otp_verify(body: OtpVerifyBody, db: DbSession):
+@limiter.limit("20/hour")
+def otp_verify(request: Request, body: OtpVerifyBody, db: DbSession):
     try:
         token = auth_service.verify_otp(db, email=body.email, code=body.code)
     except AuthError as exc:
@@ -107,7 +113,8 @@ def otp_verify(body: OtpVerifyBody, db: DbSession):
 # ── POST /auth/forgot-password ───────────────────────────────────────────────
 
 @router.post("/forgot-password", response_model=MessageResponse)
-def forgot_password(body: ForgotPasswordRequest, db: DbSession):
+@limiter.limit("5/hour")
+def forgot_password(request: Request, body: ForgotPasswordRequest, db: DbSession):
     auth_service.forgot_password(db, email=body.email)
     # Always return success — never reveal whether the email exists
     return MessageResponse(message="If that email exists, a reset link has been sent")
@@ -116,7 +123,8 @@ def forgot_password(body: ForgotPasswordRequest, db: DbSession):
 # ── POST /auth/reset-password ────────────────────────────────────────────────
 
 @router.post("/reset-password", response_model=MessageResponse)
-def reset_password(body: ResetPasswordRequest, db: DbSession):
+@limiter.limit("10/hour")
+def reset_password(request: Request, body: ResetPasswordRequest, db: DbSession):
     try:
         auth_service.reset_password(
             db, token=body.token, new_password=body.new_password
@@ -130,7 +138,8 @@ def reset_password(body: ResetPasswordRequest, db: DbSession):
 # ── POST /auth/verify-email ──────────────────────────────────────────────────
 
 @router.post("/verify-email", response_model=MessageResponse)
-def verify_email(body: VerifyEmailRequest, db: DbSession):
+@limiter.limit("10/hour")
+def verify_email(request: Request, body: VerifyEmailRequest, db: DbSession):
     try:
         auth_service.verify_email(db, email=body.email, code=body.code)
     except AuthError as exc:

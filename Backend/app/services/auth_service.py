@@ -18,6 +18,12 @@ logger = get_logger(__name__)
 # Business rule from the PRD: every new signup gets a 7 day free trial.
 TRIAL_LENGTH_DAYS = 7
 
+# A hash of a value nobody will ever type in. Verified against on every
+# login for an email that doesn't exist, so the bcrypt comparison always
+# runs and a wrong-password attempt on a real account can't be timed
+# against a nonexistent-account attempt to enumerate registered emails.
+_DUMMY_PASSWORD_HASH = hash_password(secrets.token_urlsafe(32))
+
 
 class AuthError(Exception):
     """Raised for any auth-related business rule violation."""
@@ -105,7 +111,11 @@ def login(db: Session, *, email: str, password: str) -> str:
     The error message is deliberately vague to prevent email enumeration.
     """
     user = user_repository.get_user_by_email(db, email)
-    if not user or not verify_password(password, user["password_hash"]):
+    # Always run the bcrypt comparison, even for an unknown email, so a
+    # missing account can't be distinguished from a wrong password by timing.
+    password_hash = user["password_hash"] if user else _DUMMY_PASSWORD_HASH
+    password_ok = verify_password(password, password_hash)
+    if not user or not password_ok:
         raise AuthError(
             message="Incorrect email or password",
             status_code=401,
@@ -222,7 +232,13 @@ def request_otp(db: Session, *, email: str) -> None:
 
     _OTP_STORE[email.lower()] = (code, expires_at)
 
-    logger.info("OTP for %s: %s (expires in %ds)", email, code, _OTP_TTL_SECONDS)
+    if settings.resend_api_key:
+        logger.info("OTP issued for %s (expires in %ds)", email, _OTP_TTL_SECONDS)
+    else:
+        # No email provider configured — this is the only way to see the
+        # code locally, so it's fine to print it. Never do this once
+        # RESEND_API_KEY is set, since app.log is persisted to disk.
+        logger.info("[dev] OTP for %s: %s (expires in %ds)", email, code, _OTP_TTL_SECONDS)
     email_service.send_otp_email(to=email, code=code)
 
 
@@ -297,7 +313,10 @@ def forgot_password(db: Session, *, email: str) -> None:
     expires_at = datetime.now(timezone.utc) + timedelta(seconds=_RESET_TTL_SECONDS)
     _RESET_STORE[token] = (email.lower(), expires_at)
 
-    logger.info("Password reset token for %s: %s", email, token)
+    if settings.resend_api_key:
+        logger.info("Password reset token issued for %s", email)
+    else:
+        logger.info("[dev] Password reset token for %s: %s", email, token)
     email_service.send_password_reset_email(to=email, token=token)
 
 
@@ -350,7 +369,10 @@ def create_email_verification_code(email: str) -> str:
     code = f"{secrets.randbelow(1_000_000):06d}"
     expires_at = datetime.now(timezone.utc) + timedelta(seconds=_VERIFY_TTL_SECONDS)
     _VERIFY_STORE[email.lower()] = (code, expires_at)
-    logger.info("Email verification code for %s: %s", email, code)
+    if settings.resend_api_key:
+        logger.info("Email verification code issued for %s", email)
+    else:
+        logger.info("[dev] Email verification code for %s: %s", email, code)
     return code
 
 

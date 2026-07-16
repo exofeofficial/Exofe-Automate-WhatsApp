@@ -24,6 +24,13 @@ def _require_business(current: CurrentUser) -> str:
     return current.business_id
 
 
+def _require_owner(current: CurrentUser) -> str:
+    business_id = _require_business(current)
+    if current.role != "owner":
+        raise AppError(403, "Only the account owner can manage billing")
+    return business_id
+
+
 @router.get("/trial-status", response_model=TrialStatusResponse)
 def trial_status(db: DbSession, current: CurrentOwner) -> TrialStatusResponse:
     business_id = _require_business(current)
@@ -32,13 +39,13 @@ def trial_status(db: DbSession, current: CurrentOwner) -> TrialStatusResponse:
 
 @router.post("/subscribe", response_model=TrialStatusResponse)
 def subscribe(payload: SubscribeRequest, db: DbSession, current: CurrentOwner) -> TrialStatusResponse:
-    business_id = _require_business(current)
+    business_id = _require_owner(current)
     return TrialStatusResponse(**billing_service.subscribe(db, business_id, payload.plan))
 
 
 @router.post("/cancel", response_model=TrialStatusResponse)
 def cancel(db: DbSession, current: CurrentOwner) -> TrialStatusResponse:
-    business_id = _require_business(current)
+    business_id = _require_owner(current)
     return TrialStatusResponse(**billing_service.cancel(db, business_id))
 
 

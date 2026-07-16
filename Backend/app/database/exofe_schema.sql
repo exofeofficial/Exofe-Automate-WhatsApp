@@ -344,7 +344,7 @@ CREATE TABLE admin_logs (
 
 CREATE TABLE feature_flags (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    key         TEXT NOT NULL UNIQUE,
+    key         TEXT NOT NULL,
     enabled     BOOLEAN NOT NULL DEFAULT FALSE,
     business_id UUID REFERENCES businesses(id) ON DELETE CASCADE  -- NULL = global flag
 );

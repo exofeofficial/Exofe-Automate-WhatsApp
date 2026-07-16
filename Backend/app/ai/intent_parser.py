@@ -1,23 +1,36 @@
+# app/ai/intent_parser.py
+#
+# Fix: the has_active_draft=True case had no return at all — fell off
+# the end of the function returning None, which crashed any caller
+# doing intent.kind. When a draft is active, skip the Gemini call
+# entirely (the customer is almost certainly answering the question we
+# just asked) rather than spending a call to reach the same conclusion.
+
 from typing import Literal
+
 from pydantic import BaseModel, Field
+
 from app.ai import gemini_client
+
 
 class Intent(BaseModel):
     kind: Literal["greeting", "faq", "order", "unclear"]
     confidence: float = Field(..., ge=0, le=1)
 
-def classify_intent(message: str, has_active_draft: bool) -> Intent:
-    # has_active_draft matters: if there's already a draft in progress,
-    # bias toward "order" unless the message clearly signals something else
-    # (cancel, a question, etc). Build this bias into the prompt text.
-    if not has_active_draft:
-        prompt = f"""
-        1. Greeting (Hi, Hello, etc)
-        2. Order  (I want to order, Place an order, etc)
-        3. FAQ (Do you offer this, How much is this, etc)
-        4. Unclear (Anything else, Anything else)
 
-        Classify the intent of the {message} and return the intent and confidence.
-        """
-        response = gemini_client.generate_structured(prompt, Intent)
-        return response
+def classify_intent(message: str, has_active_draft: bool) -> Intent:
+    if has_active_draft:
+        return Intent(kind="order", confidence=1.0)
+
+    prompt = f"""
+    Classify the customer's message into exactly one of:
+    1. greeting (Hi, Hello, etc)
+    2. order (I want to order, Place an order, etc)
+    3. faq (Do you offer this, How much is this, etc)
+    4. unclear (anything that doesn't clearly fit the above)
+
+    Message: "{message}"
+
+    Return the intent and your confidence (0 to 1).
+    """
+    return gemini_client.generate_structured(prompt, Intent)

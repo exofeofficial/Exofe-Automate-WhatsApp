@@ -73,29 +73,79 @@ def update_order_status(db: Session, business_id: str, order_id: str, status: st
     db.commit()
     return dict(row._mapping) if row else None
 
-def create_order(db, business_id: str, customer_id: str, items: list[dict], delivery_address: str, payment_method: str) -> dict: 
-    
-    row = db.execute(
-        text("""
-            INSERT INTO orders (business_id, customer_id, status, total_amount)
-            VALUES (:business_id, :customer_id, 'pending', 0)
-            RETURNING id
-        """),
-        {"business_id": business_id, "customer_id": customer_id},
-    ).fetchone()
-    order_id = dict(row._mapping)["id"]
-    for item in items:
-        db.execute(
-            text("""
-                INSERT INTO order_items (order_id, product_id, quantity, unit_price)
-                VALUES (:order_id, :product_id, :quantity, :unit_price)
-            """),
+def create_order(
+        db: Session,
+        business_id: str,
+        customer_id: str,
+        items: list[dict],  # [{"product_id": ..., "quantity": ...}, ...]
+        delivery_address: str,
+        payment_method: str = "cod",
+        created_by: str = "ai",
+    ) -> dict:
+        subtotal = 0.0
+        resolved_items = []
+ 
+        for item in items:
+            product = db.execute(
+                text(
+                    "SELECT id, name, price, stock FROM products "
+                    "WHERE id = :product_id AND business_id = :business_id"
+                ),
+                {"product_id": item["product_id"], "business_id": business_id},
+            ).fetchone()
+            if not product:
+                raise ValueError(f"Product {item['product_id']} not found")
+            if product.stock < item["quantity"]:
+                raise ValueError(f"Not enough stock for {product.name}")
+ 
+            unit_price = float(product.price)
+            subtotal += unit_price * item["quantity"]
+            resolved_items.append(
+                {"product_id": str(product.id), "quantity": item["quantity"], "unit_price": unit_price}
+            )
+ 
+        business = db.execute(
+            text("SELECT delivery_charge, tax_rate FROM businesses WHERE id = :business_id"),
+            {"business_id": business_id},
+        ).fetchone()
+        delivery_charge = float(business.delivery_charge)
+        tax = round(subtotal * float(business.tax_rate) / 100, 2)
+        total = round(subtotal + delivery_charge + tax, 2)
+ 
+        row = db.execute(
+            text(
+                """
+                INSERT INTO orders
+                    (business_id, customer_id, status, payment_method,
+                     subtotal, delivery_charge, tax, total, delivery_address, created_by)
+                VALUES
+                    (:business_id, :customer_id, 'new', :payment_method,
+                     :subtotal, :delivery_charge, :tax, :total, :delivery_address, :created_by)
+                RETURNING *
+                """
+            ),
             {
-                "order_id": order_id,
-                "product_id": item["product_id"],
-                "quantity": item["quantity"],
-                "unit_price": item["unit_price"],
+                "business_id": business_id,
+                "customer_id": customer_id,
+                "payment_method": payment_method,
+                "subtotal": subtotal,
+                "delivery_charge": delivery_charge,
+                "tax": tax,
+                "total": total,
+                "delivery_address": delivery_address,
+                "created_by": created_by,
             },
-        )
-    db.commit()
-    return dict(row._mapping) if row else None
+        ).fetchone()
+        order_id = row.id
+ 
+        for item in resolved_items:
+            db.execute(
+                text(
+                    "INSERT INTO order_items (order_id, product_id, quantity, unit_price) "
+                    "VALUES (:order_id, :product_id, :quantity, :unit_price)"
+                ),
+                {"order_id": order_id, **item},
+            )
+ 
+        db.commit()
+        return dict(row._mapping)

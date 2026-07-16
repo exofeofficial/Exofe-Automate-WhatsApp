@@ -85,3 +85,7 @@ def get_analytics(db: Session, business_id: str, days: int) -> list[dict]:
     end = date.today()
     start = end - timedelta(days=days - 1)
     return dashboard_repository.daily_order_stats(db, business_id, start, end)
+
+
+def get_onboarding_status(db: Session, business_id: str) -> dict:
+    return dashboard_repository.get_onboarding_status(db, business_id)

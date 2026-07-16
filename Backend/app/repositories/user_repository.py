@@ -152,6 +152,7 @@ _BUSINESS_ALLOWED_FIELDS = frozenset({
     "delivery_charge", "delivery_areas", "delivery_estimated_time",
     "cash_on_delivery", "pickup_available",
     "tax_rate", "tax_name", "prices_include_tax",
+    "payment_details",
     "language",
 })
 

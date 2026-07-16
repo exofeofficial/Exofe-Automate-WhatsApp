@@ -4,16 +4,17 @@ import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronRight, Circle, CircleCheck, Clock, ListChecks, X } from "lucide-react";
-import { MOCK_ONBOARDING_TASKS, type TrialStatus } from "@/lib/trial";
+import type { OnboardingTask, TrialStatus } from "@/lib/trial";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 // Floating, dismissible checklist. This is on purpose not a blocking modal,
 // login should never force a "connect your account" step, this widget just
 // nudges the user while they're already using the dashboard normally.
-export default function PendingTasksWidget({ trial }: { trial: TrialStatus }) {
-  const [open, setOpen] = useState(false);
-  const tasks = MOCK_ONBOARDING_TASKS;
+// Starts open — the whole point is to be seen the moment the dashboard
+// loads, not to wait for a click that might never come.
+export default function PendingTasksWidget({ trial, tasks }: { trial: TrialStatus; tasks: OnboardingTask[] }) {
+  const [open, setOpen] = useState(true);
 
   const doneCount = tasks.filter((t) => t.completed).length;
   const remaining = tasks.length - doneCount;

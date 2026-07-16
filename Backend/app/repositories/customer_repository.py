@@ -26,6 +26,37 @@ def get_customer(db: Session, business_id: str, customer_id: str) -> dict | None
     return dict(row._mapping) if row else None
 
 
+def get_or_create_by_whatsapp(db: Session, business_id: str, whatsapp_number: str, name: str | None = None) -> dict:
+    """Called from the inbound WhatsApp pipeline — every message needs a
+    customer row to hang a draft order / order history off of. name is
+    only set on first contact (pulled from the WhatsApp profile); an
+    existing customer's name is never overwritten here."""
+    row = db.execute(
+        text(
+            """
+            INSERT INTO customers (business_id, whatsapp_number, name)
+            VALUES (:business_id, :whatsapp_number, :name)
+            ON CONFLICT (business_id, whatsapp_number) DO UPDATE SET business_id = EXCLUDED.business_id
+            RETURNING *
+            """
+        ),
+        {"business_id": business_id, "whatsapp_number": whatsapp_number, "name": name},
+    ).fetchone()
+    db.commit()
+    return dict(row._mapping)
+
+
+def set_name_if_missing(db: Session, customer_id: str, name: str) -> None:
+    """Fills in the customer's name once the AI learns it mid-conversation
+    (e.g. while collecting a draft order) — only if we didn't already
+    have one, same rule as get_or_create_by_whatsapp above."""
+    db.execute(
+        text("UPDATE customers SET name = :name WHERE id = :customer_id AND name IS NULL"),
+        {"customer_id": customer_id, "name": name},
+    )
+    db.commit()
+
+
 def get_orders_for_customer(db: Session, business_id: str, customer_id: str) -> list[dict]:
     rows = db.execute(
         text(

@@ -104,6 +104,27 @@ def recent_customers(db: Session, business_id: str, limit: int) -> list[dict]:
     return [dict(row._mapping) for row in rows]
 
 
+def get_onboarding_status(db: Session, business_id: str) -> dict:
+    """One round trip for the dashboard's "Setup guide" checklist —
+    whether each onboarding step is actually done, not just clicked."""
+    row = db.execute(
+        text(
+            """
+            SELECT
+                (SELECT whatsapp_connected_at IS NOT NULL FROM businesses WHERE id = :business_id)
+                    AS whatsapp_connected,
+                EXISTS(SELECT 1 FROM products WHERE business_id = :business_id) AS has_products,
+                EXISTS(
+                    SELECT 1 FROM subscriptions WHERE business_id = :business_id AND status = 'active'
+                ) AS has_paid_plan,
+                (SELECT COUNT(*) FROM users WHERE business_id = :business_id) > 1 AS has_team_members
+            """
+        ),
+        {"business_id": business_id},
+    ).fetchone()
+    return dict(row._mapping)
+
+
 def daily_order_stats(db: Session, business_id: str, start: date, end_inclusive: date) -> list[dict]:
     rows = db.execute(
         text(

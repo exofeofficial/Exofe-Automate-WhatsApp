@@ -84,6 +84,19 @@ class TaxWrapper(BaseModel):
     tax: TaxSettings
 
 
+# ── Payment ──────────────────────────────────────────────────────────────────
+
+class PaymentSettings(_CamelModel):
+    # Free text on purpose — no payment gateway is wired up yet, so this
+    # is just what the AI reads back verbatim to a customer who wants to
+    # pay online (e.g. "JazzCash: 0300-1234567 — Ali's Store").
+    online_payment_details: str = Field("", max_length=500)
+
+
+class PaymentWrapper(BaseModel):
+    payment: PaymentSettings
+
+
 # ── Language ─────────────────────────────────────────────────────────────────
 
 class LanguageUpdateRequest(_CamelModel):
@@ -101,6 +114,7 @@ class SettingsResponse(_CamelModel):
     hours: list[BusinessHourRow]
     delivery: DeliverySettings
     tax: TaxSettings
+    payment: PaymentSettings
     language: str = "en"
 
 

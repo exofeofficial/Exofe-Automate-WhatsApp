@@ -8,8 +8,8 @@ import Topbar from "@/components/dashboard/Topbar";
 import PendingTasksWidget from "@/components/dashboard/PendingTasksWidget";
 import TrialLockOverlay from "@/components/dashboard/TrialLockOverlay";
 import { getToken } from "@/lib/auth";
-import { getTrialStatus } from "@/lib/api";
-import type { TrialStatus } from "@/lib/trial";
+import { getOnboardingStatus, getTrialStatus, type OnboardingStatus } from "@/lib/api";
+import { buildOnboardingTasks, type TrialStatus } from "@/lib/trial";
 
 // Fail-open default: if the trial-status fetch errors out (a network
 // hiccup, the backend being briefly down), don't lock a paying customer
@@ -28,6 +28,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [checked, setChecked] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [trial, setTrial] = useState<TrialStatus>(SAFE_DEFAULT_TRIAL);
+  const [onboarding, setOnboarding] = useState<OnboardingStatus | null>(null);
 
   useEffect(() => {
     if (!getToken()) {
@@ -38,6 +39,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       .then(setTrial)
       .catch(() => {})
       .finally(() => setChecked(true));
+    getOnboardingStatus()
+      .then(setOnboarding)
+      .catch(() => {});
   }, [router]);
 
   // close the mobile drawer whenever the route changes
@@ -87,7 +91,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <main className="flex-1 p-4 sm:p-6">{children}</main>
       </div>
 
-      {!showLock && <PendingTasksWidget trial={trial} />}
+      {!showLock && <PendingTasksWidget trial={trial} tasks={buildOnboardingTasks(onboarding)} />}
       {showLock && <TrialLockOverlay trial={trial} />}
     </div>
   );

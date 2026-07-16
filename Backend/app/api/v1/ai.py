@@ -9,8 +9,18 @@ from sqlalchemy.orm import Session
 from app.core.dependencies import CurrentUser, get_current_user
 from app.core.exceptions import AppError
 from app.database.session import get_db
-from app.models.ai import AISettings, AISettingsWrapper, FAQ, FAQRequest, FAQResponse, FAQsResponse, MessageResponse
-from app.services import ai_service
+from app.models.ai import (
+    AISettings,
+    AISettingsWrapper,
+    AIUsage,
+    AIUsageResponse,
+    FAQ,
+    FAQRequest,
+    FAQResponse,
+    FAQsResponse,
+    MessageResponse,
+)
+from app.services import ai_service, ai_usage_service
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 
@@ -70,3 +80,17 @@ def delete_faq(faq_id: str, db: DbSession, current: CurrentOwner) -> MessageResp
     business_id = _require_business(current)
     ai_service.delete_faq(db, business_id, faq_id)
     return MessageResponse(message="FAQ deleted")
+
+
+@router.get("/usage", response_model=AIUsageResponse)
+def get_usage(db: DbSession, current: CurrentOwner) -> AIUsageResponse:
+    business_id = _require_business(current)
+    summary = ai_usage_service.get_usage_summary(db, business_id)
+    return AIUsageResponse(
+        usage=AIUsage(
+            month_count=summary["month_count"],
+            month_limit=summary["month_limit"],
+            blocked=summary["blocked"],
+            blocked_until=summary["blocked_until"].isoformat() if summary["blocked_until"] else None,
+        )
+    )

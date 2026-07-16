@@ -51,14 +51,17 @@ def get_message(db: Session, business_id: str, message_id: str) -> dict | None:
 
 
 def create_message(db: Session, business_id: str, data: dict) -> dict:
+    # CAST(... AS jsonb) instead of the :param::jsonb shorthand — SQLAlchemy's
+    # text() bind-parameter parser doesn't recognize a bind param immediately
+    # followed by a `::` cast, so :buttons::jsonb silently stays unbound.
     row = db.execute(
         text(
             f"""
             INSERT INTO interactive_messages
                 ({_COLUMNS})
             VALUES
-                (:business_id, :template, :prompt, :body_text, :kind, :buttons::jsonb,
-                 :list_button_label, :list_rows::jsonb, :trigger, :status)
+                (:business_id, :template, :prompt, :body_text, :kind, CAST(:buttons AS jsonb),
+                 :list_button_label, CAST(:list_rows AS jsonb), :trigger, :status)
             RETURNING *
             """
         ),
@@ -76,8 +79,8 @@ def update_message(db: Session, business_id: str, message_id: str, data: dict) -
             """
             UPDATE interactive_messages SET
                 template = :template, prompt = :prompt, body_text = :body_text,
-                kind = :kind, buttons = :buttons::jsonb,
-                list_button_label = :list_button_label, list_rows = :list_rows::jsonb,
+                kind = :kind, buttons = CAST(:buttons AS jsonb),
+                list_button_label = :list_button_label, list_rows = CAST(:list_rows AS jsonb),
                 trigger = :trigger, status = :status, updated_at = NOW()
             WHERE id = :id AND business_id = :business_id
             RETURNING *

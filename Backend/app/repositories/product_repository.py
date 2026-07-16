@@ -50,7 +50,7 @@ def _fetch_images(db: Session, product_ids: list[str]) -> dict[str, list[str]]:
     rows = db.execute(
         text(
             "SELECT product_id, url FROM product_images "
-            "WHERE product_id = ANY(:ids) ORDER BY product_id, sort_order"
+            "WHERE product_id = ANY(CAST(:ids AS uuid[])) ORDER BY product_id, sort_order"
         ),
         {"ids": product_ids},
     ).fetchall()
@@ -66,7 +66,7 @@ def _fetch_options(db: Session, product_ids: list[str]) -> dict[str, list[dict]]
     rows = db.execute(
         text(
             "SELECT product_id, name, values FROM product_options "
-            "WHERE product_id = ANY(:ids) ORDER BY product_id, sort_order"
+            "WHERE product_id = ANY(CAST(:ids AS uuid[])) ORDER BY product_id, sort_order"
         ),
         {"ids": product_ids},
     ).fetchall()
@@ -82,7 +82,7 @@ def _fetch_variants(db: Session, product_ids: list[str]) -> dict[str, list[dict]
     rows = db.execute(
         text(
             "SELECT id, product_id, option_values, sku, price, stock FROM product_variants "
-            "WHERE product_id = ANY(:ids) ORDER BY product_id, created_at"
+            "WHERE product_id = ANY(CAST(:ids AS uuid[])) ORDER BY product_id, created_at"
         ),
         {"ids": product_ids},
     ).fetchall()

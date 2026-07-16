@@ -23,7 +23,7 @@ export default function BillingPage() {
   const [trial, setTrial] = useState<TrialStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   // No payment gateway is wired up yet, so "Subscribe" can't actually
-  // activate a plan — clicking it just reveals how to reach us instead
+  // activate a plan clicking it just reveals how to reach us instead
   // of silently granting a paid plan for free.
   const [interestedPlan, setInterestedPlan] = useState<PlanId | null>(null);
 

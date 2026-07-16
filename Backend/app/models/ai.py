@@ -42,3 +42,14 @@ class FAQResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+
+class AIUsage(_CamelModel):
+    month_count: int
+    month_limit: int | None = None  # None = unlimited (Business plan)
+    blocked: bool
+    blocked_until: str | None = None
+
+
+class AIUsageResponse(BaseModel):
+    usage: AIUsage

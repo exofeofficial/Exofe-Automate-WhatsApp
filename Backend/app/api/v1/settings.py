@@ -1,6 +1,6 @@
 # app/api/v1/settings.py
 # Endpoints: GET /settings, PATCH /settings/profile, /settings/hours,
-# /settings/delivery, /settings/tax, /settings/language
+# /settings/delivery, /settings/tax, /settings/payment, /settings/language
 # (later: GET/POST/DELETE /settings/team)
 from typing import Annotated
 
@@ -19,6 +19,8 @@ from app.models.settings import (
     HoursWrapper,
     LanguageUpdateRequest,
     LanguageWrapper,
+    PaymentSettings,
+    PaymentWrapper,
     SettingsWrapper,
     TaxSettings,
     TaxWrapper,
@@ -65,6 +67,12 @@ def update_delivery(payload: DeliverySettings, db: DbSession, current: CurrentOw
 def update_tax(payload: TaxSettings, db: DbSession, current: CurrentOwner) -> TaxWrapper:
     business_id = _require_business(current)
     return TaxWrapper(tax=settings_service.update_tax(db, business_id, payload))
+
+
+@router.patch("/payment", response_model=PaymentWrapper)
+def update_payment(payload: PaymentSettings, db: DbSession, current: CurrentOwner) -> PaymentWrapper:
+    business_id = _require_business(current)
+    return PaymentWrapper(payment=settings_service.update_payment(db, business_id, payload))
 
 
 @router.patch("/language", response_model=LanguageWrapper)

@@ -1,12 +1,5 @@
-import { LayoutTemplate } from "lucide-react";
-import ComingSoon from "@/components/dashboard/ComingSoon";
+import TemplatesPage from "@/views/dashboard/automation/TemplatesPage";
 
 export default function Page() {
-  return (
-    <ComingSoon
-      icon={<LayoutTemplate className="h-6 w-6" strokeWidth={2} />}
-      title="Templates"
-      description="Ready made WhatsApp message templates you can reuse across automations."
-    />
-  );
+  return <TemplatesPage />;
 }

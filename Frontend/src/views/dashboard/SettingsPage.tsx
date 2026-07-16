@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Building2, Clock, Globe, Loader2, Percent, Truck } from "lucide-react";
+import { Building2, Clock, CreditCard, Globe, Loader2, Percent, Truck } from "lucide-react";
 import { getSettings, type BusinessHourRow, type Settings } from "@/lib/api";
 import BusinessProfileSection from "@/components/dashboard/settings/BusinessProfileSection";
 import BusinessHoursSection from "@/components/dashboard/settings/BusinessHoursSection";
 import DeliverySection from "@/components/dashboard/settings/DeliverySection";
 import TaxSection from "@/components/dashboard/settings/TaxSection";
+import PaymentSection from "@/components/dashboard/settings/PaymentSection";
 import LanguageSection from "@/components/dashboard/settings/LanguageSection";
 
 const DAYS: BusinessHourRow["day"][] = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
@@ -16,6 +17,7 @@ const DEFAULT_SETTINGS: Settings = {
   hours: DAYS.map((day) => ({ day, open: "09:00", close: "18:00", closed: false })),
   delivery: { areas: "", charge: 0, estimatedTime: "", cashOnDelivery: true, pickupAvailable: false },
   tax: { taxName: "", taxRate: 0, pricesIncludeTax: false },
+  payment: { onlinePaymentDetails: "" },
   language: "en",
 };
 
@@ -24,6 +26,7 @@ const TABS = [
   { id: "hours", label: "Business Hours", icon: Clock },
   { id: "delivery", label: "Delivery", icon: Truck },
   { id: "tax", label: "Taxes", icon: Percent },
+  { id: "payment", label: "Payment", icon: CreditCard },
   { id: "language", label: "Language", icon: Globe },
 ] as const;
 
@@ -88,6 +91,9 @@ export default function SettingsPage() {
           <DeliverySection initial={settings.delivery} onSaved={(delivery) => setSettings((s) => ({ ...s, delivery }))} />
         )}
         {tab === "tax" && <TaxSection initial={settings.tax} onSaved={(tax) => setSettings((s) => ({ ...s, tax }))} />}
+        {tab === "payment" && (
+          <PaymentSection initial={settings.payment} onSaved={(payment) => setSettings((s) => ({ ...s, payment }))} />
+        )}
         {tab === "language" && (
           <LanguageSection initial={settings.language} onSaved={(language) => setSettings((s) => ({ ...s, language }))} />
         )}

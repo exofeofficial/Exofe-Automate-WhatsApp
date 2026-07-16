@@ -44,3 +44,10 @@ class AnalyticsPoint(_CamelModel):
 
 class AnalyticsResponse(BaseModel):
     points: list[AnalyticsPoint]
+
+
+class OnboardingStatus(_CamelModel):
+    whatsapp_connected: bool
+    has_products: bool
+    has_paid_plan: bool
+    has_team_members: bool

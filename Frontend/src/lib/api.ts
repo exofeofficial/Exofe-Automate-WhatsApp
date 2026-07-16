@@ -141,6 +141,24 @@ export function verifyEmail(email: string, code: string) {
   });
 }
 
+// Password reset is two calls: request a code, then reset with it.
+// Always returns success — the backend never reveals whether the email exists.
+// Expected: POST /auth/forgot-password { email } -> 200 { message }
+export function forgotPassword(email: string) {
+  return request<{ message: string }>("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+// Expected: POST /auth/reset-password { email, code, newPassword } -> 200 { message }
+export function resetPassword(email: string, code: string, newPassword: string) {
+  return request<{ message: string }>("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ email, code, newPassword }),
+  });
+}
+
 export type DemoBookingPayload = {
   name: string;
   email: string;
@@ -270,7 +288,7 @@ export async function importProductsCsv(file: File) {
 // ── Orders ───────────────────────────────────────────────────────────────────
 
 export type OrderStatus = "new" | "confirmed" | "shipped" | "delivered" | "canceled";
-export type PaymentMethod = "cod" | "jazzcash" | "easypaisa" | "stripe";
+export type PaymentMethod = "cod" | "online" | "jazzcash" | "easypaisa" | "stripe";
 
 export type OrderSummary = {
   id: string;
@@ -329,6 +347,79 @@ export function updateOrderStatus(id: string, status: OrderStatus) {
   });
 }
 
+// ── Dashboard ────────────────────────────────────────────────────────────────
+
+export type OnboardingStatus = {
+  whatsappConnected: boolean;
+  hasProducts: boolean;
+  hasPaidPlan: boolean;
+  hasTeamMembers: boolean;
+};
+
+// Drives the real checkmarks on the dashboard's "Setup guide" widget.
+// Expected: GET /dashboard/onboarding -> 200 OnboardingStatus
+export function getOnboardingStatus() {
+  return request<OnboardingStatus>("/dashboard/onboarding");
+}
+
+export type AnalyticsPoint = { date: string; orders: number; revenue: number };
+
+// Expected: GET /dashboard/analytics?days= -> 200 { points: AnalyticsPoint[] }
+export function getAnalytics(days = 30) {
+  return request<{ points: AnalyticsPoint[] }>(`/dashboard/analytics?days=${days}`);
+}
+
+// ── Customers ────────────────────────────────────────────────────────────────
+
+export type CustomerSummary = {
+  id: string;
+  name: string | null;
+  whatsappNumber: string;
+  totalSpent: number;
+  createdAt: string;
+};
+
+export type CustomerOrderSummary = {
+  id: string;
+  status: OrderStatus;
+  paymentMethod: PaymentMethod;
+  total: number;
+  createdAt: string;
+};
+
+export type CustomerDetail = CustomerSummary & { orders: CustomerOrderSummary[] };
+
+export type CustomerNote = {
+  id: string;
+  note: string;
+  authorName: string;
+  createdAt: string;
+};
+
+// Expected: GET /customers?search= -> 200 { customers: CustomerSummary[] }
+export function getCustomers(search?: string) {
+  const qs = search ? `?search=${encodeURIComponent(search)}` : "";
+  return request<{ customers: CustomerSummary[] }>(`/customers${qs}`);
+}
+
+// Expected: GET /customers/:id -> 200 { customer: CustomerDetail }
+export function getCustomer(id: string) {
+  return request<{ customer: CustomerDetail }>(`/customers/${id}`);
+}
+
+// Expected: GET /customers/:id/notes -> 200 { notes: CustomerNote[] }
+export function getCustomerNotes(id: string) {
+  return request<{ notes: CustomerNote[] }>(`/customers/${id}/notes`);
+}
+
+// Expected: POST /customers/:id/notes { note } -> 201 { note: CustomerNote }
+export function addCustomerNote(id: string, note: string) {
+  return request<{ note: CustomerNote }>(`/customers/${id}/notes`, {
+    method: "POST",
+    body: JSON.stringify({ note }),
+  });
+}
+
 // Settings, split into sections so each one saves independently instead
 // of forcing a save-everything-at-once form.
 export type BusinessProfile = {
@@ -364,6 +455,10 @@ export type TaxSettings = {
   pricesIncludeTax: boolean;
 };
 
+export type PaymentSettings = {
+  onlinePaymentDetails: string;
+};
+
 export type LanguageCode = "en" | "ur" | "ko" | "ar";
 
 export type Settings = {
@@ -371,6 +466,7 @@ export type Settings = {
   hours: BusinessHourRow[];
   delivery: DeliverySettings;
   tax: TaxSettings;
+  payment: PaymentSettings;
   language: LanguageCode;
 };
 
@@ -421,6 +517,14 @@ export function updateDeliverySettings(payload: DeliverySettings) {
 // Expected: PATCH /settings/tax { ...TaxSettings } -> 200 { tax: TaxSettings }
 export function updateTaxSettings(payload: TaxSettings) {
   return request<{ tax: TaxSettings }>("/settings/tax", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+// Expected: PATCH /settings/payment { ...PaymentSettings } -> 200 { payment: PaymentSettings }
+export function updatePaymentSettings(payload: PaymentSettings) {
+  return request<{ payment: PaymentSettings }>("/settings/payment", {
     method: "PATCH",
     body: JSON.stringify(payload),
   });
@@ -579,4 +683,66 @@ export type AdminUser = {
 // Expected backend contract: GET /admin/users -> 200 { users: AdminUser[] }
 export function getAdminUsers() {
   return adminRequest<{ users: AdminUser[] }>("/admin/users");
+}
+
+// ── AI Assistant ─────────────────────────────────────────────────────────────
+
+export type AITone = "friendly" | "formal" | "brief";
+
+export type AISettings = {
+  businessPrompt: string;
+  tone: AITone;
+  greetingMessage: string;
+  handoverEnabled: boolean;
+};
+
+export function getAISettings() {
+  return request<{ settings: AISettings }>("/ai/settings");
+}
+
+export function updateAISettings(payload: AISettings) {
+  return request<{ settings: AISettings }>("/ai/settings", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export type Faq = {
+  id: string;
+  question: string;
+  answer: string;
+  createdAt: string;
+};
+
+export function getFaqs() {
+  return request<{ faqs: Faq[] }>("/ai/faqs");
+}
+
+export function createFaq(payload: { question: string; answer: string }) {
+  return request<{ faq: Faq }>("/ai/faqs", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateFaq(id: string, payload: { question: string; answer: string }) {
+  return request<{ faq: Faq }>(`/ai/faqs/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteFaq(id: string) {
+  return request<void>(`/ai/faqs/${id}`, { method: "DELETE" });
+}
+
+export type AIUsage = {
+  monthCount: number;
+  monthLimit: number | null; // null = unlimited (Business plan)
+  blocked: boolean;
+  blockedUntil: string | null;
+};
+
+export function getAIUsage() {
+  return request<{ usage: AIUsage }>("/ai/usage");
 }

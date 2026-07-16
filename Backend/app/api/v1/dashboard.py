@@ -1,5 +1,6 @@
 # app/api/v1/dashboard.py
-# Endpoints: GET /dashboard/summary, GET /dashboard/activity, GET /dashboard/analytics
+# Endpoints: GET /dashboard/summary, GET /dashboard/activity,
+# GET /dashboard/analytics, GET /dashboard/onboarding
 
 from typing import Annotated
 
@@ -17,6 +18,7 @@ from app.models.dashboard import (
     DashboardSummary,
     DashboardSummaryWrapper,
     MetricValue,
+    OnboardingStatus,
 )
 from app.services import dashboard_service
 
@@ -66,3 +68,10 @@ def get_analytics(
             for r in rows
         ]
     )
+
+
+@router.get("/onboarding", response_model=OnboardingStatus)
+def get_onboarding(db: DbSession, current: CurrentOwner) -> OnboardingStatus:
+    business_id = _require_business(current)
+    data = dashboard_service.get_onboarding_status(db, business_id)
+    return OnboardingStatus(**data)

@@ -73,6 +73,9 @@ CREATE TABLE businesses (
     tax_rate                NUMERIC(5,2) NOT NULL DEFAULT 0,    -- percentage (e.g. 17.00 = 17%)
     tax_name                TEXT,
     prices_include_tax      BOOLEAN NOT NULL DEFAULT FALSE,
+    payment_details         TEXT,                  -- free text (e.g. "JazzCash: 0300-1234567 —
+                                                    -- Ali's Store") the AI reads back to a
+                                                    -- customer who chooses to pay online
     language                TEXT NOT NULL DEFAULT 'en'
                                 CHECK (language IN ('en', 'ur', 'ko', 'ar')),
     status                   TEXT NOT NULL DEFAULT 'active'
@@ -250,7 +253,7 @@ CREATE TABLE orders (
     status           TEXT NOT NULL DEFAULT 'new'
                          CHECK (status IN ('new', 'confirmed', 'shipped', 'delivered', 'canceled')),
     payment_method   TEXT NOT NULL
-                         CHECK (payment_method IN ('cod', 'jazzcash', 'easypaisa', 'stripe')),
+                         CHECK (payment_method IN ('cod', 'online', 'jazzcash', 'easypaisa', 'stripe')),
     subtotal         NUMERIC(10,2) NOT NULL,
     delivery_charge  NUMERIC(10,2) NOT NULL DEFAULT 0,
     tax              NUMERIC(10,2) NOT NULL DEFAULT 0,
@@ -312,6 +315,33 @@ CREATE TABLE ai_settings (
     greeting_message    TEXT,           -- first reply sent to a new conversation
     handover_enabled    BOOLEAN NOT NULL DEFAULT TRUE,  -- FALSE = every message goes to human
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
+-- AI USAGE
+-- One row per business. Enforces each plan's AI conversation limit
+-- (see PLAN_AI_LIMITS in app/services/ai_usage_service.py, and the
+-- "X conversations/month" copy on the pricing page).
+--
+-- window_count/window_started_at/blocked_at enforce the actual limit:
+-- once window_count hits the plan cap, blocked_at is stamped and the
+-- AI hands every message to a human for a 5 hour cooldown, after which
+-- the window fully resets — the AI is never down for more than a few
+-- hours at a time, even on the Starter plan.
+--
+-- month_count/month_started_at is a separate, purely informational
+-- counter (resets on the 1st of each calendar month) used only to
+-- show "742 / 1,000 conversations this month" on the dashboard. It
+-- does not gate anything.
+-- ============================================================
+
+CREATE TABLE ai_usage (
+    business_id         UUID PRIMARY KEY REFERENCES businesses(id) ON DELETE CASCADE,
+    window_count        INTEGER NOT NULL DEFAULT 0,
+    window_started_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    blocked_at          TIMESTAMPTZ,
+    month_count         INTEGER NOT NULL DEFAULT 0,
+    month_started_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ============================================================
@@ -543,6 +573,7 @@ ALTER TABLE orders                 ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE whatsapp_message_logs  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_settings            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_usage               ENABLE ROW LEVEL SECURITY;
 ALTER TABLE faqs                   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_logs             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE feature_flags          ENABLE ROW LEVEL SECURITY;
@@ -816,6 +847,23 @@ CREATE POLICY "whatsapp_message_logs: own business only"
 
 CREATE POLICY "ai_settings: own business only"
     ON ai_settings FOR ALL
+    USING (
+        EXISTS (
+            SELECT 1 FROM users u
+            WHERE u.id = auth.uid()
+              AND u.role = 'admin'
+              AND u.business_id IS NULL
+        )
+        OR
+        business_id = (
+            SELECT business_id FROM users WHERE id = auth.uid()
+        )
+    );
+
+-- ── ai_usage ─────────────────────────────────────────────────
+
+CREATE POLICY "ai_usage: own business only"
+    ON ai_usage FOR ALL
     USING (
         EXISTS (
             SELECT 1 FROM users u

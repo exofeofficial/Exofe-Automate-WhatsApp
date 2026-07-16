@@ -17,6 +17,7 @@ const STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
 
 const PAYMENT_LABELS: Record<string, string> = {
   cod: "Cash on Delivery",
+  online: "Online Payment",
   jazzcash: "JazzCash",
   easypaisa: "EasyPaisa",
   stripe: "Card",

@@ -7,6 +7,7 @@ from app.models.settings import (
     BusinessHourRow,
     BusinessProfile,
     DeliverySettings,
+    PaymentSettings,
     SettingsResponse,
     TaxSettings,
 )
@@ -42,6 +43,10 @@ def _tax_from_business(business: dict) -> TaxSettings:
     )
 
 
+def _payment_from_business(business: dict) -> PaymentSettings:
+    return PaymentSettings(online_payment_details=business["payment_details"] or "")
+
+
 def _default_hours() -> list[BusinessHourRow]:
     return [BusinessHourRow(day=d) for d in DAYS]
 
@@ -60,6 +65,7 @@ def get_settings(db: Session, business_id: str) -> SettingsResponse:
         hours=_default_hours(),
         delivery=_delivery_from_business(business),
         tax=_tax_from_business(business),
+        payment=_payment_from_business(business),
         language=business["language"],
     )
 
@@ -110,6 +116,14 @@ def update_tax(db: Session, business_id: str, payload: TaxSettings) -> TaxSettin
     )
     db.commit()
     return _tax_from_business(business)
+
+
+def update_payment(db: Session, business_id: str, payload: PaymentSettings) -> PaymentSettings:
+    business = user_repository.update_business_fields(
+        db, business_id, payment_details=payload.online_payment_details
+    )
+    db.commit()
+    return _payment_from_business(business)
 
 
 def update_language(db: Session, business_id: str, language: str) -> str:

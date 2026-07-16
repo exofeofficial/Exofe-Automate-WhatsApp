@@ -29,13 +29,17 @@ CREATE TABLE users (
     first_name          TEXT NOT NULL,
     last_name           TEXT NOT NULL,
     email               TEXT NOT NULL UNIQUE,
-    password_hash       TEXT NOT NULL,
+    password_hash       TEXT,
     phone               TEXT,
+    status              TEXT NOT NULL DEFAULT 'active'
+                            CHECK (status IN ('active', 'invited')),
     country_code        TEXT                           -- 'PK' | 'KR' | 'AE'
                             CHECK (country_code IN ('PK', 'KR', 'AE')),
     email_verified_at   TIMESTAMPTZ,                   -- NULL until email is confirmed
+    invite_token        TEXT UNIQUE,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    invited_at          TIMESTAMPTZ,
 );
 
 -- ============================================================

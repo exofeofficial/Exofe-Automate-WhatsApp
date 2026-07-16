@@ -78,6 +78,28 @@ def send_password_reset_email(to: str, token: str) -> None:
     )
     _send(to=to, subject="Reset your Exofe password", html=html)
 
+def send_team_invite_email(to: str, business_name: str, token: str) -> None:
+    """Send a team invite. No accept-invite page exists yet on the
+    frontend — this token is ready for whenever that flow gets built
+    (POST /auth/accept-invite or similar), same shape as the existing
+    password-reset token."""
+    html = _base_html(
+        "You've been invited",
+        f"""
+        <p style="margin:16px 0 0;font-size:14px;color:#3f3f46;">
+          You've been invited to join <strong>{business_name}</strong> on Exofe.
+          Use the code below to set up your account.
+        </p>
+        <div style="margin:24px 0;padding:16px;background:#f4f4f5;border-radius:8px;
+                    text-align:center;font-size:14px;font-family:monospace;word-break:break-all;color:#18181b;">
+          {token}
+        </div>
+        <p style="margin:0;font-size:12px;color:#a1a1aa;">
+          If you weren't expecting this invite, you can safely ignore this email.
+        </p>""",
+    )
+    _send(to=to, subject=f"You've been invited to join {business_name} on Exofe", html=html)
+
 
 def send_verification_email(to: str, code: str) -> None:
     """Send a 6-digit email-verification code after signup."""

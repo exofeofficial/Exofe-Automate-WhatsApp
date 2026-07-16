@@ -1,4 +1,4 @@
-# models/order.py
+# app/models/order.py
 # Pydantic request/response schemas for orders endpoints.
 
 from pydantic import BaseModel, ConfigDict, Field

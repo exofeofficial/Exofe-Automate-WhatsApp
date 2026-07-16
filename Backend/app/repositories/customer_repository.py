@@ -1,7 +1,8 @@
-# repositories/customer_repository.py
+# app/repositories/customer_repository.py
+# Raw SQL queries for the customers and customer_notes tables.
+
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-
 
 def list_customers(db: Session, business_id: str, *, search: str | None = None) -> list[dict]:
     query = "SELECT * FROM customers WHERE business_id = :business_id"
@@ -55,6 +56,28 @@ def list_notes(db: Session, customer_id: str) -> list[dict]:
         {"customer_id": customer_id},
     ).fetchall()
     return [dict(row._mapping) for row in rows]
+
+
+def recalculate_total_spent(db: Session, customer_id: str) -> None:
+    """Recomputes from scratch (sum of delivered orders) rather than
+    incrementing/decrementing on each status change — status can flip
+    to/from 'delivered' in any direction (the dashboard's status buttons
+    allow un-delivering, un-canceling, etc.), so a running increment
+    would drift. A full recompute can't drift."""
+    db.execute(
+        text(
+            """
+            UPDATE customers
+            SET total_spent = (
+                SELECT COALESCE(SUM(total), 0) FROM orders
+                WHERE customer_id = :customer_id AND status = 'delivered'
+            )
+            WHERE id = :customer_id
+            """
+        ),
+        {"customer_id": customer_id},
+    )
+    db.commit()
 
 
 def create_note(db: Session, *, customer_id: str, author_id: str, note: str) -> dict:

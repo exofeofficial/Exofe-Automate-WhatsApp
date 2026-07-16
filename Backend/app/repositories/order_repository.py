@@ -75,4 +75,5 @@ def update_order_status(db: Session, business_id: str, order_id: str, status: st
         """),
         {"status": status, "order_id": order_id, "business_id": business_id},
     ).fetchone()
+    db.commit()
     return dict(row._mapping) if row else None

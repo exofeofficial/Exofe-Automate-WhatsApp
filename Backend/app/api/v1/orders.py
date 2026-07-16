@@ -1,5 +1,9 @@
-# /api/v1/orders.py
+# app/api/v1/orders.py
 # Endpoints: GET /orders, GET /orders/{id}, PATCH /orders/{id}/status
+#
+# Was calling order_repository directly before — now goes through
+# order_service, same as every other module. The _order_detail() helper
+# that used to live here moved into order_service.get_order_detail().
 
 from typing import Annotated
 
@@ -17,7 +21,7 @@ from app.models.order import (
     OrderSummary,
     UpdateOrderStatusRequest,
 )
-from app.repositories import order_repository
+from app.services import order_service
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
@@ -31,13 +35,7 @@ def _require_business(current: CurrentUser) -> str:
     return current.business_id
 
 
-def _order_detail(db: Session, business_id: str, order_id: str) -> OrderDetail:
-    order = order_repository.get_order(db, business_id, order_id)
-    if not order:
-        raise AppError(404, "Order not found")
-
-    items = order_repository.get_order_items(db, order_id)
-
+def _to_order_detail(order: dict) -> OrderDetail:
     return OrderDetail(
         id=str(order["id"]),
         customer_name=order["customer_name"],
@@ -56,7 +54,7 @@ def _order_detail(db: Session, business_id: str, order_id: str) -> OrderDetail:
                 quantity=i["quantity"],
                 unit_price=float(i["unit_price"]),
             )
-            for i in items
+            for i in order["items"]
         ],
         created_at=order["created_at"].isoformat(),
     )
@@ -70,9 +68,7 @@ def list_orders(
     search: str | None = Query(None),
 ) -> OrdersListResponse:
     business_id = _require_business(current)
-
-    rows = order_repository.list_orders(db, business_id, status=status, search=search)
-    counts = order_repository.count_by_status(db, business_id)
+    rows, counts = order_service.list_orders(db, business_id, status=status, search=search)
 
     return OrdersListResponse(
         orders=[
@@ -95,7 +91,8 @@ def list_orders(
 @router.get("/{order_id}", response_model=OrderDetailWrapper)
 def get_order(order_id: str, db: DbSession, current: CurrentOwner) -> OrderDetailWrapper:
     business_id = _require_business(current)
-    return OrderDetailWrapper(order=_order_detail(db, business_id, order_id))
+    order = order_service.get_order_detail(db, business_id, order_id)
+    return OrderDetailWrapper(order=_to_order_detail(order))
 
 
 @router.patch("/{order_id}/status", response_model=OrderDetailWrapper)
@@ -103,10 +100,5 @@ def update_status(
     order_id: str, payload: UpdateOrderStatusRequest, db: DbSession, current: CurrentOwner
 ) -> OrderDetailWrapper:
     business_id = _require_business(current)
-
-    updated = order_repository.update_order_status(db, business_id, order_id, payload.status)
-    if not updated:
-        raise AppError(404, "Order not found")
-    db.commit()
-
-    return OrderDetailWrapper(order=_order_detail(db, business_id, order_id))
+    order = order_service.update_order_status(db, business_id, order_id, payload.status)
+    return OrderDetailWrapper(order=_to_order_detail(order))

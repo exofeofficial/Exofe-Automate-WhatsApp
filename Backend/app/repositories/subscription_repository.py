@@ -1,5 +1,5 @@
 """
-Raw SQL queries for the subscriptions table.
+Raw SQL queries for the subscriptions and payments tables.
 
 Every function receives a SQLAlchemy ``Session`` as its first argument —
 repositories are plain Python, never FastAPI-aware.
@@ -68,4 +68,36 @@ def activate_subscription(db: Session, *, business_id: str, plan: str, amount: f
         """),
         {"business_id": business_id, "plan": plan, "amount": amount},
     ).fetchone()
+    db.commit()
     return dict(row._mapping)
+
+
+def cancel_subscription(db: Session, business_id: str) -> dict | None:
+    """Marks the subscription canceled immediately — no payment gateway
+    exists yet to prorate or defer to period end, so this is the honest
+    behavior for now: cancel takes effect right away, not at the end of
+    the current billing period."""
+    row = db.execute(
+        text("""
+            UPDATE subscriptions
+            SET status = 'canceled'
+            WHERE business_id = :business_id
+            RETURNING *
+        """),
+        {"business_id": business_id},
+    ).fetchone()
+    db.commit()
+    return dict(row._mapping) if row else None
+
+
+def list_payments(db: Session, business_id: str) -> list[dict]:
+    rows = db.execute(
+        text("""
+            SELECT id, amount, currency, status, paid_at
+            FROM payments
+            WHERE business_id = :business_id
+            ORDER BY paid_at DESC NULLS LAST
+        """),
+        {"business_id": business_id},
+    ).fetchall()
+    return [dict(row._mapping) for row in rows]

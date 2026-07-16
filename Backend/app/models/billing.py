@@ -18,3 +18,15 @@ class TrialStatusResponse(_CamelModel):
 
 class SubscribeRequest(_CamelModel):
     plan: str = Field(..., pattern=r"^(starter|growth|business)$")
+
+
+class PaymentRow(_CamelModel):
+    id: str
+    amount: float
+    currency: str
+    status: str  # "succeeded" | "failed" | "refunded"
+    paid_at: str | None
+
+
+class PaymentsListResponse(BaseModel):
+    payments: list[PaymentRow]

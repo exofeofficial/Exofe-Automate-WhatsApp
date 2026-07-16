@@ -77,7 +77,7 @@ def create_order(
         db: Session,
         business_id: str,
         customer_id: str,
-        items: list[dict],  # [{"product_id": ..., "quantity": ...}, ...]
+        items: list[dict],
         delivery_address: str,
         payment_method: str = "cod",
         created_by: str = "ai",

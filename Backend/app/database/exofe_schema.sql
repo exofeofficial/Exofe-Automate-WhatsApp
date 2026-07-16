@@ -38,8 +38,8 @@ CREATE TABLE users (
     email_verified_at   TIMESTAMPTZ,                   -- NULL until email is confirmed
     invite_token        TEXT UNIQUE,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    invited_at          TIMESTAMPTZ,
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    invited_at          TIMESTAMPTZ
 );
 
 -- ============================================================

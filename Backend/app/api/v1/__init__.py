@@ -10,7 +10,8 @@ from app.api.v1 import (
     marketing,
     orders, 
     products, 
-    settings
+    settings,
+    team
 )
 router = APIRouter()
 
@@ -26,3 +27,4 @@ router.include_router(orders.router)
 router.include_router(products.router)
 router.include_router(products.categories_router)
 router.include_router(settings.router)
+router.include_router(team.router)

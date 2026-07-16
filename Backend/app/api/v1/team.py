@@ -1,11 +1,5 @@
 # app/api/v1/team.py
 # Endpoints: GET /team, POST /team/invite, PATCH /team/:id/role, DELETE /team/:id
-#
-# api.ts's own comment on TeamRole says staff "only handles conversations
-# and views orders" — meaning staff shouldn't be able to manage the team
-# at all. That's enforced here (_require_team_manager), not just implied
-# by the frontend hiding the UI for them.
-
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
@@ -28,7 +22,6 @@ router = APIRouter(prefix="/team", tags=["team"])
 
 DbSession = Annotated[Session, Depends(get_db)]
 CurrentOwner = Annotated[CurrentUser, Depends(get_current_user)]
-
 
 def _require_team_manager(current: CurrentUser) -> str:
     if not current.business_id:

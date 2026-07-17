@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Crown } from "lucide-react";
@@ -13,7 +13,7 @@ export default function UpgradeCard({ trial }: { trial: TrialStatus }) {
     <div className="relative mb-3 overflow-hidden rounded-2xl bg-gradient-to-br from-[#4a3fd6] via-[#5B4FE9] to-[#7C6FF5] p-4">
       <span className="pointer-events-none absolute -right-6 -top-8 h-20 w-20 rounded-full bg-white/10 blur-2xl" />
 
-      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/15 text-white">
+      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-secondary/20 text-secondary">
         <Crown className="h-4 w-4" strokeWidth={2} />
       </span>
       <p className="relative mt-2.5 text-sm font-bold text-white">Upgrade to Premium</p>
@@ -22,7 +22,7 @@ export default function UpgradeCard({ trial }: { trial: TrialStatus }) {
       </p>
       <Link
         href="/dashboard/billing"
-        className="relative mt-3 flex items-center justify-center rounded-lg bg-white py-2 text-xs font-semibold text-[#5B4FE9] transition-colors hover:bg-white/90"
+        className="shine-btn relative mt-3 flex items-center justify-center overflow-hidden rounded-lg bg-secondary py-2 text-xs font-semibold text-[#1a1730] transition-opacity hover:opacity-90"
       >
         Upgrade Now
       </Link>

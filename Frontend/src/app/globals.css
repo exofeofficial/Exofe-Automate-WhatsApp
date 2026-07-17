@@ -1,14 +1,38 @@
 @import "tailwindcss";
 
+/* Dark mode is scoped to the client dashboard only (the .dashboard-dark
+   class lives on the dashboard layout's root div, never on <html> or
+   <body>) — the marketing site and admin panel stay light-only and are
+   completely unaffected by this. */
+@custom-variant dark (&:where(.dashboard-dark, .dashboard-dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --surface: #ffffff;
+  --ink: 0 0 0; /* rgb triplet (no alpha) — multiplied by an opacity
+                   modifier for every bg-ink/[.NN] / border-ink/[.NN]
+                   utility, so a single flip here re-themes every
+                   border/hover-tint in the dashboard at once */
+  --secondary: #fcba03; /* brand secondary — same value in both themes,
+                            gold reads fine on both light and dark */
   color-scheme: light;
+}
+
+.dashboard-dark {
+  --background: #131220;
+  --foreground: #f1effa;
+  --surface: #1c1a2a;
+  --ink: 255 255 255;
+  color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-ink: rgb(var(--ink));
+  --color-secondary: var(--secondary);
   --font-sans: var(--font-exo2);
   --font-mono: var(--font-geist-mono);
 }
@@ -78,9 +102,32 @@ button:disabled {
   animation: shine 0.9s ease;
 }
 
+/* Same sweep, tinted with the secondary gold instead of white — used on
+   the dashboard's primary (indigo gradient) buttons so every one of them
+   picks up the secondary color without recoloring their background. */
+.shine-btn-gold::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(252, 186, 3, 0.55),
+    transparent
+  );
+  transform: translateX(-120%) skewX(-20deg);
+}
+.shine-btn-gold:hover::after {
+  animation: shine 0.9s ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-gradient-x,
-  .shine-btn:hover::after {
+  .shine-btn:hover::after,
+  .shine-btn-gold:hover::after {
     animation: none;
   }
 }

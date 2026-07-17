@@ -34,8 +34,8 @@ export default function Dropdown({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`flex w-full items-center justify-between gap-2 rounded-lg border bg-zinc-50 px-3.5 py-2.5 text-left text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
-          error ? "border-red-400" : "border-black/[.1] hover:border-black/20"
+        className={`flex w-full items-center justify-between gap-2 rounded-lg border bg-ink/[.03] px-3.5 py-2.5 text-left text-sm text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+          error ? "border-red-400 dark:border-red-500/50" : "border-ink/[.1] hover:border-ink/20"
         } ${selected ? "text-foreground" : "text-foreground/40"}`}
       >
         <span className="truncate">{selected ? selected.label : placeholder}</span>
@@ -59,7 +59,7 @@ export default function Dropdown({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -6, scale: 0.98 }}
               transition={{ duration: 0.15, ease: EASE }}
-              className={`absolute z-40 mt-1.5 max-h-60 w-full min-w-max overflow-y-auto rounded-xl border border-black/[.06] bg-white p-1.5 shadow-xl ${
+              className={`absolute z-40 mt-1.5 max-h-60 w-full min-w-max overflow-y-auto rounded-xl border border-ink/[.06] bg-surface p-1.5 shadow-xl ${
                 align === "right" ? "right-0" : "left-0"
               }`}
             >
@@ -74,7 +74,9 @@ export default function Dropdown({
                       setOpen(false);
                     }}
                     className={`flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                      isSelected ? "bg-indigo-50 font-medium text-[#5B4FE9]" : "text-foreground/75 hover:bg-black/[.03]"
+                      isSelected
+                        ? "bg-indigo-50 dark:bg-indigo-500/15 font-medium text-[#5B4FE9]"
+                        : "text-foreground/75 hover:bg-ink/[.03]"
                     }`}
                   >
                     {o.label}

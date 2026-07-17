@@ -14,11 +14,13 @@ import {
   Plug,
   Search,
   Settings,
+  Sun,
   User,
   UsersRound,
 } from "lucide-react";
 import { clearToken } from "@/lib/auth";
 import { getUserProfile } from "@/lib/user";
+import { useTheme } from "@/components/dashboard/ThemeProvider";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -32,6 +34,7 @@ const MENU_ITEMS = [
 
 export default function Topbar({ onMenuClick, title }: { onMenuClick: () => void; title: string }) {
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<{ firstName: string; lastName?: string; email: string } | null>(null);
 
@@ -65,13 +68,13 @@ export default function Topbar({ onMenuClick, title }: { onMenuClick: () => void
           <input
             type="search"
             placeholder="Search"
-            className="w-56 rounded-full border border-black/[.08] bg-zinc-50 py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/25"
+            className="w-56 rounded-full border border-ink/[.08] bg-ink/[.03] py-2 pl-9 pr-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/25"
           />
         </div>
         <button
           type="button"
           aria-label="Notifications"
-          className="relative flex h-9 w-9 items-center justify-center rounded-full text-foreground/60 hover:bg-black/[.03]"
+          className="relative flex h-9 w-9 items-center justify-center rounded-full text-foreground/60 hover:bg-ink/[.03]"
         >
           <Bell className="h-[18px] w-[18px]" strokeWidth={2} />
           <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500" />
@@ -101,7 +104,7 @@ export default function Topbar({ onMenuClick, title }: { onMenuClick: () => void
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.97 }}
                   transition={{ duration: 0.15, ease: EASE }}
-                  className="absolute right-0 z-40 mt-2 w-72 overflow-hidden rounded-2xl border border-black/[.06] bg-white p-2 shadow-xl"
+                  className="absolute right-0 z-40 mt-2 w-72 overflow-hidden rounded-2xl border border-ink/[.06] bg-surface p-2 shadow-xl"
                 >
                   <div className="flex items-center gap-3 px-2.5 py-2.5">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-300 to-purple-400 text-sm font-bold text-white">
@@ -116,16 +119,16 @@ export default function Topbar({ onMenuClick, title }: { onMenuClick: () => void
                   <Link
                     href="/dashboard/billing"
                     onClick={() => setOpen(false)}
-                    className="mx-1 my-1.5 flex items-center justify-between rounded-xl bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+                    className="mx-1 my-1.5 flex items-center justify-between rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90"
                   >
                     <span className="flex items-center gap-2">
                       <Crown className="h-4 w-4" strokeWidth={2} />
                       Upgrade profile
                     </span>
-                    <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold tracking-wide">PRO</span>
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold tracking-wide text-[#1a1730]">PRO</span>
                   </Link>
 
-                  <div className="my-1 h-px bg-black/[.06]" />
+                  <div className="my-1 h-px bg-ink/[.06]" />
 
                   <nav className="flex flex-col gap-0.5">
                     {MENU_ITEMS.map((item) => {
@@ -135,7 +138,7 @@ export default function Topbar({ onMenuClick, title }: { onMenuClick: () => void
                           key={item.label}
                           href={item.href}
                           onClick={() => setOpen(false)}
-                          className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground/70 hover:bg-black/[.03] hover:text-foreground"
+                          className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground/70 hover:bg-ink/[.03] hover:text-foreground"
                         >
                           <Icon className="h-4 w-4 text-foreground/45" strokeWidth={2} />
                           {item.label}
@@ -144,27 +147,42 @@ export default function Topbar({ onMenuClick, title }: { onMenuClick: () => void
                     })}
                   </nav>
 
-                  <div className="my-1 h-px bg-black/[.06]" />
+                  <div className="my-1 h-px bg-ink/[.06]" />
 
-                  <div className="flex items-center justify-between rounded-lg px-2.5 py-2 text-sm text-foreground/40">
+                  <div className="flex items-center justify-between rounded-lg px-2.5 py-2 text-sm text-foreground/70">
                     <span className="flex items-center gap-2.5">
-                      <Moon className="h-4 w-4" strokeWidth={2} />
+                      {theme === "dark" ? (
+                        <Moon className="h-4 w-4" strokeWidth={2} />
+                      ) : (
+                        <Sun className="h-4 w-4" strokeWidth={2} />
+                      )}
                       Dark Mode
                     </span>
-                    <span
-                      title="Exofe is light mode only for now"
-                      className="flex h-5 w-9 shrink-0 items-center rounded-full bg-black/[.08] px-0.5"
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={theme === "dark"}
+                      aria-label="Toggle dark mode"
+                      onClick={toggleTheme}
+                      className={`flex h-5 w-9 shrink-0 items-center rounded-full px-0.5 transition-colors ${
+                        theme === "dark" ? "bg-[#5B4FE9]" : "bg-ink/[.15]"
+                      }`}
                     >
-                      <span className="h-4 w-4 rounded-full bg-white shadow-sm" />
-                    </span>
+                      <motion.span
+                        layout
+                        transition={{ duration: 0.15, ease: EASE }}
+                        className="h-4 w-4 rounded-full bg-surface shadow-sm"
+                        style={{ marginLeft: theme === "dark" ? "auto" : 0 }}
+                      />
+                    </button>
                   </div>
 
-                  <div className="my-1 h-px bg-black/[.06]" />
+                  <div className="my-1 h-px bg-ink/[.06]" />
 
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+                    className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-500/15 dark:text-red-400 dark:hover:bg-red-500/10"
                   >
                     <LogOut className="h-4 w-4" strokeWidth={2} />
                     Log out

@@ -9,9 +9,9 @@ export default function AIUsageCard({ usage }: { usage: AIUsage }) {
   const nearLimit = !unlimited && pct >= 80;
 
   return (
-    <div className="rounded-2xl border border-black/[.06] bg-white p-5 shadow-sm sm:p-6">
+    <div className="rounded-2xl border border-ink/[.06] bg-surface p-5 shadow-sm sm:p-6">
       <div className="flex items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-[#5B4FE9]">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-500/15 text-[#5B4FE9]">
           <Gauge className="h-4 w-4" strokeWidth={2} />
         </span>
         <div>
@@ -25,10 +25,10 @@ export default function AIUsageCard({ usage }: { usage: AIUsage }) {
           <span className="text-sm font-semibold text-foreground">
             {usage.monthCount.toLocaleString()} {unlimited ? "" : `/ ${usage.monthLimit!.toLocaleString()}`}
           </span>
-          {unlimited && <span className="text-xs font-medium text-emerald-600">Unlimited</span>}
+          {unlimited && <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Unlimited</span>}
         </div>
         {!unlimited && (
-          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-black/[.06]">
+          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-ink/[.06]">
             <div
               className={`h-full rounded-full transition-all ${nearLimit ? "bg-amber-500" : "bg-[#5B4FE9]"}`}
               style={{ width: `${pct}%` }}
@@ -38,7 +38,7 @@ export default function AIUsageCard({ usage }: { usage: AIUsage }) {
       </div>
 
       {usage.blocked && (
-        <p className="mt-4 rounded-lg bg-red-50 p-3 text-xs font-medium text-red-600">
+        <p className="mt-4 rounded-lg bg-red-50 dark:bg-red-500/15 p-3 text-xs font-medium text-red-600 dark:text-red-400">
           You&apos;ve hit your plan&apos;s AI limit — conversations are being routed to your team for now.{" "}
           {usage.blockedUntil && (
             <>

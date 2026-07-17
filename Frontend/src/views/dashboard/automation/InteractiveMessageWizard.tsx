@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -109,7 +109,7 @@ export default function InteractiveMessageWizard({ messageId }: { messageId?: st
 
   if (loading) {
     return (
-      <div className="flex h-[calc(100vh-10rem)] items-center justify-center rounded-2xl border border-black/[.06] bg-white shadow-sm">
+      <div className="flex h-[calc(100vh-10rem)] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
         <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
       </div>
     );
@@ -125,7 +125,7 @@ export default function InteractiveMessageWizard({ messageId }: { messageId?: st
         <Link
           href="/dashboard/automation/interactive-messages"
           aria-label="Cancel"
-          className="flex h-8 w-8 items-center justify-center rounded-full text-foreground/40 hover:bg-black/[.04] hover:text-foreground"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-foreground/40 hover:bg-ink/[.04] hover:text-foreground"
         >
           <X className="h-4 w-4" strokeWidth={2} />
         </Link>
@@ -133,7 +133,7 @@ export default function InteractiveMessageWizard({ messageId }: { messageId?: st
 
       <AutomationWizardProgress current={step} />
 
-      <div className="rounded-3xl border border-black/[.06] bg-white p-6 shadow-sm sm:p-8">
+      <div className="rounded-3xl border border-ink/[.06] bg-surface p-6 shadow-sm sm:p-8">
         <AnimatePresence mode="wait">
           <motion.div
             key={step}

@@ -59,11 +59,11 @@ export default function IntegrationsPage() {
       </p>
 
       {whatsapp?.connected === false && (
-        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" strokeWidth={2} />
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 dark:border-amber-500/25 bg-amber-50 dark:bg-amber-500/15 px-4 py-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" strokeWidth={2} />
           <div>
-            <p className="text-xs font-semibold text-amber-800">WhatsApp is not connected yet</p>
-            <p className="mt-0.5 text-xs text-amber-700/80">
+            <p className="text-xs font-semibold text-amber-800 dark:text-amber-300">WhatsApp is not connected yet</p>
+            <p className="mt-0.5 text-xs text-amber-700 dark:text-amber-400/80">
               Connect it below so Exofe can start taking orders on your behalf.
             </p>
           </div>
@@ -108,22 +108,22 @@ function IntegrationCard({
   const isSoon = integration.status === "soon";
 
   return (
-    <div className="flex flex-col rounded-2xl border border-black/[.06] bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+    <div className="flex flex-col rounded-2xl border border-ink/[.06] bg-surface p-5 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-black/[.03]">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ink/[.03]">
           {integration.icon}
         </span>
         {isSoon ? (
-          <span className="rounded-full bg-black/[.05] px-2.5 py-1 text-[11px] font-medium text-foreground/45">
+          <span className="rounded-full bg-ink/[.05] px-2.5 py-1 text-[11px] font-medium text-foreground/45">
             Coming soon
           </span>
         ) : connected ? (
-          <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-600">
+          <span className="flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-500/15 px-2.5 py-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
             Connected
           </span>
         ) : (
-          <span className="rounded-full bg-black/[.05] px-2.5 py-1 text-[11px] font-medium text-foreground/45">
+          <span className="rounded-full bg-ink/[.05] px-2.5 py-1 text-[11px] font-medium text-foreground/45">
             Not connected
           </span>
         )}
@@ -140,10 +140,10 @@ function IntegrationCard({
         onClick={connected ? onDisconnect : onConnect}
         className={`mt-4 w-full rounded-xl py-2.5 text-xs font-semibold transition-colors ${
           isSoon
-            ? "cursor-not-allowed bg-black/[.04] text-foreground/30"
+            ? "cursor-not-allowed bg-ink/[.04] text-foreground/30"
             : connected
-              ? "bg-black/[.04] text-foreground/60 hover:bg-black/[.07]"
-              : "bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] text-white shadow-sm hover:opacity-90"
+              ? "bg-ink/[.04] text-foreground/60 hover:bg-ink/[.07]"
+              : "shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] text-white shadow-sm hover:opacity-90"
         }`}
       >
         {isSoon ? "Not available yet" : connected ? "Disconnect" : `Connect ${integration.name.split(" ")[0]}`}
@@ -168,10 +168,10 @@ function DisconnectConfirmModal({ onClose, onConfirm }: { onClose: () => void; o
         exit={{ opacity: 0, y: 10, scale: 0.98 }}
         transition={{ duration: 0.2, ease: EASE }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm rounded-3xl border border-black/[.06] bg-white p-6 shadow-2xl"
+        className="w-full max-w-sm rounded-3xl border border-ink/[.06] bg-surface p-6 shadow-2xl"
       >
         <div className="flex items-start justify-between">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-400">
             <AlertTriangle className="h-5 w-5" strokeWidth={2} />
           </span>
           <button type="button" onClick={onClose} aria-label="Close" className="text-foreground/40 hover:text-foreground">
@@ -186,7 +186,7 @@ function DisconnectConfirmModal({ onClose, onConfirm }: { onClose: () => void; o
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-xl bg-black/[.04] py-2.5 text-xs font-semibold text-foreground/70 hover:bg-black/[.07]"
+            className="flex-1 rounded-xl bg-ink/[.04] py-2.5 text-xs font-semibold text-foreground/70 hover:bg-ink/[.07]"
           >
             Cancel
           </button>

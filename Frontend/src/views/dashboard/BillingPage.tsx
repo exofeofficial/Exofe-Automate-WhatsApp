@@ -35,7 +35,7 @@ export default function BillingPage() {
 
   if (error) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center rounded-2xl border border-black/[.06] bg-white p-8 text-center text-sm text-red-500 shadow-sm">
+      <div className="flex min-h-[50vh] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface p-8 text-center text-sm text-red-500 dark:text-red-400 shadow-sm">
         {error}
       </div>
     );
@@ -43,7 +43,7 @@ export default function BillingPage() {
 
   if (!trial) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center rounded-2xl border border-black/[.06] bg-white shadow-sm">
+      <div className="flex min-h-[50vh] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
         <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
       </div>
     );
@@ -60,21 +60,21 @@ export default function BillingPage() {
         variants={item}
         className={`overflow-hidden rounded-2xl p-6 shadow-sm sm:p-7 ${
           trial.isExpired
-            ? "border border-red-100 bg-red-50"
+            ? "border border-red-100 dark:border-red-500/25 bg-red-50 dark:bg-red-500/15"
             : trial.isTrialing
               ? "bg-gradient-to-br from-[#5B4FE9] to-[#4338CA] text-white"
-              : "border border-emerald-100 bg-emerald-50"
+              : "border border-emerald-100 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/15"
         }`}
       >
         {trial.isExpired ? (
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 dark:bg-red-500/15 text-red-600 dark:text-red-400">
                 <Clock className="h-5 w-5" strokeWidth={2} />
               </span>
               <div>
-                <p className="text-sm font-bold text-red-700">Your free trial has ended</p>
-                <p className="mt-0.5 text-sm text-red-600/80">
+                <p className="text-sm font-bold text-red-700 dark:text-red-400">Your free trial has ended</p>
+                <p className="mt-0.5 text-sm text-red-600 dark:text-red-400/80">
                   Pick a plan below to unlock your account and keep automating your WhatsApp store.
                 </p>
               </div>
@@ -96,7 +96,7 @@ export default function BillingPage() {
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPct}%` }}
                 transition={{ duration: 0.6, ease: EASE }}
-                className="h-full rounded-full bg-white"
+                className="h-full rounded-full bg-surface"
               />
             </div>
             <p className="mt-3 text-sm text-white/70">
@@ -105,12 +105,12 @@ export default function BillingPage() {
           </div>
         ) : (
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
               <ShieldCheck className="h-5 w-5" strokeWidth={2} />
             </span>
             <div>
-              <p className="text-sm font-bold text-emerald-700 capitalize">You&apos;re on the {trial.currentPlan} plan</p>
-              <p className="mt-0.5 text-sm text-emerald-600/80">Your subscription renews automatically every month.</p>
+              <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400 capitalize">You&apos;re on the {trial.currentPlan} plan</p>
+              <p className="mt-0.5 text-sm text-emerald-600 dark:text-emerald-400/80">Your subscription renews automatically every month.</p>
             </div>
           </div>
         )}
@@ -128,7 +128,7 @@ export default function BillingPage() {
               <div
                 key={plan.id}
                 className={`relative flex flex-col rounded-2xl border p-6 shadow-sm transition-shadow ${
-                  plan.popular ? "border-[#5B4FE9]/30 shadow-md shadow-indigo-900/10" : "border-black/[.06] bg-white"
+                  plan.popular ? "border-[#5B4FE9]/30 shadow-md shadow-indigo-900/10" : "border-ink/[.06] bg-surface"
                 } ${isCurrent ? "ring-2 ring-[#5B4FE9]/40" : ""}`}
               >
                 {plan.popular && !isCurrent && (
@@ -166,8 +166,8 @@ export default function BillingPage() {
                   onClick={() => setInterestedPlan(plan.id)}
                   className={`mt-6 flex w-full items-center justify-center gap-2 rounded-full py-2.5 text-sm font-semibold shadow-sm transition-colors disabled:cursor-default ${
                     isCurrent
-                      ? "bg-emerald-50 text-emerald-600"
-                      : "bg-[#5B4FE9] text-white hover:bg-[#4a3fd6]"
+                      ? "bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                      : "shine-btn-gold relative overflow-hidden bg-[#5B4FE9] text-white hover:bg-[#4a3fd6]"
                   }`}
                 >
                   {isCurrent ? "Current Plan" : "Subscribe"}
@@ -177,7 +177,7 @@ export default function BillingPage() {
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-3 flex items-start gap-2 rounded-xl bg-indigo-50 p-3 text-xs leading-relaxed text-[#4338CA]"
+                    className="mt-3 flex items-start gap-2 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 p-3 text-xs leading-relaxed text-[#4338CA]"
                   >
                     <Mail className="mt-0.5 h-3.5 w-3.5 shrink-0" strokeWidth={2} />
                     <span>
@@ -197,22 +197,22 @@ export default function BillingPage() {
 
       {/* payment method + invoices, honest empty states */}
       <motion.div variants={item} className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <div className="rounded-2xl border border-black/[.06] bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-ink/[.06] bg-surface p-6 shadow-sm">
           <p className="flex items-center gap-2 text-sm font-bold text-foreground">
             <CreditCard className="h-4 w-4 text-foreground/40" strokeWidth={2} />
             Payment method
           </p>
-          <div className="mt-4 flex flex-col items-center justify-center gap-2 rounded-xl bg-black/[.02] py-8 text-center">
+          <div className="mt-4 flex flex-col items-center justify-center gap-2 rounded-xl bg-ink/[.02] py-8 text-center">
             <p className="text-sm text-foreground/45">No payment method on file yet.</p>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-black/[.06] bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-ink/[.06] bg-surface p-6 shadow-sm">
           <p className="flex items-center gap-2 text-sm font-bold text-foreground">
             <FileText className="h-4 w-4 text-foreground/40" strokeWidth={2} />
             Invoices
           </p>
-          <div className="mt-4 flex flex-col items-center justify-center gap-2 rounded-xl bg-black/[.02] py-8 text-center">
+          <div className="mt-4 flex flex-col items-center justify-center gap-2 rounded-xl bg-ink/[.02] py-8 text-center">
             <p className="text-sm text-foreground/45">No invoices yet.</p>
           </div>
         </div>

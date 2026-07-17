@@ -15,11 +15,11 @@ import {
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 const STATUS_BADGE: Record<OrderStatus, string> = {
-  new: "bg-sky-50 text-sky-600",
-  confirmed: "bg-indigo-50 text-[#5B4FE9]",
-  shipped: "bg-amber-50 text-amber-600",
-  delivered: "bg-emerald-50 text-emerald-600",
-  canceled: "bg-red-50 text-red-600",
+  new: "bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400",
+  confirmed: "bg-indigo-50 dark:bg-indigo-500/15 text-[#5B4FE9]",
+  shipped: "bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400",
+  delivered: "bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+  canceled: "bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-400",
 };
 
 function formatPrice(value: number) {
@@ -75,9 +75,9 @@ export default function CustomerDetailPanel({
         animate={{ x: 0 }}
         exit={{ x: 420 }}
         transition={{ duration: 0.25, ease: EASE }}
-        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col overflow-y-auto bg-white shadow-2xl"
+        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col overflow-y-auto bg-surface shadow-2xl"
       >
-        <div className="flex items-center justify-between border-b border-black/[.06] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-ink/[.06] px-6 py-4">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-300 to-purple-400 text-sm font-bold text-white">
               {customer.name?.[0]?.toUpperCase() ?? <User className="h-4 w-4" strokeWidth={2} />}
@@ -91,7 +91,7 @@ export default function CustomerDetailPanel({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground/40 transition-colors hover:bg-black/[.04] hover:text-foreground"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground/40 transition-colors hover:bg-ink/[.04] hover:text-foreground"
           >
             <X className="h-[18px] w-[18px]" strokeWidth={2} />
           </button>
@@ -99,11 +99,11 @@ export default function CustomerDetailPanel({
 
         <div className="flex flex-col gap-6 p-6">
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-black/[.02] p-3.5">
+            <div className="rounded-xl bg-ink/[.02] p-3.5">
               <p className="text-xs text-foreground/45">Total Spent</p>
               <p className="mt-1 text-lg font-bold text-foreground">{formatPrice(customer.totalSpent)}</p>
             </div>
-            <div className="rounded-xl bg-black/[.02] p-3.5">
+            <div className="rounded-xl bg-ink/[.02] p-3.5">
               <p className="text-xs text-foreground/45">Orders</p>
               <p className="mt-1 text-lg font-bold text-foreground">{customer.orders.length}</p>
             </div>
@@ -117,7 +117,7 @@ export default function CustomerDetailPanel({
             {customer.orders.length === 0 ? (
               <p className="mt-2 text-xs text-foreground/40">No orders yet.</p>
             ) : (
-              <div className="mt-2 flex flex-col divide-y divide-black/[.05] rounded-xl border border-black/[.06]">
+              <div className="mt-2 flex flex-col divide-y divide-ink/[.05] rounded-xl border border-ink/[.06]">
                 {customer.orders.map((o) => (
                   <div key={o.id} className="flex items-center justify-between px-3.5 py-2.5 text-sm">
                     <div>
@@ -150,18 +150,18 @@ export default function CustomerDetailPanel({
                 onChange={(e) => setNewNote(e.target.value)}
                 rows={2}
                 placeholder="Add a note about this customer..."
-                className="flex-1 rounded-lg border border-black/[.12] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                className="flex-1 rounded-lg border border-ink/[.12] px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
               />
               <button
                 type="submit"
                 disabled={saving || !newNote.trim()}
                 aria-label="Add note"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#5B4FE9] text-white transition-colors hover:bg-[#4a3fd6] disabled:opacity-50"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg shine-btn-gold relative overflow-hidden bg-[#5B4FE9] text-white transition-colors hover:bg-[#4a3fd6] disabled:opacity-50"
               >
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} /> : <Send className="h-4 w-4" strokeWidth={2} />}
               </button>
             </form>
-            {error && <p className="mt-1.5 text-xs text-red-500">{error}</p>}
+            {error && <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">{error}</p>}
 
             <div className="mt-3 flex flex-col gap-2.5">
               {notes === null ? (
@@ -170,7 +170,7 @@ export default function CustomerDetailPanel({
                 <p className="text-xs text-foreground/40">No notes yet.</p>
               ) : (
                 notes.map((n) => (
-                  <div key={n.id} className="rounded-lg bg-black/[.02] p-3">
+                  <div key={n.id} className="rounded-lg bg-ink/[.02] p-3">
                     <p className="text-sm text-foreground/80">{n.note}</p>
                     <p className="mt-1 text-[11px] text-foreground/40">
                       {n.authorName} · {new Date(n.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}

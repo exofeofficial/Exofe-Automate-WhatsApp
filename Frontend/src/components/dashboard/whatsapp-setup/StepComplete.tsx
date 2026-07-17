@@ -14,7 +14,7 @@ export default function StepComplete({ businessNumber }: { businessNumber: strin
       transition={{ duration: 0.3 }}
       className="flex flex-col items-center gap-3 py-6 text-center"
     >
-      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
         <PartyPopper className="h-7 w-7" strokeWidth={2} />
       </span>
       <p className="text-lg font-bold text-foreground">Congratulations!</p>
@@ -27,14 +27,14 @@ export default function StepComplete({ businessNumber }: { businessNumber: strin
         <button
           type="button"
           onClick={() => router.push("/dashboard/conversations")}
-          className="w-full rounded-xl bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+          className="w-full rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90"
         >
           Go to Conversations
         </button>
         <button
           type="button"
           onClick={() => router.push("/dashboard/integrations")}
-          className="w-full rounded-xl bg-black/[.04] py-3 text-sm font-semibold text-foreground/70 hover:bg-black/[.07]"
+          className="w-full rounded-xl bg-ink/[.04] py-3 text-sm font-semibold text-foreground/70 hover:bg-ink/[.07]"
         >
           Back to Integrations
         </button>

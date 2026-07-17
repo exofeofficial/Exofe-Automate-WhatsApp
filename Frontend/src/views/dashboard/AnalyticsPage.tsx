@@ -57,7 +57,7 @@ function OrdersRevenueChart({ points }: { points: AnalyticsPoint[] }) {
           x2={width - padding}
           y1={padding + f * (height - padding * 2)}
           y2={padding + f * (height - padding * 2)}
-          stroke="#00000008"
+          className="stroke-ink/[0.06]"
           strokeWidth={1}
         />
       ))}
@@ -86,7 +86,7 @@ function OrdersRevenueChart({ points }: { points: AnalyticsPoint[] }) {
         if (i % labelEvery !== 0) return null;
         const x = padding + barWidth * i + barWidth / 2;
         return (
-          <text key={p.date} x={x} y={height + 16} textAnchor="middle" fontSize="10" fill="#00000055">
+          <text key={p.date} x={x} y={height + 16} textAnchor="middle" fontSize="10" className="fill-ink/[0.35]">
             {new Date(p.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
           </text>
         );
@@ -129,7 +129,7 @@ export default function AnalyticsPage() {
               type="button"
               onClick={() => setDays(r.value)}
               className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-                days === r.value ? "bg-[#5B4FE9] text-white" : "bg-white text-foreground/60 shadow-sm hover:bg-black/[.03]"
+                days === r.value ? "bg-[#5B4FE9] text-white" : "bg-surface text-foreground/60 shadow-sm hover:bg-ink/[.03]"
               }`}
             >
               {r.label}
@@ -139,13 +139,13 @@ export default function AnalyticsPage() {
       </motion.div>
 
       {error && (
-        <motion.p variants={item} className="rounded-xl bg-red-50 p-3.5 text-sm text-red-600">
+        <motion.p variants={item} className="rounded-xl bg-red-50 dark:bg-red-500/15 p-3.5 text-sm text-red-600 dark:text-red-400">
           {error}
         </motion.p>
       )}
 
       {!points ? (
-        <div className="flex h-[calc(100vh-16rem)] items-center justify-center rounded-2xl border border-black/[.06] bg-white shadow-sm">
+        <div className="flex h-[calc(100vh-16rem)] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
           <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
         </div>
       ) : (
@@ -158,15 +158,15 @@ export default function AnalyticsPage() {
               <p className="mt-4 text-xs text-white/70">Total Orders</p>
               <p className="mt-1 text-2xl font-extrabold">{totals?.totalOrders ?? 0}</p>
             </div>
-            <div className="rounded-2xl border border-black/[.06] bg-white p-5 shadow-sm">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[.04] text-foreground/60">
+            <div className="rounded-2xl border border-ink/[.06] bg-surface p-5 shadow-sm">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink/[.04] text-foreground/60">
                 <Wallet className="h-4 w-4" strokeWidth={2} />
               </span>
               <p className="mt-4 text-xs text-foreground/45">Total Revenue</p>
               <p className="mt-1 text-2xl font-extrabold text-foreground">{formatPrice(totals?.totalRevenue ?? 0)}</p>
             </div>
-            <div className="rounded-2xl border border-black/[.06] bg-white p-5 shadow-sm">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[.04] text-foreground/60">
+            <div className="rounded-2xl border border-ink/[.06] bg-surface p-5 shadow-sm">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink/[.04] text-foreground/60">
                 <BarChart3 className="h-4 w-4" strokeWidth={2} />
               </span>
               <p className="mt-4 text-xs text-foreground/45">Avg Order Value</p>
@@ -174,7 +174,7 @@ export default function AnalyticsPage() {
             </div>
           </motion.div>
 
-          <motion.div variants={item} className="rounded-2xl border border-black/[.06] bg-white p-5 shadow-sm sm:p-6">
+          <motion.div variants={item} className="rounded-2xl border border-ink/[.06] bg-surface p-5 shadow-sm sm:p-6">
             <div className="flex items-center justify-between">
               <p className="text-sm font-bold text-foreground">Orders & Revenue</p>
               <div className="flex items-center gap-4 text-xs text-foreground/50">

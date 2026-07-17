@@ -63,7 +63,7 @@ export default function Step2EmbeddedConnect({
   if (state === "done") {
     return (
       <div className="flex flex-col items-center gap-3 py-10 text-center">
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
           <Check className="h-6 w-6" strokeWidth={2.5} />
         </span>
         <p className="text-sm font-semibold text-foreground">Connected</p>
@@ -73,7 +73,7 @@ export default function Step2EmbeddedConnect({
 
   return (
     <div className="flex flex-col items-center gap-4 py-6 text-center">
-      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-black/[.03]">
+      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-ink/[.03]">
         <WhatsAppIcon />
       </span>
       <div>

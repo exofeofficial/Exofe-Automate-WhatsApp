@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ApiError, updatePaymentSettings, type PaymentSettings } from "@/lib/api";
 import SettingsSectionCard from "./SettingsSectionCard";
 
-const inputClass = "mt-1.5 w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30";
+const inputClass = "mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30";
 
 export default function PaymentSection({
   initial,

@@ -33,10 +33,10 @@ export default function RemoveMemberModal({
         exit={{ opacity: 0, y: 10, scale: 0.98 }}
         transition={{ duration: 0.2, ease: EASE }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm rounded-3xl border border-black/[.06] bg-white p-6 shadow-2xl"
+        className="w-full max-w-sm rounded-3xl border border-ink/[.06] bg-surface p-6 shadow-2xl"
       >
         <div className="flex items-start justify-between">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-400">
             <UserX className="h-5 w-5" strokeWidth={2} />
           </span>
           <button type="button" onClick={onClose} aria-label="Close" className="text-foreground/40 hover:text-foreground">
@@ -48,13 +48,13 @@ export default function RemoveMemberModal({
           They'll lose access to this Exofe account right away. You can invite them again later.
         </p>
 
-        {error && <p className="mt-4 text-xs font-medium text-red-500">{error}</p>}
+        {error && <p className="mt-4 text-xs font-medium text-red-500 dark:text-red-400">{error}</p>}
 
         <div className="mt-6 flex gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-xl bg-black/[.04] py-2.5 text-xs font-semibold text-foreground/70 hover:bg-black/[.07]"
+            className="flex-1 rounded-xl bg-ink/[.04] py-2.5 text-xs font-semibold text-foreground/70 hover:bg-ink/[.07]"
           >
             Cancel
           </button>

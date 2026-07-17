@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -47,7 +47,7 @@ export default function WhatsAppSetupWizard() {
             type="button"
             onClick={() => router.push("/dashboard/integrations")}
             aria-label="Cancel setup"
-            className="flex h-8 w-8 items-center justify-center rounded-full text-foreground/40 hover:bg-black/[.04] hover:text-foreground"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-foreground/40 hover:bg-ink/[.04] hover:text-foreground"
           >
             <X className="h-4 w-4" strokeWidth={2} />
           </button>
@@ -56,7 +56,7 @@ export default function WhatsAppSetupWizard() {
 
       {step < 5 && <WizardProgress current={step} />}
 
-      <div className="rounded-3xl border border-black/[.06] bg-white p-6 shadow-sm sm:p-8">
+      <div className="rounded-3xl border border-ink/[.06] bg-surface p-6 shadow-sm sm:p-8">
         <AnimatePresence mode="wait">
           <motion.div
             key={step}

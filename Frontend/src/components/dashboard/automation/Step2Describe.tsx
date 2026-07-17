@@ -67,7 +67,7 @@ export default function Step2Describe({
           onClick={(e) => trackCursor(e.currentTarget)}
           rows={7}
           placeholder="Hello {{customer_name}}, thank you for your order."
-          className="w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+          className="w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
         />
         <InsertVariablePanel onInsert={insertVariable} />
       </div>
@@ -75,7 +75,7 @@ export default function Step2Describe({
       <div>
         <p className="text-xs font-semibold text-foreground/60">Preview with sample data</p>
         <div className="mt-1.5 rounded-xl bg-[#e5ddd5] p-4">
-          <div className="max-w-[260px] rounded-2xl rounded-tl-sm bg-white px-3.5 py-3 shadow-sm">
+          <div className="max-w-[260px] rounded-2xl rounded-tl-sm bg-surface px-3.5 py-3 shadow-sm">
             <p className="whitespace-pre-wrap text-sm text-foreground/85">
               {bodyText.trim() ? renderPreview(bodyText) : "Your message will appear here"}
             </p>
@@ -87,7 +87,7 @@ export default function Step2Describe({
         <button
           type="button"
           onClick={onBack}
-          className="flex-1 rounded-xl bg-black/[.04] py-3 text-sm font-semibold text-foreground/70 hover:bg-black/[.07]"
+          className="flex-1 rounded-xl bg-ink/[.04] py-3 text-sm font-semibold text-foreground/70 hover:bg-ink/[.07]"
         >
           Back
         </button>
@@ -95,7 +95,7 @@ export default function Step2Describe({
           type="button"
           onClick={onNext}
           disabled={!bodyText.trim()}
-          className="flex-1 rounded-xl bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
+          className="flex-1 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
         >
           Continue
         </button>

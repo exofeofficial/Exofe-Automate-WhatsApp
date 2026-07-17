@@ -68,27 +68,27 @@ export default function CustomersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name or number"
-            className="w-full rounded-full border border-black/[.08] bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/25"
+            className="w-full rounded-full border border-ink/[.08] bg-surface py-2.5 pl-10 pr-4 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/25"
           />
         </div>
       </motion.div>
 
       {error && (
-        <motion.p variants={item} className="rounded-xl bg-red-50 p-3.5 text-sm text-red-600">
+        <motion.p variants={item} className="rounded-xl bg-red-50 dark:bg-red-500/15 p-3.5 text-sm text-red-600 dark:text-red-400">
           {error}
         </motion.p>
       )}
 
       {loading ? (
-        <div className="flex h-[calc(100vh-14rem)] items-center justify-center rounded-2xl border border-black/[.06] bg-white shadow-sm">
+        <div className="flex h-[calc(100vh-14rem)] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
           <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
         </div>
       ) : customers.length === 0 ? (
         <motion.div
           variants={item}
-          className="flex h-[calc(100vh-14rem)] flex-col items-center justify-center gap-3 rounded-2xl border border-black/[.06] bg-white p-6 text-center shadow-sm"
+          className="flex h-[calc(100vh-14rem)] flex-col items-center justify-center gap-3 rounded-2xl border border-ink/[.06] bg-surface p-6 text-center shadow-sm"
         >
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-black/[.03] text-foreground/30">
+          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-ink/[.03] text-foreground/30">
             <Users className="h-5 w-5" strokeWidth={2} />
           </span>
           <p className="max-w-xs text-sm text-foreground/50">
@@ -96,22 +96,22 @@ export default function CustomersPage() {
           </p>
         </motion.div>
       ) : (
-        <motion.div variants={item} className="overflow-x-auto rounded-2xl border border-black/[.06] bg-white shadow-sm">
+        <motion.div variants={item} className="overflow-x-auto rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-black/[.06] text-xs uppercase tracking-wide text-foreground/40">
+              <tr className="border-b border-ink/[.06] text-xs uppercase tracking-wide text-foreground/40">
                 <th className="px-5 py-3 font-medium">Customer</th>
                 <th className="px-5 py-3 font-medium">WhatsApp Number</th>
                 <th className="px-5 py-3 font-medium">Total Spent</th>
                 <th className="px-5 py-3 font-medium">Joined</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-black/[.05]">
+            <tbody className="divide-y divide-ink/[.05]">
               {customers.map((c) => (
                 <tr
                   key={c.id}
                   onClick={() => openCustomer(c.id)}
-                  className="cursor-pointer transition-colors hover:bg-black/[.02]"
+                  className="cursor-pointer transition-colors hover:bg-ink/[.02]"
                 >
                   <td className="flex items-center gap-2.5 px-5 py-3.5 font-medium text-foreground">
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-300 to-purple-400 text-xs font-bold text-white">

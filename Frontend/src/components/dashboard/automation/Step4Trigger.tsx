@@ -40,12 +40,12 @@ export default function Step4Trigger({
               type="button"
               onClick={() => onChange(t)}
               className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
-                active ? "border-[#5B4FE9] bg-indigo-50" : "border-black/[.1] hover:bg-black/[.03]"
+                active ? "border-[#5B4FE9] bg-indigo-50 dark:bg-indigo-500/15" : "border-ink/[.1] hover:bg-ink/[.03]"
               }`}
             >
               <span
                 className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${
-                  active ? "border-[#5B4FE9]" : "border-black/[.2]"
+                  active ? "border-[#5B4FE9]" : "border-ink/[.2]"
                 }`}
               >
                 {active && <span className="h-2 w-2 rounded-full bg-[#5B4FE9]" />}
@@ -59,13 +59,13 @@ export default function Step4Trigger({
         })}
       </div>
 
-      {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>}
+      {error && <p className="rounded-lg bg-red-50 dark:bg-red-500/15 p-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       <div className="flex gap-3">
         <button
           type="button"
           onClick={onBack}
-          className="flex-1 rounded-xl bg-black/[.04] py-3 text-sm font-semibold text-foreground/70 hover:bg-black/[.07]"
+          className="flex-1 rounded-xl bg-ink/[.04] py-3 text-sm font-semibold text-foreground/70 hover:bg-ink/[.07]"
         >
           Back
         </button>
@@ -73,7 +73,7 @@ export default function Step4Trigger({
           type="button"
           onClick={onSave}
           disabled={saving}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-70"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-70"
         >
           {saving && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.4} />}
           {saving ? "Saving..." : isEdit ? "Save changes" : "Save Automation"}

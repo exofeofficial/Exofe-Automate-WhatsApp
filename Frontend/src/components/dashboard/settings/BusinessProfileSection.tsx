@@ -6,8 +6,8 @@ import { ApiError, updateBusinessProfile, type BusinessProfile } from "@/lib/api
 import SettingsSectionCard from "./SettingsSectionCard";
 
 const inputClass = (hasError: boolean) =>
-  `mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
-    hasError ? "border-red-400" : "border-black/[.12]"
+  `mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+    hasError ? "border-red-400 dark:border-red-500/50" : "border-ink/[.12]"
   }`;
 
 const CATEGORIES = ["Fashion and Apparel", "Food and Beverage", "Electronics", "Beauty and Cosmetics", "Home and Living", "Grocery", "Services", "Other"];
@@ -77,7 +77,7 @@ export default function BusinessProfileSection({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-black/[.15] bg-black/[.02] text-foreground/35 hover:bg-black/[.04]"
+            className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-ink/[.15] bg-ink/[.02] text-foreground/35 hover:bg-ink/[.04]"
           >
             {form.logo ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -89,7 +89,7 @@ export default function BusinessProfileSection({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1.5 rounded-xl bg-black/[.04] px-3.5 py-2 text-xs font-semibold text-foreground/70 hover:bg-black/[.07]"
+            className="flex items-center gap-1.5 rounded-xl bg-ink/[.04] px-3.5 py-2 text-xs font-semibold text-foreground/70 hover:bg-ink/[.07]"
           >
             <ImagePlus className="h-3.5 w-3.5" strokeWidth={2} />
             {form.logo ? "Change logo" : "Upload logo"}
@@ -107,7 +107,7 @@ export default function BusinessProfileSection({
           placeholder="Ayesha Boutique"
           className={inputClass(Boolean(errors.businessName))}
         />
-        {errors.businessName && <p className="mt-1 text-xs text-red-500">{errors.businessName}</p>}
+        {errors.businessName && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.businessName}</p>}
       </div>
 
       <div>
@@ -115,7 +115,7 @@ export default function BusinessProfileSection({
         <select
           value={form.category}
           onChange={(e) => setField("category", e.target.value)}
-          className={`${inputClass(false)} bg-white ${form.category ? "text-foreground" : "text-foreground/40"}`}
+          className={`${inputClass(false)} bg-surface ${form.category ? "text-foreground" : "text-foreground/40"}`}
         >
           <option value="">Select a category</option>
           {CATEGORIES.map((c) => (
@@ -133,7 +133,7 @@ export default function BusinessProfileSection({
           onChange={(e) => setField("description", e.target.value)}
           rows={3}
           placeholder="We sell premium clothing for women."
-          className="mt-1.5 w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+          className="mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
         />
       </div>
 
@@ -147,7 +147,7 @@ export default function BusinessProfileSection({
             placeholder="support@yourbusiness.com"
             className={inputClass(Boolean(errors.supportEmail))}
           />
-          {errors.supportEmail && <p className="mt-1 text-xs text-red-500">{errors.supportEmail}</p>}
+          {errors.supportEmail && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.supportEmail}</p>}
         </div>
         <div>
           <label className="text-xs font-semibold text-foreground/70">Support Phone</label>

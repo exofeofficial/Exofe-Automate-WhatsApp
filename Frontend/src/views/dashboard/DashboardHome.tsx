@@ -42,7 +42,7 @@ function ChangeBadge({ change, onDark }: { change: string | null; onDark?: boole
     return (
       <span
         className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-          onDark ? "bg-white/15 text-white/60" : "bg-black/[.04] text-foreground/35"
+          onDark ? "bg-white/15 text-white/60" : "bg-ink/[.04] text-foreground/35"
         }`}
       >
         —
@@ -53,7 +53,7 @@ function ChangeBadge({ change, onDark }: { change: string | null; onDark?: boole
   return (
     <span
       className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-        isUp ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
+        isUp ? "bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-400"
       }`}
     >
       {change}
@@ -106,13 +106,13 @@ export default function DashboardHome() {
               className={`rounded-2xl p-5 shadow-sm transition-shadow hover:shadow-md ${
                 featured
                   ? "bg-gradient-to-br from-[#5B4FE9] to-[#4338CA] shadow-indigo-900/20"
-                  : "border border-black/[.06] bg-white"
+                  : "border border-ink/[.06] bg-surface"
               }`}
             >
               <div className="flex items-center justify-between">
                 <span
                   className={`flex h-9 w-9 items-center justify-center rounded-xl ${
-                    featured ? "bg-white/15 text-white" : "bg-black/[.04] text-foreground/60"
+                    featured ? "bg-white/15 text-white" : "bg-ink/[.04] text-foreground/60"
                   }`}
                 >
                   <Icon className="h-4 w-4" strokeWidth={2} />
@@ -131,12 +131,12 @@ export default function DashboardHome() {
         })}
       </div>
 
-      <motion.div variants={item} className="rounded-2xl border border-black/[.06] bg-white p-5 shadow-sm sm:p-6">
+      <motion.div variants={item} className="rounded-2xl border border-ink/[.06] bg-surface p-5 shadow-sm sm:p-6">
         <p className="text-sm font-bold text-foreground">Recent Activity</p>
 
         {ACTIVITY.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-black/[.03] text-foreground/30">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-ink/[.03] text-foreground/30">
               <Inbox className="h-5 w-5" strokeWidth={2} />
             </span>
             <p className="max-w-xs text-sm text-foreground/50">
@@ -144,14 +144,14 @@ export default function DashboardHome() {
             </p>
           </div>
         ) : (
-          <div className="mt-4 flex flex-col divide-y divide-black/[.05]">
+          <div className="mt-4 flex flex-col divide-y divide-ink/[.05]">
             {ACTIVITY.map((a) => (
               <div key={a.text} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
                 <div className="min-w-0">
                   <p className="truncate text-sm text-foreground/80">{a.text}</p>
                   <p className="mt-0.5 text-xs text-foreground/40">{a.time}</p>
                 </div>
-                <span className="shrink-0 rounded-full bg-black/[.04] px-2.5 py-1 text-[11px] font-medium text-foreground/55">
+                <span className="shrink-0 rounded-full bg-ink/[.04] px-2.5 py-1 text-[11px] font-medium text-foreground/55">
                   {a.tag}
                 </span>
               </div>

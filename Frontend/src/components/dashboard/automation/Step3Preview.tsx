@@ -55,16 +55,16 @@ export default function Step3Preview({
               value={bodyText}
               onChange={(e) => onBodyChange(e.target.value)}
               rows={3}
-              className="mt-1.5 w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+              className="mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
             />
           </div>
 
-          <div className="flex overflow-hidden rounded-lg border border-black/[.12]">
+          <div className="flex overflow-hidden rounded-lg border border-ink/[.12]">
             <button
               type="button"
               onClick={() => onKindChange("buttons")}
               className={`flex flex-1 items-center justify-center gap-1.5 py-2 text-xs font-semibold transition-colors ${
-                kind === "buttons" ? "bg-[#5B4FE9] text-white" : "bg-white text-foreground/60 hover:bg-black/[.03]"
+                kind === "buttons" ? "bg-[#5B4FE9] text-white" : "bg-surface text-foreground/60 hover:bg-ink/[.03]"
               }`}
             >
               <MessageSquareText className="h-3.5 w-3.5" strokeWidth={2} />
@@ -74,7 +74,7 @@ export default function Step3Preview({
               type="button"
               onClick={() => onKindChange("list")}
               className={`flex flex-1 items-center justify-center gap-1.5 py-2 text-xs font-semibold transition-colors ${
-                kind === "list" ? "bg-[#5B4FE9] text-white" : "bg-white text-foreground/60 hover:bg-black/[.03]"
+                kind === "list" ? "bg-[#5B4FE9] text-white" : "bg-surface text-foreground/60 hover:bg-ink/[.03]"
               }`}
             >
               <List className="h-3.5 w-3.5" strokeWidth={2} />
@@ -93,13 +93,13 @@ export default function Step3Preview({
                     onChange={(e) =>
                       onButtonsChange(buttons.map((btn, idx) => (idx === i ? { ...btn, text: e.target.value } : btn)))
                     }
-                    className="flex-1 rounded-lg border border-black/[.12] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                    className="flex-1 rounded-lg border border-ink/[.12] px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
                   />
                   <button
                     type="button"
                     onClick={() => onButtonsChange(buttons.filter((_, idx) => idx !== i))}
                     aria-label="Remove button"
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-foreground/40 hover:bg-red-50 hover:text-red-600"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-foreground/40 hover:bg-red-50 dark:bg-red-500/15 hover:text-red-600 dark:text-red-400"
                   >
                     <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
                   </button>
@@ -124,7 +124,7 @@ export default function Step3Preview({
                   type="text"
                   value={listButtonLabel}
                   onChange={(e) => onListButtonLabelChange(e.target.value)}
-                  className="mt-1.5 w-full rounded-lg border border-black/[.12] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                  className="mt-1.5 w-full rounded-lg border border-ink/[.12] px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
                 />
               </div>
               <label className="text-xs font-semibold text-foreground/70">Options (up to {MAX_LIST_ROWS})</label>
@@ -136,13 +136,13 @@ export default function Step3Preview({
                     onChange={(e) =>
                       onListRowsChange(listRows.map((r, idx) => (idx === i ? { ...r, title: e.target.value } : r)))
                     }
-                    className="flex-1 rounded-lg border border-black/[.12] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                    className="flex-1 rounded-lg border border-ink/[.12] px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
                   />
                   <button
                     type="button"
                     onClick={() => onListRowsChange(listRows.filter((_, idx) => idx !== i))}
                     aria-label="Remove option"
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-foreground/40 hover:bg-red-50 hover:text-red-600"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-foreground/40 hover:bg-red-50 dark:bg-red-500/15 hover:text-red-600 dark:text-red-400"
                   >
                     <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
                   </button>
@@ -175,7 +175,7 @@ export default function Step3Preview({
         <button
           type="button"
           onClick={onBack}
-          className="flex-1 rounded-xl bg-black/[.04] py-3 text-sm font-semibold text-foreground/70 hover:bg-black/[.07]"
+          className="flex-1 rounded-xl bg-ink/[.04] py-3 text-sm font-semibold text-foreground/70 hover:bg-ink/[.07]"
         >
           Back
         </button>
@@ -183,7 +183,7 @@ export default function Step3Preview({
           type="button"
           onClick={onNext}
           disabled={!canContinue}
-          className="flex-1 rounded-xl bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
+          className="flex-1 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
         >
           Continue
         </button>

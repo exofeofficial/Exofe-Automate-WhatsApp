@@ -44,8 +44,8 @@ const FIELDS: {
 ];
 
 const inputClass = (hasError: boolean) =>
-  `mt-1.5 w-full rounded-lg border px-3.5 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
-    hasError ? "border-red-400" : "border-black/[.12]"
+  `mt-1.5 w-full rounded-lg border px-3.5 py-2.5 pr-10 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+    hasError ? "border-red-400 dark:border-red-500/50" : "border-ink/[.12]"
   }`;
 
 export default function Step2ConnectWhatsApp({
@@ -116,7 +116,7 @@ export default function Step2ConnectWhatsApp({
             )}
           </div>
           {errors[f.key] ? (
-            <p className="mt-1 text-xs text-red-500">{errors[f.key]}</p>
+            <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors[f.key]}</p>
           ) : (
             <p className="mt-1 text-[11px] text-foreground/40">{f.helper}</p>
           )}
@@ -129,8 +129,8 @@ export default function Step2ConnectWhatsApp({
         disabled={testState === "testing"}
         className={`flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold transition-colors disabled:opacity-70 ${
           testState === "success"
-            ? "bg-emerald-50 text-emerald-600"
-            : "bg-black/[.04] text-foreground/70 hover:bg-black/[.07]"
+            ? "bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+            : "bg-ink/[.04] text-foreground/70 hover:bg-ink/[.07]"
         }`}
       >
         {testState === "testing" && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />}
@@ -142,7 +142,7 @@ export default function Step2ConnectWhatsApp({
         <button
           type="button"
           onClick={onBack}
-          className="flex-1 rounded-xl bg-black/[.04] py-3 text-sm font-semibold text-foreground/70 hover:bg-black/[.07]"
+          className="flex-1 rounded-xl bg-ink/[.04] py-3 text-sm font-semibold text-foreground/70 hover:bg-ink/[.07]"
         >
           Back
         </button>
@@ -150,7 +150,7 @@ export default function Step2ConnectWhatsApp({
           type="button"
           onClick={onNext}
           disabled={testState !== "success"}
-          className="flex-1 rounded-xl bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
+          className="flex-1 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
         >
           Continue
         </button>

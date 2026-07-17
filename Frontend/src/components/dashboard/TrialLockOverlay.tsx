@@ -31,9 +31,9 @@ export default function TrialLockOverlay({ trial }: { trial: TrialStatus }) {
         initial={{ opacity: 0, y: 16, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.25, ease: EASE }}
-        className="w-full max-w-md rounded-3xl border border-black/[.06] bg-white p-8 text-center shadow-2xl"
+        className="w-full max-w-md rounded-3xl border border-ink/[.06] bg-surface p-8 text-center shadow-2xl"
       >
-        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-[#5B4FE9]">
+        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 dark:bg-indigo-500/15 text-[#5B4FE9]">
           <Lock className="h-6 w-6" strokeWidth={2} />
         </span>
         <h2 className="mt-5 text-lg font-bold text-foreground">Your free trial has ended</h2>
@@ -45,7 +45,7 @@ export default function TrialLockOverlay({ trial }: { trial: TrialStatus }) {
         <button
           type="button"
           onClick={() => router.push("/dashboard/billing")}
-          className="mt-6 w-full rounded-xl bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-transform hover:scale-[1.01]"
+          className="mt-6 w-full rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-transform hover:scale-[1.01]"
         >
           Choose a plan
         </button>

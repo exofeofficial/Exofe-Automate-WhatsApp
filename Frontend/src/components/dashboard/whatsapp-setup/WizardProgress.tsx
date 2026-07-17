@@ -21,8 +21,8 @@ export default function WizardProgress({ current }: { current: number }) {
                   isDone
                     ? "bg-[#5B4FE9] text-white"
                     : isCurrent
-                      ? "bg-indigo-50 text-[#5B4FE9] ring-2 ring-[#5B4FE9]"
-                      : "bg-black/[.05] text-foreground/35"
+                      ? "bg-indigo-50 dark:bg-indigo-500/15 text-[#5B4FE9] ring-2 ring-[#5B4FE9]"
+                      : "bg-ink/[.05] text-foreground/35"
                 }`}
               >
                 {isDone ? <Check className="h-4 w-4" strokeWidth={2.5} /> : stepNumber}
@@ -36,7 +36,7 @@ export default function WizardProgress({ current }: { current: number }) {
               </span>
             </div>
             {!isLast && (
-              <span className={`mx-2 h-0.5 flex-1 rounded-full ${isDone ? "bg-[#5B4FE9]" : "bg-black/[.08]"}`} />
+              <span className={`mx-2 h-0.5 flex-1 rounded-full ${isDone ? "bg-[#5B4FE9]" : "bg-ink/[.08]"}`} />
             )}
           </div>
         );

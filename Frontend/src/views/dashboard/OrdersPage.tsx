@@ -19,11 +19,11 @@ const item: Variants = {
 };
 
 const STATUS_META: Record<OrderStatus, { label: string; badge: string }> = {
-  new: { label: "New", badge: "bg-sky-50 text-sky-600" },
-  confirmed: { label: "Confirmed", badge: "bg-indigo-50 text-[#5B4FE9]" },
-  shipped: { label: "Shipped", badge: "bg-amber-50 text-amber-600" },
-  delivered: { label: "Delivered", badge: "bg-emerald-50 text-emerald-600" },
-  canceled: { label: "Canceled", badge: "bg-red-50 text-red-600" },
+  new: { label: "New", badge: "bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400" },
+  confirmed: { label: "Confirmed", badge: "bg-indigo-50 dark:bg-indigo-500/15 text-[#5B4FE9]" },
+  shipped: { label: "Shipped", badge: "bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400" },
+  delivered: { label: "Delivered", badge: "bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" },
+  canceled: { label: "Canceled", badge: "bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-400" },
 };
 
 const FILTERS: { value: OrderStatus | "all"; label: string }[] = [
@@ -91,7 +91,7 @@ export default function OrdersPage() {
           <p className="mt-1 text-xl font-extrabold">{totalOrders}</p>
         </div>
         {(["new", "confirmed", "shipped", "delivered", "canceled"] as OrderStatus[]).map((s) => (
-          <div key={s} className="rounded-2xl border border-black/[.06] bg-white p-4 shadow-sm">
+          <div key={s} className="rounded-2xl border border-ink/[.06] bg-surface p-4 shadow-sm">
             <p className="text-xs text-foreground/45">{STATUS_META[s].label}</p>
             <p className="mt-1 text-xl font-extrabold text-foreground">{counts[s] ?? 0}</p>
           </div>
@@ -106,7 +106,7 @@ export default function OrdersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by customer or phone"
-            className="w-full rounded-full border border-black/[.08] bg-white py-2 pl-9 pr-4 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/25"
+            className="w-full rounded-full border border-ink/[.08] bg-surface py-2 pl-9 pr-4 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/25"
           />
         </div>
 
@@ -119,7 +119,7 @@ export default function OrdersPage() {
               className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
                 statusFilter === f.value
                   ? "bg-[#5B4FE9] text-white"
-                  : "bg-white text-foreground/60 shadow-sm hover:bg-black/[.03]"
+                  : "bg-surface text-foreground/60 shadow-sm hover:bg-ink/[.03]"
               }`}
             >
               {f.label}
@@ -129,21 +129,21 @@ export default function OrdersPage() {
       </motion.div>
 
       {error && (
-        <motion.div variants={item} className="rounded-xl bg-red-50 p-3.5 text-sm text-red-600">
+        <motion.div variants={item} className="rounded-xl bg-red-50 dark:bg-red-500/15 p-3.5 text-sm text-red-600 dark:text-red-400">
           {error}
         </motion.div>
       )}
 
       {loading ? (
-        <div className="flex h-[calc(100vh-22rem)] items-center justify-center rounded-2xl border border-black/[.06] bg-white shadow-sm">
+        <div className="flex h-[calc(100vh-22rem)] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
           <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
         </div>
       ) : orders.length === 0 ? (
         <motion.div
           variants={item}
-          className="flex h-[calc(100vh-22rem)] flex-col items-center justify-center gap-3 rounded-2xl border border-black/[.06] bg-white p-6 text-center shadow-sm"
+          className="flex h-[calc(100vh-22rem)] flex-col items-center justify-center gap-3 rounded-2xl border border-ink/[.06] bg-surface p-6 text-center shadow-sm"
         >
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-black/[.03] text-foreground/30">
+          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-ink/[.03] text-foreground/30">
             <Inbox className="h-5 w-5" strokeWidth={2} />
           </span>
           <p className="max-w-xs text-sm text-foreground/50">
@@ -153,10 +153,10 @@ export default function OrdersPage() {
           </p>
         </motion.div>
       ) : (
-        <motion.div variants={item} className="overflow-x-auto rounded-2xl border border-black/[.06] bg-white shadow-sm">
+        <motion.div variants={item} className="overflow-x-auto rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-black/[.06] text-xs uppercase tracking-wide text-foreground/40">
+              <tr className="border-b border-ink/[.06] text-xs uppercase tracking-wide text-foreground/40">
                 <th className="px-5 py-3 font-medium">Order</th>
                 <th className="px-5 py-3 font-medium">Customer</th>
                 <th className="px-5 py-3 font-medium">Items</th>
@@ -165,15 +165,15 @@ export default function OrdersPage() {
                 <th className="px-5 py-3 font-medium">Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-black/[.05]">
+            <tbody className="divide-y divide-ink/[.05]">
               {orders.map((o) => (
                 <tr
                   key={o.id}
                   onClick={() => openOrder(o.id)}
-                  className="cursor-pointer transition-colors hover:bg-black/[.02]"
+                  className="cursor-pointer transition-colors hover:bg-ink/[.02]"
                 >
                   <td className="flex items-center gap-2 px-5 py-3.5 font-semibold text-foreground">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/[.04] text-foreground/50">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-ink/[.04] text-foreground/50">
                       <Package className="h-3.5 w-3.5" strokeWidth={2} />
                     </span>
                     #{o.id.slice(0, 8).toUpperCase()}

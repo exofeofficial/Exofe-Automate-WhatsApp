@@ -43,28 +43,28 @@ export default function Step3Verification({ onNext, onBack }: { onNext: () => vo
         <p className="mt-1 text-xs text-foreground/50">This only takes a few seconds.</p>
       </div>
 
-      <div className="flex flex-col divide-y divide-black/[.05] rounded-2xl border border-black/[.06]">
+      <div className="flex flex-col divide-y divide-ink/[.05] rounded-2xl border border-ink/[.06]">
         {CHECKS.map((label, i) => (
           <div key={label} className="flex items-center justify-between px-4 py-3">
             <span className="text-sm text-foreground/75">{label}</span>
             {states[i] === "pending" && <span className="h-4 w-4 rounded-full border border-black/10" />}
             {states[i] === "checking" && <Loader2 className="h-4 w-4 animate-spin text-[#5B4FE9]" strokeWidth={2} />}
-            {states[i] === "passed" && <Check className="h-4 w-4 text-emerald-500" strokeWidth={2.5} />}
-            {states[i] === "failed" && <CircleAlert className="h-4 w-4 text-red-500" strokeWidth={2} />}
+            {states[i] === "passed" && <Check className="h-4 w-4 text-emerald-500 dark:text-emerald-400" strokeWidth={2.5} />}
+            {states[i] === "failed" && <CircleAlert className="h-4 w-4 text-red-500 dark:text-red-400" strokeWidth={2} />}
           </div>
         ))}
       </div>
 
       {allPassed && (
-        <div className="rounded-2xl bg-emerald-50 px-4 py-3 text-center">
-          <p className="text-xs font-semibold text-emerald-700">Connected</p>
-          <p className="mt-0.5 text-[11px] text-emerald-700/70">Everything checks out, you&apos;re ready for the next step.</p>
+        <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 px-4 py-3 text-center">
+          <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Connected</p>
+          <p className="mt-0.5 text-[11px] text-emerald-700 dark:text-emerald-400/70">Everything checks out, you&apos;re ready for the next step.</p>
         </div>
       )}
       {anyFailed && (
-        <div className="rounded-2xl bg-red-50 px-4 py-3 text-center">
-          <p className="text-xs font-semibold text-red-700">Something didn&apos;t check out</p>
-          <p className="mt-0.5 text-[11px] text-red-700/70">Go back and double check the values from Meta for Developers.</p>
+        <div className="rounded-2xl bg-red-50 dark:bg-red-500/15 px-4 py-3 text-center">
+          <p className="text-xs font-semibold text-red-700 dark:text-red-400">Something didn&apos;t check out</p>
+          <p className="mt-0.5 text-[11px] text-red-700 dark:text-red-400/70">Go back and double check the values from Meta for Developers.</p>
 
         </div>
       )}
@@ -73,7 +73,7 @@ export default function Step3Verification({ onNext, onBack }: { onNext: () => vo
         <button
           type="button"
           onClick={onBack}
-          className="flex-1 rounded-xl bg-black/[.04] py-3 text-sm font-semibold text-foreground/70 hover:bg-black/[.07]"
+          className="flex-1 rounded-xl bg-ink/[.04] py-3 text-sm font-semibold text-foreground/70 hover:bg-ink/[.07]"
         >
           Back
         </button>
@@ -81,7 +81,7 @@ export default function Step3Verification({ onNext, onBack }: { onNext: () => vo
           type="button"
           onClick={onNext}
           disabled={!allPassed}
-          className="flex-1 rounded-xl bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
+          className="flex-1 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
         >
           Continue
         </button>

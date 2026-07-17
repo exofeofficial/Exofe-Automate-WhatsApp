@@ -49,7 +49,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex h-[calc(100vh-10rem)] items-center justify-center rounded-2xl border border-black/[.06] bg-white shadow-sm">
+      <div className="flex h-[calc(100vh-10rem)] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
         <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
       </div>
     );
@@ -57,7 +57,7 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
-      <nav className="flex gap-1.5 overflow-x-auto rounded-2xl border border-black/[.06] bg-white p-2 lg:w-56 lg:shrink-0 lg:flex-col lg:gap-0.5">
+      <nav className="flex gap-1.5 overflow-x-auto rounded-2xl border border-ink/[.06] bg-surface p-2 lg:w-56 lg:shrink-0 lg:flex-col lg:gap-0.5">
         {TABS.map((t) => {
           const Icon = t.icon;
           const isActive = tab === t.id;
@@ -67,7 +67,7 @@ export default function SettingsPage() {
               type="button"
               onClick={() => setTab(t.id)}
               className={`flex shrink-0 items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                isActive ? "bg-indigo-50 text-[#5B4FE9]" : "text-foreground/60 hover:bg-black/[.03]"
+                isActive ? "bg-indigo-50 dark:bg-indigo-500/15 text-[#5B4FE9]" : "text-foreground/60 hover:bg-ink/[.03]"
               }`}
             >
               <Icon className="h-4 w-4 shrink-0" strokeWidth={2} />

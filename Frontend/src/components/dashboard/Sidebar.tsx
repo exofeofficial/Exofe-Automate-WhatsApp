@@ -98,7 +98,7 @@ export default function Sidebar({ onClose, trial }: { onClose?: () => void; tria
   });
 
   return (
-    <div className="sticky top-4 m-4 flex h-[calc(100vh-2rem)] w-64 shrink-0 flex-col rounded-3xl bg-white shadow-sm">
+    <div className="sticky top-4 m-4 flex h-[calc(100vh-2rem)] w-64 shrink-0 flex-col rounded-3xl bg-surface shadow-sm">
       <div className="flex items-center justify-between px-5 py-5">
         <Link href="/dashboard" className="flex items-center gap-2">
           <LogoMark />
@@ -109,7 +109,7 @@ export default function Sidebar({ onClose, trial }: { onClose?: () => void; tria
             type="button"
             onClick={onClose}
             aria-label="Close menu"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground/50 transition-colors hover:bg-black/[.04] hover:text-foreground lg:hidden"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-foreground/50 transition-colors hover:bg-ink/[.04] hover:text-foreground lg:hidden"
           >
             <X className="h-[18px] w-[18px]" strokeWidth={2} />
           </button>
@@ -133,7 +133,7 @@ export default function Sidebar({ onClose, trial }: { onClose?: () => void; tria
                   <motion.span
                     layoutId="sidebar-active"
                     transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute inset-0 rounded-xl bg-indigo-50"
+                    className="absolute inset-0 rounded-xl bg-indigo-50 dark:bg-indigo-500/15"
                   />
                 )}
                 <Icon className={`relative h-[18px] w-[18px] shrink-0 ${isActive ? "text-[#5B4FE9]" : "text-foreground/45"}`} strokeWidth={2} />
@@ -150,7 +150,7 @@ export default function Sidebar({ onClose, trial }: { onClose?: () => void; tria
               <button
                 type="button"
                 onClick={() => setOpenGroup(isOpen ? null : entry.label)}
-                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-black/[.03] ${
+                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-ink/[.03] ${
                   hasActiveChild ? "text-[#5B4FE9]" : "text-foreground/70"
                 }`}
               >
@@ -167,7 +167,7 @@ export default function Sidebar({ onClose, trial }: { onClose?: () => void; tria
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="ml-[27px] flex flex-col gap-0.5 border-l border-black/[.06] py-1 pl-3">
+                    <div className="ml-[27px] flex flex-col gap-0.5 border-l border-ink/[.06] py-1 pl-3">
                       {entry.children.map((child) => {
                         const isActive = child.href === activeHref;
                         return (
@@ -176,7 +176,7 @@ export default function Sidebar({ onClose, trial }: { onClose?: () => void; tria
                             href={child.href}
                             onClick={onClose}
                             className={`rounded-lg px-2.5 py-2 text-sm transition-colors ${
-                              isActive ? "bg-indigo-50 font-medium text-[#5B4FE9]" : "text-foreground/60 hover:bg-black/[.03]"
+                              isActive ? "bg-indigo-50 dark:bg-indigo-500/15 font-medium text-[#5B4FE9]" : "text-foreground/60 hover:bg-ink/[.03]"
                             }`}
                           >
                             {child.label}
@@ -192,7 +192,7 @@ export default function Sidebar({ onClose, trial }: { onClose?: () => void; tria
         })}
       </nav>
 
-      <div className="border-t border-black/[.06] p-3">
+      <div className="border-t border-ink/[.06] p-3">
         <UpgradeCard trial={trial} />
       </div>
     </div>

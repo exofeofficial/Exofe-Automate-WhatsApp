@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { AppWindow, BadgeCheck, MessageSquarePlus, Phone } from "lucide-react";
 
@@ -27,14 +27,14 @@ const GUIDE_STEPS = [
 
 export default function ManualSetupGuide() {
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-black/[.06] bg-black/[.015] p-4">
+    <div className="flex flex-col gap-3 rounded-2xl border border-ink/[.06] bg-ink/[.015] p-4">
       <p className="text-xs font-semibold text-foreground/60">Before you start, on Meta&apos;s side</p>
       <div className="flex flex-col gap-3">
         {GUIDE_STEPS.map((step, i) => {
           const Icon = step.icon;
           return (
             <div key={step.title} className="flex items-start gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-bold text-foreground/50 shadow-sm">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface text-[10px] font-bold text-foreground/50 shadow-sm">
                 {i + 1}
               </span>
               <div className="min-w-0 flex-1">

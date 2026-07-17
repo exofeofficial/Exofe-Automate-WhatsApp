@@ -67,9 +67,9 @@ export default function OrderDetailPanel({
         animate={{ x: 0 }}
         exit={{ x: 420 }}
         transition={{ duration: 0.25, ease: EASE }}
-        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col overflow-y-auto bg-white shadow-2xl"
+        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col overflow-y-auto bg-surface shadow-2xl"
       >
-        <div className="flex items-center justify-between border-b border-black/[.06] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-ink/[.06] px-6 py-4">
           <div>
             <p className="text-xs font-medium text-foreground/40">Order</p>
             <p className="text-sm font-bold text-foreground">#{order.id.slice(0, 8).toUpperCase()}</p>
@@ -78,7 +78,7 @@ export default function OrderDetailPanel({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="flex h-8 w-8 items-center justify-center rounded-full text-foreground/40 transition-colors hover:bg-black/[.04] hover:text-foreground"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-foreground/40 transition-colors hover:bg-ink/[.04] hover:text-foreground"
           >
             <X className="h-[18px] w-[18px]" strokeWidth={2} />
           </button>
@@ -97,7 +97,7 @@ export default function OrderDetailPanel({
                   className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 ${
                     order.status === opt.value
                       ? "bg-[#5B4FE9] text-white"
-                      : "bg-black/[.04] text-foreground/60 hover:bg-black/[.07]"
+                      : "bg-ink/[.04] text-foreground/60 hover:bg-ink/[.07]"
                   }`}
                 >
                   {opt.label}
@@ -105,7 +105,7 @@ export default function OrderDetailPanel({
               ))}
               {saving && <Loader2 className="h-4 w-4 animate-spin text-foreground/40" strokeWidth={2} />}
             </div>
-            {error && <p className="mt-1.5 text-xs text-red-500">{error}</p>}
+            {error && <p className="mt-1.5 text-xs text-red-500 dark:text-red-400">{error}</p>}
           </div>
 
           <div>
@@ -130,7 +130,7 @@ export default function OrderDetailPanel({
 
           <div>
             <p className="text-xs font-semibold text-foreground/60">Items</p>
-            <div className="mt-2 flex flex-col divide-y divide-black/[.05] rounded-xl border border-black/[.06]">
+            <div className="mt-2 flex flex-col divide-y divide-ink/[.05] rounded-xl border border-ink/[.06]">
               {order.items.map((item) => (
                 <div key={item.id} className="flex items-center justify-between px-3.5 py-2.5 text-sm">
                   <div className="min-w-0">
@@ -147,7 +147,7 @@ export default function OrderDetailPanel({
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 rounded-xl bg-black/[.02] p-4 text-sm">
+          <div className="flex flex-col gap-1.5 rounded-xl bg-ink/[.02] p-4 text-sm">
             <div className="flex items-center justify-between text-foreground/60">
               <span>Subtotal</span>
               <span>{formatPrice(order.subtotal)}</span>
@@ -160,7 +160,7 @@ export default function OrderDetailPanel({
               <span>Tax</span>
               <span>{formatPrice(order.tax)}</span>
             </div>
-            <div className="mt-1.5 flex items-center justify-between border-t border-black/[.06] pt-1.5 text-sm font-bold text-foreground">
+            <div className="mt-1.5 flex items-center justify-between border-t border-ink/[.06] pt-1.5 text-sm font-bold text-foreground">
               <span>Total</span>
               <span>{formatPrice(order.total)}</span>
             </div>

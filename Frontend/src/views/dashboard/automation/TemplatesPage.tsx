@@ -107,7 +107,7 @@ export default function TemplatesPage() {
           <button
             type="button"
             onClick={() => router.push("/dashboard/automation/interactive-messages/new")}
-            className="flex items-center gap-1.5 rounded-full bg-[#5B4FE9] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#4a3fd6]"
+            className="flex items-center gap-1.5 rounded-full shine-btn-gold relative overflow-hidden bg-[#5B4FE9] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#4a3fd6]"
           >
             <Plus className="h-4 w-4" strokeWidth={2.5} />
             Create template
@@ -115,7 +115,7 @@ export default function TemplatesPage() {
           <button
             type="button"
             aria-label="View as code"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-black/[.08] bg-white text-foreground/60 transition-colors hover:bg-black/[.03]"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ink/[.08] bg-surface text-foreground/60 transition-colors hover:bg-ink/[.03]"
           >
             <Code2 className="h-4 w-4" strokeWidth={2} />
           </button>
@@ -130,7 +130,7 @@ export default function TemplatesPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search..."
-            className="w-full rounded-full border border-black/[.08] bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/25"
+            className="w-full rounded-full border border-ink/[.08] bg-surface py-2.5 pl-10 pr-4 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/25"
           />
         </div>
         <Dropdown
@@ -143,10 +143,10 @@ export default function TemplatesPage() {
         />
       </div>
 
-      {error && <p className="rounded-xl bg-red-50 p-3.5 text-sm text-red-600">{error}</p>}
+      {error && <p className="rounded-xl bg-red-50 dark:bg-red-500/15 p-3.5 text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       {visible.length === 0 ? (
-        <div className="flex min-h-[50vh] flex-col items-center justify-center rounded-2xl border border-black/[.06] bg-white p-8 text-center shadow-sm">
+        <div className="flex min-h-[50vh] flex-col items-center justify-center rounded-2xl border border-ink/[.06] bg-surface p-8 text-center shadow-sm">
           <p className="text-sm text-foreground/50">No templates match your search.</p>
         </div>
       ) : (
@@ -158,14 +158,14 @@ export default function TemplatesPage() {
             return (
               <div
                 key={template}
-                className="flex flex-col rounded-2xl border border-black/[.06] bg-white p-5 shadow-sm"
+                className="flex flex-col rounded-2xl border border-ink/[.06] bg-surface p-5 shadow-sm"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-[#5B4FE9]">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-[#5B4FE9]">
                     <Icon className="h-5 w-5" strokeWidth={2} />
                   </span>
                   {isActive && (
-                    <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-600">
+                    <span className="flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-500/15 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
                       <CheckCircle2 className="h-3 w-3" strokeWidth={2.5} />
                       Active
                     </span>
@@ -178,7 +178,7 @@ export default function TemplatesPage() {
                   <button
                     type="button"
                     onClick={() => setPreviewing(template)}
-                    className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-black/[.04] py-2 text-xs font-semibold text-foreground/70 transition-colors hover:bg-black/[.07]"
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-ink/[.04] py-2 text-xs font-semibold text-foreground/70 transition-colors hover:bg-ink/[.07]"
                   >
                     <Eye className="h-3.5 w-3.5" strokeWidth={2} />
                     Preview
@@ -187,7 +187,7 @@ export default function TemplatesPage() {
                     type="button"
                     disabled={isActive || isActivating}
                     onClick={() => handleActivate(template, trigger)}
-                    className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[#5B4FE9] py-2 text-xs font-semibold text-white transition-colors hover:bg-[#4a3fd6] disabled:opacity-50"
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-full shine-btn-gold relative overflow-hidden bg-[#5B4FE9] py-2 text-xs font-semibold text-white transition-colors hover:bg-[#4a3fd6] disabled:opacity-50"
                   >
                     {isActivating ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
@@ -218,15 +218,15 @@ export default function TemplatesPage() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 16, scale: 0.97 }}
               transition={{ duration: 0.2, ease: EASE }}
-              className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl bg-white shadow-2xl"
+              className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl bg-surface shadow-2xl"
             >
-              <div className="flex items-center justify-between border-b border-black/[.06] px-5 py-4">
+              <div className="flex items-center justify-between border-b border-ink/[.06] px-5 py-4">
                 <p className="text-sm font-bold text-foreground">{previewingMeta.label}</p>
                 <button
                   type="button"
                   onClick={() => setPreviewing(null)}
                   aria-label="Close"
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-foreground/40 transition-colors hover:bg-black/[.04] hover:text-foreground"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-foreground/40 transition-colors hover:bg-ink/[.04] hover:text-foreground"
                 >
                   <X className="h-[18px] w-[18px]" strokeWidth={2} />
                 </button>
@@ -248,7 +248,7 @@ export default function TemplatesPage() {
                   type="button"
                   disabled={activated.has(previewing) || activating === previewing}
                   onClick={() => handleActivate(previewing, previewingTrigger)}
-                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-[#5B4FE9] py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#4a3fd6] disabled:opacity-50"
+                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-full shine-btn-gold relative overflow-hidden bg-[#5B4FE9] py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#4a3fd6] disabled:opacity-50"
                 >
                   {activating === previewing ? (
                     <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />

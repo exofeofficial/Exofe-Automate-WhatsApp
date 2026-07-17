@@ -37,10 +37,10 @@ function DeleteModal({
         exit={{ opacity: 0, y: 10, scale: 0.98 }}
         transition={{ duration: 0.2, ease: EASE }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm rounded-3xl border border-black/[.06] bg-white p-6 shadow-2xl"
+        className="w-full max-w-sm rounded-3xl border border-ink/[.06] bg-surface p-6 shadow-2xl"
       >
         <div className="flex items-start justify-between">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-400">
             <Trash2 className="h-5 w-5" strokeWidth={2} />
           </span>
           <button type="button" onClick={onClose} aria-label="Close" className="text-foreground/40 hover:text-foreground">
@@ -49,12 +49,12 @@ function DeleteModal({
         </div>
         <p className="mt-4 text-sm font-bold text-foreground">Delete &quot;{name}&quot;?</p>
         <p className="mt-2 text-xs leading-relaxed text-foreground/55">This automation will stop sending right away. This can&apos;t be undone.</p>
-        {error && <p className="mt-4 text-xs font-medium text-red-500">{error}</p>}
+        {error && <p className="mt-4 text-xs font-medium text-red-500 dark:text-red-400">{error}</p>}
         <div className="mt-6 flex gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-xl bg-black/[.04] py-2.5 text-xs font-semibold text-foreground/70 hover:bg-black/[.07]"
+            className="flex-1 rounded-xl bg-ink/[.04] py-2.5 text-xs font-semibold text-foreground/70 hover:bg-ink/[.07]"
           >
             Cancel
           </button>
@@ -107,7 +107,7 @@ export default function InteractiveMessagesPage() {
 
   if (loading) {
     return (
-      <div className="flex h-[calc(100vh-10rem)] items-center justify-center rounded-2xl border border-black/[.06] bg-white shadow-sm">
+      <div className="flex h-[calc(100vh-10rem)] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
         <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
       </div>
     );
@@ -115,8 +115,8 @@ export default function InteractiveMessagesPage() {
 
   if (messages.length === 0) {
     return (
-      <div className="flex h-[calc(100vh-10rem)] flex-col items-center justify-center gap-3 rounded-2xl border border-black/[.06] bg-white p-6 text-center shadow-sm">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-[#5B4FE9]">
+      <div className="flex h-[calc(100vh-10rem)] flex-col items-center justify-center gap-3 rounded-2xl border border-ink/[.06] bg-surface p-6 text-center shadow-sm">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 dark:bg-indigo-500/15 text-[#5B4FE9]">
           <Sparkles className="h-6 w-6" strokeWidth={2} />
         </span>
         <p className="text-sm font-bold text-foreground">No interactive messages yet</p>
@@ -126,7 +126,7 @@ export default function InteractiveMessagesPage() {
         </p>
         <Link
           href="/dashboard/automation/interactive-messages/new"
-          className="mt-2 flex items-center gap-1.5 rounded-xl bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-90"
+          className="mt-2 flex items-center gap-1.5 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-90"
         >
           <MessageSquarePlus className="h-3.5 w-3.5" strokeWidth={2} />
           Create Interactive Message
@@ -141,7 +141,7 @@ export default function InteractiveMessagesPage() {
         <p className="text-sm text-foreground/55">Buttons and lists your AI assistant sends automatically.</p>
         <Link
           href="/dashboard/automation/interactive-messages/new"
-          className="flex items-center gap-1.5 rounded-xl bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-90"
+          className="flex items-center gap-1.5 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-90"
         >
           <MessageSquarePlus className="h-3.5 w-3.5" strokeWidth={2} />
           Create Interactive Message
@@ -150,14 +150,14 @@ export default function InteractiveMessagesPage() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {messages.map((m) => (
-          <div key={m.id} className="flex flex-col rounded-2xl border border-black/[.06] bg-white p-5 shadow-sm">
+          <div key={m.id} className="flex flex-col rounded-2xl border border-ink/[.06] bg-surface p-5 shadow-sm">
             <div className="flex items-start justify-between gap-3">
-              <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[11px] font-medium text-[#5B4FE9]">
+              <span className="rounded-full bg-indigo-50 dark:bg-indigo-500/15 px-2.5 py-1 text-[11px] font-medium text-[#5B4FE9]">
                 {TEMPLATE_META[m.template].label}
               </span>
               <span
                 className={`rounded-full px-2.5 py-1 text-[11px] font-medium capitalize ${
-                  m.status === "active" ? "bg-emerald-50 text-emerald-600" : "bg-black/[.05] text-foreground/45"
+                  m.status === "active" ? "bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-ink/[.05] text-foreground/45"
                 }`}
               >
                 {m.status}
@@ -168,7 +168,7 @@ export default function InteractiveMessagesPage() {
 
             <div className="mt-3 flex flex-wrap gap-1.5">
               {(m.kind === "buttons" ? m.buttons.map((b) => b.text) : [m.listButtonLabel]).map((label) => (
-                <span key={label} className="rounded-full border border-black/[.1] px-2.5 py-1 text-[11px] font-medium text-foreground/60">
+                <span key={label} className="rounded-full border border-ink/[.1] px-2.5 py-1 text-[11px] font-medium text-foreground/60">
                   {label}
                 </span>
               ))}
@@ -176,10 +176,10 @@ export default function InteractiveMessagesPage() {
 
             <p className="mt-3 text-xs text-foreground/40">{TRIGGER_META[m.trigger].label}</p>
 
-            <div className="mt-4 flex gap-2 border-t border-black/[.06] pt-3">
+            <div className="mt-4 flex gap-2 border-t border-ink/[.06] pt-3">
               <Link
                 href={`/dashboard/automation/interactive-messages/${m.id}/edit`}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-black/[.04] py-2 text-xs font-semibold text-foreground/70 hover:bg-black/[.07]"
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-ink/[.04] py-2 text-xs font-semibold text-foreground/70 hover:bg-ink/[.07]"
               >
                 <Pencil className="h-3.5 w-3.5" strokeWidth={2} />
                 Edit
@@ -187,7 +187,7 @@ export default function InteractiveMessagesPage() {
               <button
                 type="button"
                 onClick={() => setDeleteTarget(m)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground/40 hover:bg-red-50 hover:text-red-600"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-foreground/40 hover:bg-red-50 dark:bg-red-500/15 hover:text-red-600 dark:text-red-400"
                 aria-label="Delete"
               >
                 <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />

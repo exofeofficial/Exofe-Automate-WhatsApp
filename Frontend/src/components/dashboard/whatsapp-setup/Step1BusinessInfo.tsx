@@ -5,8 +5,8 @@ import { COUNTRIES, PHONE_PLACEHOLDER, type CountryCode } from "@/lib/countries"
 import { BUSINESS_CATEGORIES, TIMEZONE_BY_COUNTRY, type BusinessInfo } from "./types";
 
 const inputClass = (hasError: boolean) =>
-  `mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
-    hasError ? "border-red-400" : "border-black/[.12]"
+  `mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+    hasError ? "border-red-400 dark:border-red-500/50" : "border-ink/[.12]"
   }`;
 
 type Errors = Partial<Record<keyof BusinessInfo, string>>;
@@ -60,7 +60,7 @@ export default function Step1BusinessInfo({
           placeholder="Ayesha Boutique"
           className={inputClass(Boolean(errors.businessName))}
         />
-        {errors.businessName && <p className="mt-1 text-xs text-red-500">{errors.businessName}</p>}
+        {errors.businessName && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.businessName}</p>}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -69,7 +69,7 @@ export default function Step1BusinessInfo({
           <select
             value={value.category}
             onChange={(e) => setField("category", e.target.value)}
-            className={`${inputClass(Boolean(errors.category))} bg-white ${value.category ? "text-foreground" : "text-foreground/40"}`}
+            className={`${inputClass(Boolean(errors.category))} bg-surface ${value.category ? "text-foreground" : "text-foreground/40"}`}
           >
             <option value="" disabled>
               Select a category
@@ -80,7 +80,7 @@ export default function Step1BusinessInfo({
               </option>
             ))}
           </select>
-          {errors.category && <p className="mt-1 text-xs text-red-500">{errors.category}</p>}
+          {errors.category && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.category}</p>}
         </div>
 
         <div>
@@ -91,7 +91,7 @@ export default function Step1BusinessInfo({
               const country = e.target.value as CountryCode;
               onChange({ ...value, country, timezone: TIMEZONE_BY_COUNTRY[country] });
             }}
-            className="mt-1.5 w-full rounded-lg border border-black/[.12] bg-white px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+            className="mt-1.5 w-full rounded-lg border border-ink/[.12] bg-surface px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
           >
             {COUNTRIES.map((c) => (
               <option key={c.code} value={c.code}>
@@ -108,7 +108,7 @@ export default function Step1BusinessInfo({
           type="text"
           value={value.timezone}
           readOnly
-          className="mt-1.5 w-full rounded-lg border border-black/[.12] bg-black/[.02] px-3.5 py-2.5 text-sm text-foreground/60"
+          className="mt-1.5 w-full rounded-lg border border-ink/[.12] bg-ink/[.02] px-3.5 py-2.5 text-sm text-foreground/60"
         />
       </div>
 
@@ -121,13 +121,13 @@ export default function Step1BusinessInfo({
           placeholder="support@yourbusiness.com"
           className={inputClass(Boolean(errors.supportEmail))}
         />
-        {errors.supportEmail && <p className="mt-1 text-xs text-red-500">{errors.supportEmail}</p>}
+        {errors.supportEmail && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.supportEmail}</p>}
       </div>
 
       <div>
         <label className="text-xs font-semibold text-foreground/70">* Business Phone</label>
         <div className="mt-1.5 flex gap-2">
-          <span className="flex w-16 shrink-0 items-center justify-center rounded-lg border border-black/[.12] bg-black/[.02] text-sm text-foreground/60">
+          <span className="flex w-16 shrink-0 items-center justify-center rounded-lg border border-ink/[.12] bg-ink/[.02] text-sm text-foreground/60">
             {COUNTRIES.find((c) => c.code === value.country)?.dial}
           </span>
           <input
@@ -136,18 +136,18 @@ export default function Step1BusinessInfo({
             value={value.businessPhone}
             onChange={(e) => setField("businessPhone", e.target.value)}
             placeholder={PHONE_PLACEHOLDER[value.country]}
-            className={`flex-1 rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
-              errors.businessPhone ? "border-red-400" : "border-black/[.12]"
+            className={`flex-1 rounded-lg border px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+              errors.businessPhone ? "border-red-400 dark:border-red-500/50" : "border-ink/[.12]"
             }`}
           />
         </div>
-        {errors.businessPhone && <p className="mt-1 text-xs text-red-500">{errors.businessPhone}</p>}
+        {errors.businessPhone && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{errors.businessPhone}</p>}
       </div>
 
       <button
         type="button"
         onClick={handleContinue}
-        className="mt-2 w-full rounded-xl bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+        className="mt-2 w-full rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90"
       >
         Continue
       </button>

@@ -34,11 +34,11 @@ export default function Step4AISetup({
           onChange={(e) => onChange(e.target.value)}
           rows={4}
           placeholder="We sell premium clothing for women."
-          className="mt-1.5 w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+          className="mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
         />
       </div>
 
-      <div className="flex items-start gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 px-4 py-3">
+      <div className="flex items-start gap-3 rounded-2xl border border-indigo-100 dark:border-indigo-500/25 bg-indigo-50 dark:bg-indigo-500/15/60 px-4 py-3">
         <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-[#5B4FE9]" strokeWidth={2} />
         <p className="text-xs leading-relaxed text-[#5B4FE9]">
           Products, business hours, delivery settings, FAQs, and AI personality are coming to this step soon.
@@ -50,14 +50,14 @@ export default function Step4AISetup({
         <button
           type="button"
           onClick={onBack}
-          className="flex-1 rounded-xl bg-black/[.04] py-3 text-sm font-semibold text-foreground/70 hover:bg-black/[.07]"
+          className="flex-1 rounded-xl bg-ink/[.04] py-3 text-sm font-semibold text-foreground/70 hover:bg-ink/[.07]"
         >
           Back
         </button>
         <button
           type="button"
           onClick={onNext}
-          className="flex-1 rounded-xl bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+          className="flex-1 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90"
         >
           Finish setup
         </button>

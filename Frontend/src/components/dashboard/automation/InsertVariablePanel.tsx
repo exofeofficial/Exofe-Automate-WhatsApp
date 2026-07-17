@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import { Plus } from "lucide-react";
 import { VARIABLE_GROUPS } from "./interactiveMessageHelpers";
 
 export default function InsertVariablePanel({ onInsert }: { onInsert: (key: string) => void }) {
   return (
-    <div className="rounded-xl border border-black/[.08] bg-black/[.015] p-3">
+    <div className="rounded-xl border border-ink/[.08] bg-ink/[.015] p-3">
       <p className="text-xs font-semibold text-foreground/60">Insert Variable</p>
       <p className="mt-0.5 text-[11px] text-foreground/40">
         Click one to drop it into your message, real order and customer details fill it in automatically.
@@ -21,7 +21,7 @@ export default function InsertVariablePanel({ onInsert }: { onInsert: (key: stri
                   key={v.key}
                   type="button"
                   onClick={() => onInsert(v.key)}
-                  className="flex items-center gap-1 rounded-full border border-black/[.1] bg-white px-2.5 py-1 text-[11px] font-medium text-foreground/65 hover:border-[#5B4FE9] hover:text-[#5B4FE9]"
+                  className="flex items-center gap-1 rounded-full border border-ink/[.1] bg-surface px-2.5 py-1 text-[11px] font-medium text-foreground/65 hover:border-[#5B4FE9] hover:text-[#5B4FE9]"
                 >
                   <Plus className="h-3 w-3" strokeWidth={2.5} />
                   {v.label}

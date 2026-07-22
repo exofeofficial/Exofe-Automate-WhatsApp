@@ -79,21 +79,29 @@ def send_password_reset_email(to: str, code: str) -> None:
     _send(to=to, subject="Reset your Exofe password", html=html)
 
 def send_team_invite_email(to: str, business_name: str, token: str) -> None:
-    """Send a team invite. No accept-invite page exists yet on the
-    frontend — this token is ready for whenever that flow gets built
-    (POST /auth/accept-invite or similar), same shape as the existing
-    password-reset token."""
+    """Send a team invite with a clickable link to /accept-invite?token=...
+    — GET /auth/invite/{token} shows who invited them before they submit
+    anything, POST /auth/accept-invite sets their name/password and logs
+    them straight into the dashboard. The link is valid for 7 days (see
+    team_service.INVITE_TOKEN_TTL_DAYS)."""
+    accept_url = f"{settings.frontend_url}/accept-invite?token={token}"
     html = _base_html(
         "You've been invited",
         f"""
         <p style="margin:16px 0 0;font-size:14px;color:#3f3f46;">
           You've been invited to join <strong>{business_name}</strong> on Exofe.
-          Use the code below to set up your account.
+          Click below to set up your account — this link is valid for 7 days.
         </p>
-        <div style="margin:24px 0;padding:16px;background:#f4f4f5;border-radius:8px;
-                    text-align:center;font-size:14px;font-family:monospace;word-break:break-all;color:#18181b;">
-          {token}
+        <div style="margin:24px 0;text-align:center;">
+          <a href="{accept_url}"
+             style="display:inline-block;padding:12px 28px;background:#5B4FE9;color:#ffffff;
+                    font-size:14px;font-weight:600;text-decoration:none;border-radius:8px;">
+            Accept invite
+          </a>
         </div>
+        <p style="margin:0 0 16px;font-size:12px;color:#a1a1aa;word-break:break-all;">
+          Or paste this link into your browser: {accept_url}
+        </p>
         <p style="margin:0;font-size:12px;color:#a1a1aa;">
           If you weren't expecting this invite, you can safely ignore this email.
         </p>""",

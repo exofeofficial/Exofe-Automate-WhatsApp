@@ -8,6 +8,7 @@ import Topbar from "@/components/dashboard/Topbar";
 import PendingTasksWidget from "@/components/dashboard/PendingTasksWidget";
 import TrialLockOverlay from "@/components/dashboard/TrialLockOverlay";
 import ThemeProvider from "@/components/dashboard/ThemeProvider";
+import DashboardLoader from "@/components/dashboard/DashboardLoader";
 import { getToken } from "@/lib/auth";
 import { getOnboardingStatus, getTrialStatus, type OnboardingStatus } from "@/lib/api";
 import { buildOnboardingTasks, type TrialStatus } from "@/lib/trial";
@@ -53,7 +54,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!checked) {
     return (
       <ThemeProvider>
-        <div className="flex min-h-screen items-center justify-center bg-background" />
+        <DashboardLoader />
       </ThemeProvider>
     );
   }

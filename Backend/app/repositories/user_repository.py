@@ -91,6 +91,7 @@ def create_user(
 _ALLOWED_FIELDS = frozenset({
     "business_id", "password_hash", "email_verified_at",
     "first_name", "last_name", "phone", "country_code",
+    "status", "invite_token", "accepted_at",
 })
 def update_user_fields(db: Session, user_id: str, **fields) -> None:
     """Update arbitrary columns on a user row.

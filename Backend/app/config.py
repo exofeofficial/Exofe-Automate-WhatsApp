@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     ai_api_key: str | None = None
     cors_origins: str = "http://localhost:3000"
     email_from: str = "Exofe <onboarding@resend.dev>"
+    # Base URL of the deployed frontend — used to build clickable links in
+    # emails (team invites, etc.) that point back at the right environment.
+    frontend_url: str = "http://localhost:3000"
 
     # "Continue with Google" — the frontend sends us the ID token Google
     # Identity Services hands it after sign-in, and we verify it against

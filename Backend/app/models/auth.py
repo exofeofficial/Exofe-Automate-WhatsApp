@@ -119,10 +119,23 @@ class GoogleAuthRequest(_CamelModel):
     id_token: str = Field(..., min_length=1)
 
 
+class AcceptInviteRequest(_CamelModel):
+    token: str = Field(..., min_length=1)
+    first_name: str = Field(..., min_length=1, max_length=150)
+    last_name: str = Field(..., min_length=1, max_length=150)
+    password: str = Field(..., min_length=8, max_length=128)
+
+
 # ── Responses ────────────────────────────────────────────────────────────────
 
 class TokenResponse(BaseModel):
     token: str
+
+
+class InviteDetailsResponse(_CamelModel):
+    business_name: str
+    email: str
+    role: str
 
 
 class MessageResponse(BaseModel):

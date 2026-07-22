@@ -35,22 +35,45 @@ def get_by_email(db: Session, email: str) -> dict | None:
     return dict(row._mapping) if row else None
 
 
+def get_by_invite_token(db: Session, invite_token: str) -> dict | None:
+    row = db.execute(
+        text(
+            """
+            SELECT u.id, u.business_id, u.email, u.role, u.status, u.invite_token_expires_at,
+                   b.name AS business_name
+            FROM users u
+            JOIN businesses b ON b.id = u.business_id
+            WHERE u.invite_token = :invite_token
+            """
+        ),
+        {"invite_token": invite_token},
+    ).fetchone()
+    return dict(row._mapping) if row else None
+
+
 def create_invited_member(
-    db: Session, *, business_id: str, email: str, role: str, invite_token: str
+    db: Session, *, business_id: str, email: str, role: str, invite_token: str, invite_token_expires_at
 ) -> dict:
-    """first_name/last_name start blank — the invited person fills those
-    in whenever the accept-invite flow gets built. Until then, the
-    service layer falls back to showing their email as the display name."""
+    """first_name/last_name start blank — filled in when the invited
+    person completes the accept-invite flow. Until then, the service
+    layer falls back to showing their email as the display name."""
     row = db.execute(
         text(
             f"""
-            INSERT INTO users (business_id, role, first_name, last_name, email,
-                                password_hash, status, invite_token, invited_at)
-            VALUES (:business_id, :role, '', '', :email, NULL, 'invited', :invite_token, NOW())
+            INSERT INTO users (business_id, role, first_name, last_name, email, password_hash,
+                                status, invite_token, invite_token_expires_at, invited_at)
+            VALUES (:business_id, :role, '', '', :email, NULL, 'invited', :invite_token,
+                    :invite_token_expires_at, NOW())
             RETURNING {_MEMBER_COLUMNS}
             """
         ),
-        {"business_id": business_id, "role": role, "email": email, "invite_token": invite_token},
+        {
+            "business_id": business_id,
+            "role": role,
+            "email": email,
+            "invite_token": invite_token,
+            "invite_token_expires_at": invite_token_expires_at,
+        },
     ).fetchone()
     db.commit()
     return dict(row._mapping)

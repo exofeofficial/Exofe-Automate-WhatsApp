@@ -1,12 +1,15 @@
 # app/services/team_service.py
 
 import secrets
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import AppError
 from app.repositories import team_repository, user_repository
 from app.services import email_service
+
+INVITE_TOKEN_TTL_DAYS = 7
 
 
 def _to_member(row: dict) -> dict:
@@ -30,9 +33,15 @@ def invite_member(db: Session, business_id: str, *, email: str, role: str) -> di
 
     business = user_repository.get_business_by_id(db, business_id)
     invite_token = secrets.token_urlsafe(24)
+    invite_token_expires_at = datetime.now(timezone.utc) + timedelta(days=INVITE_TOKEN_TTL_DAYS)
 
     row = team_repository.create_invited_member(
-        db, business_id=business_id, email=email, role=role, invite_token=invite_token
+        db,
+        business_id=business_id,
+        email=email,
+        role=role,
+        invite_token=invite_token,
+        invite_token_expires_at=invite_token_expires_at,
     )
     email_service.send_team_invite_email(email, business["name"], invite_token)
     return _to_member(row)

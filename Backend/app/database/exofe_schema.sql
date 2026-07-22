@@ -37,6 +37,8 @@ CREATE TABLE users (
                             CHECK (country_code IN ('PK', 'KR', 'AE')),
     email_verified_at   TIMESTAMPTZ,                   -- NULL until email is confirmed
     invite_token        TEXT UNIQUE,
+    invite_token_expires_at TIMESTAMPTZ,                -- invite links are valid for 7 days
+    accepted_at         TIMESTAMPTZ,                   -- when an invited member finished setup
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     invited_at          TIMESTAMPTZ
@@ -219,12 +221,15 @@ CREATE TABLE product_variants (
 -- ============================================================
 
 CREATE TABLE customers (
-    id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    business_id      UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
-    whatsapp_number  TEXT NOT NULL,
-    name             TEXT,           -- pulled from WhatsApp profile if available
-    total_spent      NUMERIC(10,2) NOT NULL DEFAULT 0,  -- running total, updated on order completion
-    created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_id           UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+    whatsapp_number       TEXT NOT NULL,
+    name                  TEXT,           -- pulled from WhatsApp profile if available
+    total_spent           NUMERIC(10,2) NOT NULL DEFAULT 0,  -- running total, updated on order completion
+    ai_window_started_at  TIMESTAMPTZ,    -- start of this customer's current 24h AI-billing
+                                           -- conversation window (see ai_usage_service) — null
+                                           -- until their first AI-handled message
+    created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (business_id, whatsapp_number)   -- same number per business = same customer
 );
 

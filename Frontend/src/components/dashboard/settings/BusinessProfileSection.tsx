@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Building2, ImagePlus } from "lucide-react";
 import { ApiError, updateBusinessProfile, type BusinessProfile } from "@/lib/api";
+import { validateImageFile } from "@/lib/imageValidation";
 import SettingsSectionCard from "./SettingsSectionCard";
 
 const inputClass = (hasError: boolean) =>
@@ -24,6 +25,7 @@ export default function BusinessProfileSection({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [logoError, setLogoError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const setField = <K extends keyof BusinessProfile>(key: K, value: BusinessProfile[K]) => {
@@ -35,6 +37,13 @@ export default function BusinessProfileSection({
   const handleLogoPick = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      setLogoError(validationError);
+      e.target.value = "";
+      return;
+    }
+    setLogoError(null);
     const reader = new FileReader();
     reader.onload = () => setField("logo", reader.result as string);
     reader.readAsDataURL(file);
@@ -94,8 +103,10 @@ export default function BusinessProfileSection({
             <ImagePlus className="h-3.5 w-3.5" strokeWidth={2} />
             {form.logo ? "Change logo" : "Upload logo"}
           </button>
-          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleLogoPick} className="hidden" />
+          <input ref={fileInputRef} type="file" accept="image/jpeg,image/webp" onChange={handleLogoPick} className="hidden" />
         </div>
+        <p className="mt-1.5 text-[11px] text-foreground/40">JPG or WebP, up to 200KB.</p>
+        {logoError && <p className="mt-1 text-xs text-red-500 dark:text-red-400">{logoError}</p>}
       </div>
 
       <div>

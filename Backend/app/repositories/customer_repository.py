@@ -1,8 +1,12 @@
 # app/repositories/customer_repository.py
 # Raw SQL queries for the customers and customer_notes tables.
 
+from datetime import datetime, timedelta
+
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+
+AI_WINDOW = timedelta(hours=24)
 
 def list_customers(db: Session, business_id: str, *, search: str | None = None) -> list[dict]:
     query = "SELECT * FROM customers WHERE business_id = :business_id"
@@ -55,6 +59,32 @@ def set_name_if_missing(db: Session, customer_id: str, name: str) -> None:
         {"customer_id": customer_id, "name": name},
     )
     db.commit()
+
+
+def is_new_conversation_window(db: Session, customer_id: str, now: datetime) -> bool:
+    """True if this message opens a fresh 24h AI-billing conversation
+    window for this customer, and advances their stored window start to
+    `now` when it does. Mirrors how Meta's own WhatsApp Business Platform
+    prices conversations: the first message opens a 24h window and bills
+    one unit of the plan's AI usage; every other message from that same
+    customer inside that window is free; a message after the window
+    closes opens (and bills) a new one. See ai_usage_service.check_and_increment,
+    the only caller — this only touches customers, never ai_usage."""
+    row = db.execute(
+        text("SELECT ai_window_started_at FROM customers WHERE id = :customer_id"),
+        {"customer_id": customer_id},
+    ).fetchone()
+    started_at = row.ai_window_started_at if row else None
+
+    if started_at is not None and now - started_at < AI_WINDOW:
+        return False
+
+    db.execute(
+        text("UPDATE customers SET ai_window_started_at = :now WHERE id = :customer_id"),
+        {"now": now, "customer_id": customer_id},
+    )
+    db.commit()
+    return True
 
 
 def get_orders_for_customer(db: Session, business_id: str, customer_id: str) -> list[dict]:

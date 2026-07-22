@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, type Variants } from "framer-motion";
-import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { ApiError, adminLogin } from "@/lib/api";
 import { setAdminToken } from "@/lib/adminAuth";
 
@@ -69,9 +69,8 @@ export default function AdminLoginPage() {
         className="w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-6 shadow-2xl sm:p-8"
       >
         <motion.div variants={item} className="flex flex-col items-center text-center">
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#5B4FE9]/15 text-[#7C6FF5]">
-            <ShieldCheck className="h-5 w-5" strokeWidth={2} />
-          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-icon.png" alt="" className="h-11 w-auto" />
           <h1 className="mt-3 text-lg font-bold text-white">Exofe Admin</h1>
           <p className="mt-1 text-xs text-white/40">Internal access only</p>
         </motion.div>

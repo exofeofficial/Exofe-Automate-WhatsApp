@@ -131,3 +131,99 @@ button:disabled {
     animation: none;
   }
 }
+
+/* Dashboard boot loader (recolored Exofe brand version of a Uiverse.io
+   loader by SelfMadeSystem). Keyframes are prefixed "exofe-loader-" so
+   they never collide with Tailwind's own built-in "spin" animation. */
+.exofe-loader-dash {
+  animation:
+    exofe-loader-dash-array 2s ease-in-out infinite,
+    exofe-loader-dash-offset 2s linear infinite;
+}
+
+.exofe-loader-spin {
+  animation:
+    exofe-loader-spin-dash-array 2s ease-in-out infinite,
+    exofe-loader-spin 8s ease-in-out infinite,
+    exofe-loader-dash-offset 2s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes exofe-loader-dash-array {
+  0% {
+    stroke-dasharray: 0 1 359 0;
+  }
+  50% {
+    stroke-dasharray: 0 359 1 0;
+  }
+  100% {
+    stroke-dasharray: 359 1 0 0;
+  }
+}
+
+@keyframes exofe-loader-spin-dash-array {
+  0% {
+    stroke-dasharray: 270 90;
+  }
+  50% {
+    stroke-dasharray: 0 360;
+  }
+  100% {
+    stroke-dasharray: 270 90;
+  }
+}
+
+@keyframes exofe-loader-dash-offset {
+  0% {
+    stroke-dashoffset: 365;
+  }
+  100% {
+    stroke-dashoffset: 5;
+  }
+}
+
+@keyframes exofe-loader-spin {
+  0% {
+    rotate: 0deg;
+  }
+  12.5%,
+  25% {
+    rotate: 270deg;
+  }
+  37.5%,
+  50% {
+    rotate: 540deg;
+  }
+  62.5%,
+  75% {
+    rotate: 810deg;
+  }
+  87.5%,
+  100% {
+    rotate: 1080deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exofe-loader-dash,
+  .exofe-loader-spin {
+    animation: none;
+  }
+}
+
+/* React Flow (Flow Builder page) ships its own light-themed chrome —
+   these override just the bits (controls, minimap) that don't already
+   pick up our surface/foreground tokens, scoped to dashboard dark mode
+   the same way as everything else. */
+.dashboard-dark .react-flow__controls-button {
+  background: var(--surface);
+  border-bottom-color: rgb(255 255 255 / 0.08);
+  fill: var(--foreground);
+  color: var(--foreground);
+}
+.dashboard-dark .react-flow__controls-button:hover {
+  background: rgb(255 255 255 / 0.06);
+}
+.dashboard-dark .react-flow__minimap {
+  background: var(--surface);
+}

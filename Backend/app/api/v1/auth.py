@@ -6,8 +6,10 @@ from sqlalchemy.orm import Session
 from app.core.rate_limit import limiter
 from app.database.session import get_db
 from app.models.auth import (
+    AcceptInviteRequest,
     ForgotPasswordRequest,
     GoogleAuthRequest,
+    InviteDetailsResponse,
     LoginRequest,
     MessageResponse,
     OtpRequestBody,
@@ -146,6 +148,38 @@ def verify_email(request: Request, body: VerifyEmailRequest, db: DbSession):
         raise _handle_auth_error(exc)
 
     return MessageResponse(message="Email verified")
+
+
+# ── GET /auth/invite/{token} ─────────────────────────────────────────────────
+
+@router.get("/invite/{token}", response_model=InviteDetailsResponse)
+@limiter.limit("30/hour")
+def invite_details(request: Request, token: str, db: DbSession):
+    try:
+        details = auth_service.get_invite_details(db, token=token)
+    except AuthError as exc:
+        raise _handle_auth_error(exc)
+
+    return InviteDetailsResponse(**details)
+
+
+# ── POST /auth/accept-invite ─────────────────────────────────────────────────
+
+@router.post("/accept-invite", response_model=TokenResponse)
+@limiter.limit("10/hour")
+def accept_invite(request: Request, body: AcceptInviteRequest, db: DbSession):
+    try:
+        token = auth_service.accept_invite(
+            db,
+            token=body.token,
+            first_name=body.first_name,
+            last_name=body.last_name,
+            password=body.password,
+        )
+    except AuthError as exc:
+        raise _handle_auth_error(exc)
+
+    return TokenResponse(token=token)
 
 
 # ── POST /auth/logout ────────────────────────────────────────────────────────

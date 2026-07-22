@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.core.logger import get_logger
 from app.core.security import create_access_token, hash_password, verify_password
-from app.repositories import subscription_repository, user_repository
+from app.repositories import subscription_repository, team_repository, user_repository
 from app.services import email_service
 
 
@@ -427,3 +427,57 @@ def verify_email(db: Session, *, email: str, code: str) -> None:
     db.commit()
 
     logger.info("Email verified: user=%s", user["id"])
+
+
+# ── Team invites ──────────────────────────────────────────────────────────────
+#
+# Unlike the 6-digit-code flows above, an invite is a persisted DB token
+# (see team_service.invite_member) rather than an in-memory store — it's a
+# "magic link" a person clicks from their email, not a code they type in.
+
+def _get_valid_invite(db: Session, token: str) -> dict:
+    invite = team_repository.get_by_invite_token(db, token)
+    if not invite or invite["status"] != "invited":
+        raise AuthError(message="This invite link is invalid or has already been used", status_code=404)
+
+    expires_at = invite["invite_token_expires_at"]
+    if expires_at and datetime.now(timezone.utc) > expires_at:
+        raise AuthError(message="This invite link has expired — ask for a new one", status_code=404)
+
+    return invite
+
+
+def get_invite_details(db: Session, *, token: str) -> dict:
+    """Read-only lookup for the accept-invite landing page, so it can show
+    "You've been invited to join X as Y" before asking for anything."""
+    invite = _get_valid_invite(db, token)
+    return {
+        "business_name": invite["business_name"],
+        "email": invite["email"],
+        "role": invite["role"],
+    }
+
+
+def accept_invite(db: Session, *, token: str, first_name: str, last_name: str, password: str) -> str:
+    """Complete a team invite — sets the person's name/password, marks
+    them active, and returns a JWT so they land straight in the
+    dashboard, same as signup/login.
+    """
+    invite = _get_valid_invite(db, token)
+    user_id = str(invite["id"])
+
+    user_repository.update_user_fields(
+        db,
+        user_id,
+        first_name=first_name,
+        last_name=last_name,
+        password_hash=hash_password(password),
+        status="active",
+        invite_token=None,
+        accepted_at=datetime.now(timezone.utc).isoformat(),
+    )
+    db.commit()
+
+    logger.info("Invite accepted: user=%s business=%s", user_id, invite["business_id"])
+
+    return create_access_token(user_id, str(invite["business_id"]), invite["role"])

@@ -3,7 +3,15 @@
 # Enforces each plan's AI conversation limit (see the "X conversations/month"
 # copy on the pricing page, src/lib/plans.ts on the frontend).
 #
-# Two separate counters, on purpose:
+# Billing granularity is a conversation, not a message: one unit is only
+# spent the first time a given customer messages within a rolling 24h
+# window (see customer_repository.is_new_conversation_window) — every
+# other message from that same customer inside that window is free. This
+# mirrors how Meta's own WhatsApp Business Platform prices conversations.
+#
+# Two separate counters, on purpose — "window" here is unrelated to the
+# 24h conversation window above, it's this module's own 5-hour rate-limit
+# cooldown:
 #   - window_count: what actually gates the AI. Once it hits the plan's
 #     limit, the AI hands every message to a human for a 5 hour cooldown,
 #     then the window fully resets to 0 and the business gets a fresh
@@ -16,7 +24,7 @@ from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
 
-from app.repositories import ai_usage_repository, subscription_repository
+from app.repositories import ai_usage_repository, customer_repository, subscription_repository
 
 COOLDOWN = timedelta(hours=5)
 
@@ -61,12 +69,16 @@ def get_usage_summary(db: Session, business_id: str) -> dict:
     }
 
 
-def check_and_increment(db: Session, business_id: str) -> bool:
+def check_and_increment(db: Session, business_id: str, customer_id: str) -> bool:
     """Call this once per inbound customer message, right before asking
     the AI for a reply. Returns True if the AI should respond, False if
     this business is over its limit and the message should go to a human
-    instead. Every call that doesn't return early updates the counters,
-    so this should only be called once per message."""
+    instead.
+
+    A message that continues an already-open 24h conversation window for
+    this customer (see customer_repository.is_new_conversation_window) is
+    free — it returns True without touching any of the counters below at
+    all. Only a message that opens a new window can increment or block."""
     usage = ai_usage_repository.get_usage(db, business_id) or ai_usage_repository.create_usage(db, business_id)
     limit = _get_limit(db, business_id)
     now = datetime.now(timezone.utc)
@@ -81,19 +93,10 @@ def check_and_increment(db: Session, business_id: str) -> bool:
         month_count = 0
         month_started_at = now
 
-    if limit is None:
-        month_count += 1
-        ai_usage_repository.save_usage(
-            db,
-            business_id,
-            window_count=window_count,
-            window_started_at=window_started_at,
-            blocked_at=blocked_at,
-            month_count=month_count,
-            month_started_at=month_started_at,
-        )
-        return True
-
+    # blocked_at can only be set when limit is an int (see the
+    # window_count >= limit branch below), so this is a no-op for
+    # unlimited-plan businesses — safe to check before the limit-is-None
+    # branch further down.
     if blocked_at is not None:
         if now - blocked_at >= COOLDOWN:
             blocked_at = None
@@ -110,6 +113,33 @@ def check_and_increment(db: Session, business_id: str) -> bool:
                 month_started_at=month_started_at,
             )
             return False
+
+    if not customer_repository.is_new_conversation_window(db, customer_id, now):
+        # Continues an already-billed conversation — free, but still
+        # persist any month-rollover/cooldown-reset bookkeeping above.
+        ai_usage_repository.save_usage(
+            db,
+            business_id,
+            window_count=window_count,
+            window_started_at=window_started_at,
+            blocked_at=blocked_at,
+            month_count=month_count,
+            month_started_at=month_started_at,
+        )
+        return True
+
+    if limit is None:
+        month_count += 1
+        ai_usage_repository.save_usage(
+            db,
+            business_id,
+            window_count=window_count,
+            window_started_at=window_started_at,
+            blocked_at=blocked_at,
+            month_count=month_count,
+            month_started_at=month_started_at,
+        )
+        return True
 
     if window_count >= limit:
         ai_usage_repository.save_usage(

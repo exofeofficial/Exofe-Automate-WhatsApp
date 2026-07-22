@@ -159,6 +159,24 @@ export function resetPassword(email: string, code: string, newPassword: string) 
   });
 }
 
+// Team invite acceptance — the link from the invite email lands on
+// /accept-invite?token=..., which reads the invite details before asking
+// for a name/password, then logs the new member straight in.
+export type InviteDetails = { businessName: string; email: string; role: string };
+
+// Expected: GET /auth/invite/:token -> 200 { businessName, email, role }
+export function getInviteDetails(token: string) {
+  return request<InviteDetails>(`/auth/invite/${encodeURIComponent(token)}`);
+}
+
+// Expected: POST /auth/accept-invite { token, firstName, lastName, password } -> 200 { token }
+export function acceptInvite(payload: { token: string; firstName: string; lastName: string; password: string }) {
+  return request<{ token: string }>("/auth/accept-invite", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 export type DemoBookingPayload = {
   name: string;
   email: string;

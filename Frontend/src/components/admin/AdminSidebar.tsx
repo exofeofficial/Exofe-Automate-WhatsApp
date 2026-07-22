@@ -11,7 +11,6 @@ import {
   LifeBuoy,
   LogOut,
   ScrollText,
-  ShieldCheck,
   Users,
 } from "lucide-react";
 import { clearAdminToken } from "@/lib/adminAuth";
@@ -40,9 +39,8 @@ export default function AdminSidebar() {
   return (
     <div className="sticky top-0 flex h-screen w-64 flex-col border-r border-white/10 bg-zinc-950">
       <div className="flex items-center gap-2 px-5 py-5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#5B4FE9]/15 text-[#7C6FF5]">
-          <ShieldCheck className="h-4 w-4" strokeWidth={2} />
-        </span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-icon.png" alt="" className="h-8 w-auto" />
         <div>
           <p className="text-sm font-bold text-white">Exofe Admin</p>
           <p className="text-[10px] text-white/35">Internal only</p>

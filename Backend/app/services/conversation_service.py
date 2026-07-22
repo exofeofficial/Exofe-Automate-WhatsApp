@@ -43,6 +43,13 @@ def _active_catalog(db: Session, business_id: str) -> list[dict]:
             )
     return catalog
 
+_CONFIRMATION_WORDS = {"yes", "y", "yeah", "yep", "confirm", "confirmed", "ok", "okay", "haan", "ji", "ji haan"}
+
+
+def _is_explicit_confirmation(message: str) -> bool:
+    return message.strip().lower().strip(".!?") in _CONFIRMATION_WORDS
+
+
 def _best_matching_faq(db: Session, business_id: str, message: str) -> dict | None:
     faqs = ai_repository.list_faqs(db, business_id)
     if not faqs:
@@ -137,8 +144,27 @@ def _continue_draft(
     missing = [] if result.is_complete else ["see next_question"]
     draft_order_repository.update_draft(db, business_id, draft["id"], merged_data, missing)
 
-    if not (result.is_complete and result.confirmed):
+    # The model is sometimes too conservative about setting confirmed=true
+    # on a bare "yes" once every field is already filled — leaving a
+    # customer stuck replying "yes" to the same summary forever is a real
+    # dropped-order risk, so a plain affirmative on an already-complete
+    # draft confirms it deterministically instead of relying on the model
+    # to notice every time.
+    was_already_complete = not draft["missing_fields"]
+    confirmed = result.confirmed or (
+        was_already_complete and result.is_complete and _is_explicit_confirmation(message)
+    )
+
+    if not (result.is_complete and confirmed):
         return result.next_question or "Got it — anything else to add?"
+
+    if not result.confirmed:
+        # Came from the deterministic override above — the model's own
+        # next_question is still its unconfirmed "please reply YES"
+        # phrasing, which would be a confusing thing to show alongside an
+        # order that just got placed. Drop it so _finalize_order falls
+        # back to its own real, total-based confirmation message.
+        result = result.model_copy(update={"next_question": None})
 
     return _finalize_order(db, business_id, customer_id, draft["id"], result, merged_data)
 
@@ -150,7 +176,7 @@ def handle_inbound_message(db: Session, business_id: str, customer_id: str, mess
     Returns None when this business has hit its plan's monthly AI
     conversation limit (see ai_usage_service) — no automated reply
     should be sent, a human needs to pick this conversation up."""
-    if not ai_usage_service.check_and_increment(db, business_id):
+    if not ai_usage_service.check_and_increment(db, business_id, customer_id):
         return None
 
     settings = ai_service.get_settings(db, business_id)

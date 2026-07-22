@@ -14,6 +14,7 @@ import {
   type ProductInput,
   type ProductStatus,
 } from "@/lib/api";
+import { validateImageFile } from "@/lib/imageValidation";
 
 const MAX_IMAGES = 5;
 const MAX_OPTIONS = 2;
@@ -242,6 +243,7 @@ export default function ProductFormPage({ productId }: { productId?: string }) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [activeImage, setActiveImage] = useState(0);
+  const [imageError, setImageError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -267,8 +269,21 @@ export default function ProductFormPage({ productId }: { productId?: string }) {
     const files = Array.from(e.target.files ?? []).slice(0, MAX_IMAGES - form.images.length);
     if (files.length === 0) return;
 
+    const rejections: string[] = [];
+    const validFiles = files.filter((file) => {
+      const error = validateImageFile(file);
+      if (error) rejections.push(error);
+      return !error;
+    });
+    setImageError(rejections.length > 0 ? rejections.join(" ") : null);
+
+    if (validFiles.length === 0) {
+      e.target.value = "";
+      return;
+    }
+
     Promise.all(
-      files.map(
+      validFiles.map(
         (file) =>
           new Promise<string>((resolve) => {
             const reader = new FileReader();
@@ -689,6 +704,8 @@ export default function ProductFormPage({ productId }: { productId?: string }) {
                 </button>
               )}
             </div>
+            <p className="text-[11px] text-foreground/40">JPG or WebP, up to 200KB each.</p>
+            {imageError && <p className="text-xs text-red-500 dark:text-red-400">{imageError}</p>}
             {form.images.length > 0 && (
               <button
                 type="button"
@@ -698,7 +715,7 @@ export default function ProductFormPage({ productId }: { productId?: string }) {
                 Remove this photo
               </button>
             )}
-            <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImagePick} className="hidden" />
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/webp" multiple onChange={handleImagePick} className="hidden" />
           </Card>
 
           <Card title="Category">

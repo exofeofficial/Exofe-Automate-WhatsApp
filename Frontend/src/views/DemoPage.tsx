@@ -157,23 +157,8 @@ export default function DemoPage() {
       <div className="mx-auto w-full max-w-4xl">
         <motion.div initial="hidden" animate="show" variants={container}>
           <motion.div variants={item} className="flex items-center gap-3">
-            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-              <path
-                d="M4 18L12 10L16 14L20 10L28 18"
-                stroke="#5B4FE9"
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M4 24L12 16L16 20L20 16L28 24"
-                stroke="#5B4FE9"
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                opacity="0.5"
-              />
-            </svg>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo-icon.png" alt="" className="h-7 w-auto" />
             <h1 className="text-2xl font-bold text-foreground sm:text-3xl">Book your free demo</h1>
           </motion.div>
 

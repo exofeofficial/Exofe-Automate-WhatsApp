@@ -4,7 +4,6 @@ import { useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, useScroll, useTransform, type Variants } from "framer-motion";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { ArrowRight, Play } from "lucide-react";
 
@@ -15,9 +14,13 @@ const container: Variants = {
   show: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
 };
 
+// Content stays fully opaque even before hydration/animation kicks in — only
+// a subtle slide-up plays once JS is ready. Fading from opacity: 0 here left
+// the hero blank (just the background sparkles) for however long hydration
+// took on a cold load.
 const item: Variants = {
-  hidden: { y: 28, opacity: 0 },
-  show: { y: 0, opacity: 1, transition: { duration: 0.7, ease: EASE } },
+  hidden: { y: 14, opacity: 1 },
+  show: { y: 0, opacity: 1, transition: { duration: 0.5, ease: EASE } },
 };
 
 /* fixed star positions */
@@ -184,42 +187,35 @@ export default function Hero() {
   const yRight = useTransform(scrollYProgress, [0, 1], [0, -90]);
 
   useLayoutEffect(() => {
-    gsap.registerPlugin(ScrollTrigger, SplitText);
+    gsap.registerPlugin(SplitText);
 
     let split: SplitText | undefined;
 
+    // Plays directly on mount instead of behind a ScrollTrigger — the hero
+    // heading is always in view on load anyway, and gating it on a scroll
+    // measurement was the thing leaving it stuck invisible (opacity: 0 from
+    // the `fromTo` below) whenever that measurement raced with late-loading
+    // fonts on a cold reload.
     const ctx = gsap.context(() => {
       split = new SplitText(headingRef.current, { type: "words, chars", wordsClass: "split-word" });
       gsap.set(split.chars, { transformPerspective: 400 });
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          // fires automatically on load (hero heading already sits within
-          // the top 85% of the viewport at scroll 0), and re-triggers 
-          // reverses if it's scrolled out of and back into view.
-          trigger: headingRef.current,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
-        },
-      });
-
-      tl.fromTo(
-        split.chars,
-        { skewX: 30, opacity: 0 },
-        { skewX: 0, opacity: 1, ease: "none", stagger: { each: 0.5 / split.chars.length, from: "start" } }
-      ).fromTo(
-        ".reveal-word-para",
-        { color: PARA_DIM },
-        { color: PARA_FULL, stagger: 0.025, ease: "none" },
-        "<+=0.3"
-      );
+      gsap
+        .timeline()
+        .fromTo(
+          split.chars,
+          { skewX: 30, opacity: 0 },
+          { skewX: 0, opacity: 1, ease: "none", stagger: { each: 0.5 / split.chars.length, from: "start" } }
+        )
+        .fromTo(
+          ".reveal-word-para",
+          { color: PARA_DIM },
+          { color: PARA_FULL, stagger: 0.025, ease: "none" },
+          "<+=0.3"
+        );
     }, sectionRef);
 
-    // fonts / late layout shifts can throw off measurements taken too early
-    const refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 300);
-
     return () => {
-      clearTimeout(refreshTimer);
       ctx.revert();
       split?.revert();
     };

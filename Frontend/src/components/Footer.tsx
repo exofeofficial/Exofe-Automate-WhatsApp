@@ -1,9 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, type Variants } from "framer-motion";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+
+// fixed navbar height + a little breathing room, same offset the navbar
+// itself uses so a footer scroll lands in the same spot
+const NAVBAR_OFFSET = 84;
 
 const container: Variants = {
   hidden: {},
@@ -16,11 +21,11 @@ const item: Variants = {
 };
 
 const MENU_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "Features", href: "/features" },
-  { label: "Why Choose", href: "/why-choose" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "FAQ", href: "/faq" },
+  { label: "Home", href: "/#home" },
+  { label: "Features", href: "/#features" },
+  { label: "Why Choose", href: "/#why-choose" },
+  { label: "Pricing", href: "/#pricing" },
+  { label: "FAQ", href: "/#faq" },
 ];
 
 const COMPANY_LINKS = [
@@ -61,6 +66,22 @@ function LogoMark() {
 }
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // On the home page, scroll smoothly to the section like the navbar does.
+  // On any other page, let the Link navigate to "/#section" normally and
+  // the browser lands on that section once the home page loads.
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (pathname !== "/") return;
+    const hash = href.slice(1);
+    const target = document.querySelector(hash);
+    if (target) {
+      e.preventDefault();
+      const top = target.getBoundingClientRect().top + window.scrollY - NAVBAR_OFFSET;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+  };
+
   return (
     <footer className="relative overflow-hidden border-t border-black/[.06] bg-white px-4 pt-16 sm:px-6">
       <motion.div
@@ -87,6 +108,7 @@ export default function Footer() {
               <li key={l.label}>
                 <Link
                   href={l.href}
+                  onClick={(e) => scrollToSection(e, l.href)}
                   className="text-sm text-foreground/60 transition-colors duration-200 hover:text-[#5B4FE9]"
                 >
                   {l.label}
@@ -116,16 +138,15 @@ export default function Footer() {
           <p className="text-sm font-bold text-foreground">Contact</p>
           <ul className="mt-4 flex flex-col gap-3 text-sm text-foreground/60">
             <li>
-              <a href="mailto:hello@exofe.com" className="transition-colors duration-200 hover:text-[#5B4FE9]">
-                hello@exofe.com
+              <a href="mailto:support@exofe.com" className="transition-colors duration-200 hover:text-[#5B4FE9]">
+                support@exofe.com
               </a>
             </li>
             <li>
-              <a href="tel:+923001234567" className="transition-colors duration-200 hover:text-[#5B4FE9]">
-                +92 300 1234567
+              <a href="tel:+923324835793" className="transition-colors duration-200 hover:text-[#5B4FE9]">
+                +92 332 4835793
               </a>
             </li>
-            <li className="max-w-[14rem]">Gulberg III, Lahore, Pakistan</li>
           </ul>
         </motion.div>
       </motion.div>

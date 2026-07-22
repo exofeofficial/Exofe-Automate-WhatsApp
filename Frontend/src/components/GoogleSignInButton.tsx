@@ -38,7 +38,7 @@ export default function GoogleSignInButton({
         type: "standard",
         theme: "outline",
         size: "large",
-        shape: "pill",
+        shape: "rectangular",
         text,
         width: container.offsetWidth || 320,
       });

@@ -267,7 +267,7 @@ export default function SignupPage() {
             <button
               type="button"
               onClick={() => handleSocial("facebook")}
-              className="flex items-center justify-center gap-2 rounded-xl border border-black/[.1] py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-black/[.03]"
+              className="flex items-center justify-center gap-2 rounded border border-black/[.1] py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-black/[.03]"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="#1877F2">
                 <path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.7 4.53-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.89v2.26h3.32l-.53 3.49h-2.79V24C19.61 23.1 24 18.1 24 12.07Z" />

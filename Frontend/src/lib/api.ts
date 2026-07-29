@@ -703,6 +703,33 @@ export function getAdminUsers() {
   return adminRequest<{ users: AdminUser[] }>("/admin/users");
 }
 
+export type AdminSubscription = {
+  id: string;
+  businessId: string;
+  businessName: string | null;
+  plan: "trial" | "starter" | "growth" | "business";
+  status: "trialing" | "active" | "past_due" | "canceled";
+  amount: number;
+  currentPeriodEnd: string;
+};
+
+// Expected backend contract: GET /admin/subscriptions -> 200 { subscriptions: AdminSubscription[] }
+export function getAdminSubscriptions() {
+  return adminRequest<{ subscriptions: AdminSubscription[] }>("/admin/subscriptions");
+}
+
+// Manually puts a business on a paid plan — for marking a manual/offline
+// payment (bank transfer, JazzCash, etc.) as active until a real payment
+// gateway is wired up.
+// Expected backend contract: PATCH /admin/subscriptions/{businessId}/activate
+// { plan, amount } -> 200 { ...AdminSubscription }
+export function activateSubscription(businessId: string, payload: { plan: "starter" | "growth" | "business"; amount: number }) {
+  return adminRequest<AdminSubscription>(`/admin/subscriptions/${businessId}/activate`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
 // ── AI Assistant ─────────────────────────────────────────────────────────────
 
 export type AITone = "friendly" | "formal" | "brief";

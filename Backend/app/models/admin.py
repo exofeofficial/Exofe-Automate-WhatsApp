@@ -96,6 +96,12 @@ class SubscriptionRow(BaseModel):
 class SubscriptionsResponse(BaseModel):
     subscriptions: list[SubscriptionRow]
 
+
+class ActivateSubscriptionRequest(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+    plan: Literal["starter", "growth", "business"]
+    amount: float
+
 # Admin revenue
 class RevenueByPlan(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)

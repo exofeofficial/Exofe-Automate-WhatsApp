@@ -17,24 +17,25 @@ from app.repositories import business_repository
 from app.services import admin_service
 
 from app.models.admin import (
-    AdminUserRow, 
+    AdminUserRow,
     ClientRow,
     ClientDetail,
-    ClientsResponse, 
-    ClientDetailResponse, 
+    ClientsResponse,
+    ClientDetailResponse,
     UpdateClientStatusRequest,
-    UpdateClientStatusResponse, 
-    AdminUsersResponse, 
+    UpdateClientStatusResponse,
+    AdminUsersResponse,
     AdminLogsResponse,
     AdminLogRow,
-    SubscriptionRow, 
-    SubscriptionsResponse, 
-    RevenueByPlan, 
-    RecentPayment, 
-    RevenueResponse, 
-    FeatureFlagRow, 
-    FeatureFlagsResponse, 
-    SetFeatureFlagRequest, 
+    SubscriptionRow,
+    SubscriptionsResponse,
+    ActivateSubscriptionRequest,
+    RevenueByPlan,
+    RecentPayment,
+    RevenueResponse,
+    FeatureFlagRow,
+    FeatureFlagsResponse,
+    SetFeatureFlagRequest,
     FeatureFlagResponse
 )
 router = APIRouter(tags=["Admin"], prefix="/admin")
@@ -187,6 +188,27 @@ def list_subscriptions(
             )
             for row in rows
         ]
+    )
+
+# ── PATCH /admin/subscriptions/{business_id}/activate ────────────────────────
+@router.patch("/subscriptions/{business_id}/activate", response_model=SubscriptionRow)
+def activate_subscription(
+    business_id: str,
+    body: ActivateSubscriptionRequest,
+    db: Annotated[Session, Depends(get_db)],
+    admin: Annotated[CurrentUser, Depends(require_admin)],
+) -> SubscriptionRow:
+    row = admin_service.activate_subscription(
+        db, admin_id=admin.user_id, business_id=business_id, plan=body.plan, amount=body.amount
+    )
+    return SubscriptionRow(
+        id=str(row["id"]),
+        business_id=str(row["business_id"]),
+        business_name=row["business_name"],
+        plan=row["plan"],
+        status=row["status"],
+        amount=float(row["amount"]),
+        current_period_end=row["current_period_end"].isoformat(),
     )
 
 # ── GET /admin/revenue ───────────────────────────────────────────────────────

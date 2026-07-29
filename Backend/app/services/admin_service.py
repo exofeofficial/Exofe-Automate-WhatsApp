@@ -2,7 +2,7 @@
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import AppError
-from app.repositories import business_repository
+from app.repositories import business_repository, subscription_repository
 
 
 # ── Clients ──────────────────────────────────────────────────────────────────
@@ -34,6 +34,17 @@ def update_client_status(db: Session, *, admin_id: str, business_id: str, status
 
 def list_subscriptions(db: Session) -> list[dict]:
     return business_repository.list_subscriptions(db)
+
+
+def activate_subscription(db: Session, *, admin_id: str, business_id: str, plan: str, amount: float) -> dict:
+    """Manually put a business on a paid plan — no payment gateway exists
+    yet, so this is how a bank-transfer/JazzCash-style manual payment
+    gets reflected until a real one is wired up."""
+    row = subscription_repository.activate_subscription(db, business_id=business_id, plan=plan, amount=amount)
+    business_repository.log_admin_action(
+        db, admin_id=admin_id, action=f"manually activated the '{plan}' plan", target_business_id=business_id
+    )
+    return row
 
 
 def get_revenue_summary(db: Session) -> dict:

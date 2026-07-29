@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { FacebookMark, WhatsAppIcon } from "@/components/dashboard/IntegrationIcons";
+import { ApiError, connectWhatsApp } from "@/lib/api";
+import { listenForWhatsAppSignupData, loadFacebookScript, type WhatsAppSignupData } from "@/lib/facebook";
 
 const PHASES = [
   "Opening Facebook login...",
@@ -12,23 +14,9 @@ const PHASES = [
   "Bringing you back to Exofe...",
 ];
 
-// This is the default, recommended path. Meta's Embedded Signup handles
-// login, business selection, phone number selection, and permissions
-// inside its own popup, the business owner never sees or copies a single
-// technical value.
-//
-// Backend developer: the real button calls the Facebook JS SDK,
-// FB.login({ config_id: WHATSAPP_CONFIG_ID, response_type: "code",
-// override_default_response_type: true }), then you exchange the
-// returned code server side for a WABA ID, phone number ID, and a
-// permanent access token through the Graph API, and POST the result to
-// /integrations/whatsapp/connect. Nothing below the button is real,
-// it is just standing in for that popup while there is no backend yet.
-//
-// The webhook itself does not need any extra setup per business here,
-// it is one shared URL for the whole app (see src/lib/whatsapp.ts), Meta
-// just starts sending this business's events to it as soon as the
-// connection above succeeds and the phone number is subscribed.
+const META_APP_ID = process.env.NEXT_PUBLIC_META_APP_ID;
+const WHATSAPP_CONFIG_ID = process.env.NEXT_PUBLIC_WHATSAPP_CONFIG_ID;
+
 export default function Step2EmbeddedConnect({
   onConnected,
   onUseManualSetup,
@@ -38,17 +26,69 @@ export default function Step2EmbeddedConnect({
 }) {
   const [state, setState] = useState<"idle" | "connecting" | "done">("idle");
   const [phase, setPhase] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleContinueWithFacebook = () => {
+  const handleContinueWithFacebook = async () => {
+    if (!META_APP_ID || !WHATSAPP_CONFIG_ID) {
+      setError("WhatsApp Embedded Signup isn't configured yet — use manual setup below instead.");
+      return;
+    }
+
+    setError(null);
     setState("connecting");
     setPhase(0);
-    PHASES.forEach((_, i) => {
-      setTimeout(() => setPhase(i), i * 700);
-    });
-    setTimeout(() => {
+    const advancePhase = PHASES.map((_, i) => setTimeout(() => setPhase(i), i * 700));
+
+    try {
+      await loadFacebookScript(META_APP_ID);
+
+      // Meta posts the phone_number_id/waba_id the user picked via
+      // window.postMessage — FB.login()'s own callback only ever hands
+      // back the authorization code, so both are captured together below.
+      let signupData: WhatsAppSignupData | null = null;
+      const stopListening = listenForWhatsAppSignupData((data) => {
+        signupData = data;
+      });
+
+      const code = await new Promise<string>((resolve, reject) => {
+        window.FB!.login(
+          (response) => {
+            if (response.status === "connected" && response.authResponse?.code) {
+              resolve(response.authResponse.code);
+            } else {
+              reject(new Error("Facebook login was cancelled or didn't complete."));
+            }
+          },
+          { config_id: WHATSAPP_CONFIG_ID, response_type: "code", override_default_response_type: true }
+        );
+      });
+
+      // The postMessage event can arrive slightly after FB.login()'s
+      // callback — give it a brief moment before giving up on it.
+      for (let i = 0; i < 20 && !signupData; i++) {
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      stopListening();
+
+      if (!signupData) {
+        throw new Error("Didn't receive your business/phone number selection from Meta — please try again.");
+      }
+
+      await connectWhatsApp({
+        code,
+        phoneNumberId: (signupData as WhatsAppSignupData).phone_number_id,
+        businessAccountId: (signupData as WhatsAppSignupData).waba_id,
+      });
+
+      advancePhase.forEach(clearTimeout);
+      setPhase(PHASES.length - 1);
       setState("done");
       setTimeout(onConnected, 700);
-    }, PHASES.length * 700);
+    } catch (err) {
+      advancePhase.forEach(clearTimeout);
+      setState("idle");
+      setError(err instanceof ApiError ? err.message : err instanceof Error ? err.message : "Something went wrong.");
+    }
   };
 
   if (state === "connecting") {
@@ -83,6 +123,8 @@ export default function Step2EmbeddedConnect({
           business.
         </p>
       </div>
+
+      {error && <p className="max-w-xs text-xs text-red-500 dark:text-red-400">{error}</p>}
 
       <button
         type="button"

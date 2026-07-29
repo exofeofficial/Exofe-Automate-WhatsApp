@@ -62,6 +62,35 @@ async function adminRequest<T>(path: string, options?: RequestInit): Promise<T> 
   return res.status === 204 ? (undefined as T) : res.json();
 }
 
+// ── WhatsApp integration ─────────────────────────────────────────────────────
+// The webhook itself is one shared URL Meta calls directly, nothing here.
+// These are what the dashboard's Connect WhatsApp wizard talks to.
+
+export type WhatsAppConnectionStatus = {
+  connected: boolean;
+  whatsappNumber: string | null;
+  connectedAt: string | null;
+};
+
+export function getWhatsAppConnectionStatus() {
+  return request<WhatsAppConnectionStatus>("/integrations/whatsapp/status");
+}
+
+export type ConnectWhatsAppPayload =
+  | { code: string; phoneNumberId: string; businessAccountId: string }
+  | { accessToken: string; phoneNumberId: string; businessAccountId: string };
+
+export function connectWhatsApp(payload: ConnectWhatsAppPayload) {
+  return request<WhatsAppConnectionStatus>("/integrations/whatsapp/connect", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function disconnectWhatsApp() {
+  return request<WhatsAppConnectionStatus>("/integrations/whatsapp/disconnect", { method: "POST" });
+}
+
 // Waitlist / early-access signup (CTA section email form)
 // Expected backend contract: POST /waitlist { email } -> 200 { message }
 export function joinWaitlist(email: string) {

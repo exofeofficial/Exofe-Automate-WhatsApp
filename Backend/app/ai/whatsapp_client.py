@@ -4,33 +4,39 @@ import hmac
 import httpx
 
 from app.config import settings
+from app.core.exceptions import AppError
 from app.core.logger import get_logger
 
 logger = get_logger(__name__)
 
 GRAPH_API_VERSION = "v21.0"
+GRAPH_API_BASE = f"https://graph.facebook.com/{GRAPH_API_VERSION}"
 
 
-def send_text_message(to: str, text: str) -> None:
+def send_text_message(to: str, text: str, *, phone_number_id: str | None = None, access_token: str | None = None) -> None:
     """Send a plain-text WhatsApp message via the Cloud API.
 
-    Uses the platform-level token/phone number id — fine while only
-    Exofe's own WhatsApp number is connected. Once real tenants connect
-    their own numbers via Embedded Signup, this needs to take a
-    per-business token/phone_number_id instead of the global settings.
+    Takes the sending business's own phone_number_id/access_token once a
+    business has connected via Embedded Signup or manual setup. Falls
+    back to the platform-level settings values so Exofe's own
+    already-working connection (set up before per-business columns
+    existed) keeps working unchanged.
     """
-    if not settings.whatsapp_cloud_api_token or not settings.whatsapp_phone_number_id:
-        logger.error("WhatsApp send skipped: WHATSAPP_CLOUD_API_TOKEN or WHATSAPP_PHONE_NUMBER_ID not configured")
+    phone_number_id = phone_number_id or settings.whatsapp_phone_number_id
+    access_token = access_token or settings.whatsapp_cloud_api_token
+
+    if not access_token or not phone_number_id:
+        logger.error("WhatsApp send skipped: no access token / phone number id available")
         return
 
-    url = f"https://graph.facebook.com/{GRAPH_API_VERSION}/{settings.whatsapp_phone_number_id}/messages"
+    url = f"{GRAPH_API_BASE}/{phone_number_id}/messages"
     payload = {
         "messaging_product": "whatsapp",
         "to": to,
         "type": "text",
         "text": {"body": text},
     }
-    headers = {"Authorization": f"Bearer {settings.whatsapp_cloud_api_token}"}
+    headers = {"Authorization": f"Bearer {access_token}"}
 
     try:
         response = httpx.post(url, json=payload, headers=headers, timeout=10)
@@ -52,3 +58,81 @@ def verify_signature(payload_body: bytes, signature_header: str | None) -> bool:
 
     expected = hmac.new(settings.whatsapp_app_secret.encode(), payload_body, hashlib.sha256).hexdigest()
     return hmac.compare_digest(expected, signature_header.removeprefix("sha256="))
+
+
+def _graph_get(path: str, params: dict) -> dict:
+    try:
+        response = httpx.get(f"{GRAPH_API_BASE}/{path}", params=params, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except httpx.HTTPError as e:
+        logger.error(f"Graph API call to {path} failed: {e}")
+        raise AppError(400, "Meta rejected that request — the code may have expired, try connecting again.")
+
+
+def exchange_code_for_token(code: str) -> str:
+    """Embedded Signup hands the frontend a short-lived authorization
+    code, never a token — this is the server-side exchange for a
+    short-lived user access token."""
+    if not settings.whatsapp_app_id or not settings.whatsapp_app_secret:
+        raise AppError(500, "WhatsApp integration isn't fully configured on the server yet")
+
+    data = _graph_get(
+        "oauth/access_token",
+        {
+            "client_id": settings.whatsapp_app_id,
+            "client_secret": settings.whatsapp_app_secret,
+            "code": code,
+        },
+    )
+    return data["access_token"]
+
+
+def exchange_for_long_lived_token(short_lived_token: str) -> str:
+    """Short-lived tokens expire in about an hour — swap for one that
+    lasts ~60 days before storing it. (Full non-expiring System User
+    tokens need a Business Manager step beyond Embedded Signup itself;
+    60-day tokens are the right default for now.)"""
+    data = _graph_get(
+        "oauth/access_token",
+        {
+            "grant_type": "fb_exchange_token",
+            "client_id": settings.whatsapp_app_id,
+            "client_secret": settings.whatsapp_app_secret,
+            "fb_exchange_token": short_lived_token,
+        },
+    )
+    return data["access_token"]
+
+
+def get_phone_number_details(phone_number_id: str, access_token: str) -> dict:
+    """Fetch the human-readable number for a phone_number_id — this is
+    what the webhook later matches inbound messages against, Meta's
+    Embedded Signup postMessage event doesn't include it directly."""
+    try:
+        response = httpx.get(
+            f"{GRAPH_API_BASE}/{phone_number_id}",
+            params={"fields": "display_phone_number", "access_token": access_token},
+            timeout=10,
+        )
+        response.raise_for_status()
+        return response.json()
+    except httpx.HTTPError as e:
+        logger.error(f"Failed to fetch phone number details for {phone_number_id}: {e}")
+        raise AppError(400, "Couldn't verify that phone number with Meta.")
+
+
+def subscribe_app_to_waba(waba_id: str, access_token: str) -> None:
+    """Tells Meta to start sending this WhatsApp Business Account's
+    events to Exofe's webhook — without this, a connected number never
+    actually delivers messages to us."""
+    try:
+        response = httpx.post(
+            f"{GRAPH_API_BASE}/{waba_id}/subscribed_apps",
+            params={"access_token": access_token},
+            timeout=10,
+        )
+        response.raise_for_status()
+    except httpx.HTTPError as e:
+        logger.error(f"Failed to subscribe app to WABA {waba_id}: {e}")
+        raise AppError(400, "Connected, but Meta didn't confirm the webhook subscription — try reconnecting.")

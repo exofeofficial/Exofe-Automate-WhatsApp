@@ -1,15 +1,16 @@
 from fastapi import APIRouter
 from app.api.v1 import (
-    whatsapp, 
-    ai, 
-    admin, 
-    auth, 
-    billing, 
-    customers, 
+    whatsapp,
+    integrations,
+    ai,
+    admin,
+    auth,
+    billing,
+    customers,
     dashboard,
     marketing,
-    orders, 
-    products, 
+    orders,
+    products,
     settings,
     team,
     automation
@@ -17,6 +18,7 @@ from app.api.v1 import (
 router = APIRouter()
 
 router.include_router(whatsapp.router)
+router.include_router(integrations.router)
 router.include_router(ai.router)
 router.include_router(admin.router)
 router.include_router(auth.router)

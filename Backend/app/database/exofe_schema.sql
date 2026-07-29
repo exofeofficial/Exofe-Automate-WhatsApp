@@ -67,6 +67,9 @@ CREATE TABLE businesses (
     logo_url                TEXT,                  -- stored in Cloudflare R2
     whatsapp_number         TEXT,                  -- NULL until connected
     whatsapp_connected_at   TIMESTAMPTZ,           -- NULL until first successful connection
+    whatsapp_phone_number_id TEXT,                 -- Meta's phone number id, needed to send messages
+    whatsapp_waba_id       TEXT,                   -- WhatsApp Business Account id, needed to subscribe the webhook
+    whatsapp_access_token  TEXT,                   -- per-tenant permanent token from Embedded Signup/manual setup
     delivery_charge         NUMERIC(10,2) NOT NULL DEFAULT 0,   -- flat fee per order
     delivery_areas          TEXT,
     delivery_estimated_time TEXT,

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check, Eye, EyeOff, Loader2 } from "lucide-react";
+import { ApiError, connectWhatsApp } from "@/lib/api";
 import type { WhatsAppCredentials } from "./types";
 
 // Backend developer: the webhookVerifyToken entered here is per business,
@@ -62,18 +63,20 @@ export default function Step2ConnectWhatsApp({
   const [errors, setErrors] = useState<Partial<Record<keyof WhatsAppCredentials, string>>>({});
   const [reveal, setReveal] = useState<Partial<Record<keyof WhatsAppCredentials, boolean>>>({});
   const [testState, setTestState] = useState<"idle" | "testing" | "success">("idle");
+  const [testError, setTestError] = useState<string | null>(null);
 
   const setField = (key: keyof WhatsAppCredentials, val: string) => {
     onChange({ ...value, [key]: val });
     setErrors((e) => ({ ...e, [key]: undefined }));
     setTestState("idle");
+    setTestError(null);
   };
 
-  // Backend developer: this should call POST /integrations/whatsapp/test
-  // with these five values, which does a real Graph API call server side.
-  // Access tokens should never be validated or stored from the browser
-  // directly, that request has to go through your backend.
-  const handleTestConnection = () => {
+  // Validates the credentials against Meta for real: the backend fetches
+  // this phone number's details with the given token, subscribes the
+  // webhook, and only then saves the connection — so "success" here means
+  // it's genuinely connected, not just that the fields were filled in.
+  const handleTestConnection = async () => {
     const next: Partial<Record<keyof WhatsAppCredentials, string>> = {};
     FIELDS.forEach((f) => {
       if (!value[f.key].trim()) next[f.key] = "Required";
@@ -82,7 +85,18 @@ export default function Step2ConnectWhatsApp({
     if (Object.keys(next).length > 0) return;
 
     setTestState("testing");
-    setTimeout(() => setTestState("success"), 1300);
+    setTestError(null);
+    try {
+      await connectWhatsApp({
+        accessToken: value.accessToken,
+        phoneNumberId: value.phoneNumberId,
+        businessAccountId: value.businessAccountId,
+      });
+      setTestState("success");
+    } catch (err) {
+      setTestState("idle");
+      setTestError(err instanceof ApiError ? err.message : "Couldn't verify these details with Meta.");
+    }
   };
 
   return (
@@ -122,6 +136,8 @@ export default function Step2ConnectWhatsApp({
           )}
         </div>
       ))}
+
+      {testError && <p className="text-xs text-red-500 dark:text-red-400">{testError}</p>}
 
       <button
         type="button"

@@ -163,6 +163,63 @@ def get_business_by_whatsapp_number(db: Session, whatsapp_number: str) -> dict |
     return dict(row._mapping) if row else None
 
 
+def update_whatsapp_connection(
+    db: Session,
+    business_id: str,
+    *,
+    whatsapp_number: str,
+    phone_number_id: str,
+    waba_id: str,
+    access_token: str,
+) -> dict:
+    """Saves this business's own WhatsApp connection — called once
+    Embedded Signup or the manual setup form hands back a working
+    phone_number_id/waba_id/access_token. whatsapp_connected_at is what
+    the dashboard checks to know setup is done."""
+    row = db.execute(
+        text("""
+            UPDATE businesses
+            SET whatsapp_number = :whatsapp_number,
+                whatsapp_phone_number_id = :phone_number_id,
+                whatsapp_waba_id = :waba_id,
+                whatsapp_access_token = :access_token,
+                whatsapp_connected_at = NOW()
+            WHERE id = :business_id
+            RETURNING *
+        """),
+        {
+            "business_id": business_id,
+            "whatsapp_number": whatsapp_number,
+            "phone_number_id": phone_number_id,
+            "waba_id": waba_id,
+            "access_token": access_token,
+        },
+    ).fetchone()
+    db.commit()
+    return dict(row._mapping)
+
+
+def clear_whatsapp_connection(db: Session, business_id: str) -> dict:
+    """Disconnects — clears the stored credentials so no further messages
+    get sent under this business's name, but keeps the row (and its order
+    history) intact."""
+    row = db.execute(
+        text("""
+            UPDATE businesses
+            SET whatsapp_number = NULL,
+                whatsapp_phone_number_id = NULL,
+                whatsapp_waba_id = NULL,
+                whatsapp_access_token = NULL,
+                whatsapp_connected_at = NULL
+            WHERE id = :business_id
+            RETURNING *
+        """),
+        {"business_id": business_id},
+    ).fetchone()
+    db.commit()
+    return dict(row._mapping)
+
+
 _BUSINESS_ALLOWED_FIELDS = frozenset({
     "name", "industry", "description", "support_email", "support_phone",
     "logo_url", "whatsapp_number", "whatsapp_connected_at",

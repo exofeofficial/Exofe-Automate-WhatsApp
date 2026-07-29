@@ -8,10 +8,14 @@ class Settings(BaseSettings):
     whatsapp_webhook_verify_token: str | None = None
     whatsapp_cloud_api_token: str | None = None
     whatsapp_phone_number_id: str | None = None
-    # Meta App Secret (App Dashboard > Settings > Basic) — used to verify
-    # webhook POSTs actually came from Meta. Optional so the webhook still
+    # Meta App Secret (App Dashboard > Settings > Basic) — used both to
+    # verify webhook POSTs came from Meta, and to exchange an Embedded
+    # Signup code for an access token. Optional so the webhook still
     # works before this is set up, just without that check.
     whatsapp_app_secret: str | None = None
+    # Meta App ID — needed alongside the app secret for the Embedded
+    # Signup code exchange.
+    whatsapp_app_id: str | None = None
     r2_access_key_id: str | None = None
     r2_secret_access_key: str | None = None
     r2_bucket_name: str | None = None

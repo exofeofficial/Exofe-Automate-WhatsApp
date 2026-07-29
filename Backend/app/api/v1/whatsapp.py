@@ -1,8 +1,7 @@
 # app/api/v1/whatsapp.py
-# Endpoints: /whatsapp/webhook (live), /whatsapp/connect, /whatsapp/status,
-# /whatsapp/disconnect, /whatsapp/messages (not yet implemented — the
-# frontend's Connect WhatsApp wizard is still a mock, see
-# Step2EmbeddedConnect.tsx)
+# Meta-facing webhook only — one shared URL for every connected business.
+# Endpoints: GET /whatsapp/webhook (verify), POST /whatsapp/webhook (events).
+# Business-facing connect/status/disconnect live in app/api/v1/integrations.py.
 
 from typing import Annotated
 
@@ -72,6 +71,11 @@ async def receive_webhook(request: Request, db: Annotated[Session, Depends(get_d
                 customer = customer_repository.get_or_create_by_whatsapp(db, business["id"], sender, name)
                 reply = handle_inbound_message(db, business["id"], customer["id"], text_body)
                 if reply:
-                    send_text_message(sender, reply)
+                    send_text_message(
+                        sender,
+                        reply,
+                        phone_number_id=business["whatsapp_phone_number_id"],
+                        access_token=business["whatsapp_access_token"],
+                    )
 
     return {"status": "received"}

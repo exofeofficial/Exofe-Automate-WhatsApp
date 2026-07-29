@@ -147,6 +147,22 @@ def get_business_by_id(db: Session, business_id: str) -> dict | None:
     return dict(row._mapping) if row else None
 
 
+def get_business_by_whatsapp_number(db: Session, whatsapp_number: str) -> dict | None:
+    """Fetch the business connected to this WhatsApp number, used by the
+    webhook to route an inbound message to its tenant. Compares
+    digits-only so formatting differences (+92 vs 92, spaces, dashes)
+    between what's stored and what Meta sends don't cause a silent miss."""
+    row = db.execute(
+        text("""
+            SELECT * FROM businesses
+            WHERE regexp_replace(whatsapp_number, '[^0-9]', '', 'g')
+                = regexp_replace(:number, '[^0-9]', '', 'g')
+        """),
+        {"number": whatsapp_number},
+    ).fetchone()
+    return dict(row._mapping) if row else None
+
+
 _BUSINESS_ALLOWED_FIELDS = frozenset({
     "name", "industry", "description", "support_email", "support_phone",
     "logo_url", "whatsapp_number", "whatsapp_connected_at",

@@ -312,6 +312,21 @@ def handle_inbound_message(db: Session, business_id: str, customer_id: str, mess
     business = user_repository.get_business_by_id(db, business_id)
     draft = draft_order_repository.get_active_draft(db, business_id, customer_id)
 
+    # An explicit ask to (re)browse the catalog should always win, even
+    # mid-draft — otherwise a customer who already picked one product is
+    # stuck restating quantity/address forever with no way to say "actually,
+    # show me the catalog again" (extract_order_update just answers that
+    # conversationally without ever actually re-opening the browse flow).
+    lower_message = message.strip().lower()
+    wants_catalog = any(w in lower_message for w in ("catalog", "catelog")) or message in (
+        "next",
+        "browse_categories",
+    ) or message.startswith("category:") or message.startswith("select:")
+
+    if draft and wants_catalog:
+        draft_order_repository.mark_status(db, business_id, draft["id"], "abandoned")
+        draft = None
+
     if draft:
         return _continue_draft(db, business_id, business, customer_id, message, draft, settings)
 

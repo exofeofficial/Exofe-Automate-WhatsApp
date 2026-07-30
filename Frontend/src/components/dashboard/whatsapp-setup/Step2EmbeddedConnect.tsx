@@ -59,7 +59,12 @@ export default function Step2EmbeddedConnect({
               reject(new Error("Facebook login was cancelled or didn't complete."));
             }
           },
-          { config_id: WHATSAPP_CONFIG_ID, response_type: "code", override_default_response_type: true }
+          {
+            config_id: WHATSAPP_CONFIG_ID,
+            response_type: "code",
+            override_default_response_type: true,
+            extras: { setup: {}, featureType: "", sessionInfoVersion: "3" },
+          }
         );
       });
 

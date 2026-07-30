@@ -26,6 +26,11 @@ declare global {
           config_id: string;
           response_type: "code";
           override_default_response_type: true;
+          extras: {
+            setup: Record<string, never>;
+            featureType: string;
+            sessionInfoVersion: string;
+          };
         }
       ) => void;
     };

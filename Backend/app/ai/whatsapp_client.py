@@ -60,6 +60,17 @@ def verify_signature(payload_body: bytes, signature_header: str | None) -> bool:
     return hmac.compare_digest(expected, signature_header.removeprefix("sha256="))
 
 
+def _meta_error_message(response: httpx.Response) -> str:
+    """Meta's Graph API errors come back as {"error": {"message": "..."}}
+    — surface that instead of a generic string, it's usually specific
+    enough (wrong permission, token expired, app not linked) to actually
+    tell the business owner what to fix."""
+    try:
+        return response.json()["error"]["message"]
+    except Exception:
+        return response.text[:200]
+
+
 def _graph_get(path: str, params: dict) -> dict:
     try:
         response = httpx.get(f"{GRAPH_API_BASE}/{path}", params=params, timeout=10)
@@ -117,6 +128,10 @@ def get_phone_number_details(phone_number_id: str, access_token: str) -> dict:
         )
         response.raise_for_status()
         return response.json()
+    except httpx.HTTPStatusError as e:
+        message = _meta_error_message(e.response)
+        logger.error(f"Failed to fetch phone number details for {phone_number_id}: {message}")
+        raise AppError(400, f"Couldn't verify that phone number with Meta: {message}")
     except httpx.HTTPError as e:
         logger.error(f"Failed to fetch phone number details for {phone_number_id}: {e}")
         raise AppError(400, "Couldn't verify that phone number with Meta.")
@@ -133,6 +148,10 @@ def subscribe_app_to_waba(waba_id: str, access_token: str) -> None:
             timeout=10,
         )
         response.raise_for_status()
+    except httpx.HTTPStatusError as e:
+        message = _meta_error_message(e.response)
+        logger.error(f"Failed to subscribe app to WABA {waba_id}: {message}")
+        raise AppError(400, f"Meta rejected the webhook subscription: {message}")
     except httpx.HTTPError as e:
         logger.error(f"Failed to subscribe app to WABA {waba_id}: {e}")
         raise AppError(400, "Connected, but Meta didn't confirm the webhook subscription — try reconnecting.")

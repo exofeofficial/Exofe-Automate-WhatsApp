@@ -32,6 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# .env.production holds only NEXT_PUBLIC_* values (client-bundled, not
+# secret) — committed on purpose so Cloudflare's git-connected build has
+# real values instead of falling back to localhost.
+!.env.production
 
 # vercel
 .vercel

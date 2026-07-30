@@ -14,7 +14,7 @@ from app.ai import gemini_client
 
 
 class Intent(BaseModel):
-    kind: Literal["greeting", "faq", "order", "unclear"]
+    kind: Literal["greeting", "faq", "order", "browse_catalog", "unclear"]
     confidence: float = Field(..., ge=0, le=1)
 
 
@@ -25,9 +25,11 @@ def classify_intent(message: str, has_active_draft: bool) -> Intent:
     prompt = f"""
     Classify the customer's message into exactly one of:
     1. greeting (Hi, Hello, etc)
-    2. order (I want to order, Place an order, etc)
-    3. faq (Do you offer this, How much is this, etc)
-    4. unclear (anything that doesn't clearly fit the above)
+    2. order (I want to order a specific item they already named, Place an order, etc)
+    3. browse_catalog (show me the catalog, what do you have, mujhe catalog dikhao,
+       browsing/exploring what's available without naming a specific product)
+    4. faq (Do you offer this, How much is this, etc)
+    5. unclear (anything that doesn't clearly fit the above)
 
     Message: "{message}"
 

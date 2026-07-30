@@ -60,15 +60,31 @@ async def receive_webhook(request: Request, db: Annotated[Session, Depends(get_d
             contacts = value.get("contacts", [])
 
             for message in messages:
-                if message.get("type") != "text":
-                    continue  # images/audio/interactive replies come later
+                msg_type = message.get("type")
+                if msg_type not in ("text", "interactive"):
+                    continue  # images/audio/etc come later
 
                 wamid = message.get("id")
                 if wamid and message_repository.message_exists(db, wamid):
                     continue  # Meta retried a delivery we already handled
 
+                if msg_type == "text":
+                    incoming_text = message["text"]["body"]
+                    log_text = incoming_text
+                else:
+                    # Button/list taps land here — the reply's `id` is what
+                    # we encoded when sending it (e.g. "category:<uuid>",
+                    # "next", "select:<uuid>"), the `title` is what the
+                    # customer actually saw and tapped, used only for the
+                    # conversation log.
+                    interactive = message.get("interactive", {})
+                    reply_obj = interactive.get("button_reply") or interactive.get("list_reply")
+                    if not reply_obj:
+                        continue
+                    incoming_text = reply_obj["id"]
+                    log_text = reply_obj.get("title", incoming_text)
+
                 sender = message["from"]
-                text_body = message["text"]["body"]
                 contact = next((c for c in contacts if c.get("wa_id") == sender), None)
                 name = contact["profile"]["name"] if contact else None
 
@@ -78,11 +94,11 @@ async def receive_webhook(request: Request, db: Annotated[Session, Depends(get_d
                     business_id=business["id"],
                     customer_id=customer["id"],
                     direction="inbound",
-                    content=text_body,
+                    content=log_text,
                     whatsapp_message_id=wamid,
                 )
 
-                reply = handle_inbound_message(db, business["id"], customer["id"], text_body)
+                reply = handle_inbound_message(db, business["id"], customer["id"], incoming_text)
                 if reply:
                     send_text_message(
                         sender,

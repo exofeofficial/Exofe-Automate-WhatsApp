@@ -13,8 +13,9 @@ GRAPH_API_VERSION = "v21.0"
 GRAPH_API_BASE = f"https://graph.facebook.com/{GRAPH_API_VERSION}"
 
 
-def send_text_message(to: str, text: str, *, phone_number_id: str | None = None, access_token: str | None = None) -> None:
-    """Send a plain-text WhatsApp message via the Cloud API.
+def _send(payload: dict, to: str, *, phone_number_id: str | None, access_token: str | None) -> None:
+    """Shared POST to /{phone_number_id}/messages — every message type
+    (text, list, buttons) is just a different `payload` shape.
 
     Takes the sending business's own phone_number_id/access_token once a
     business has connected via Embedded Signup or manual setup. Falls
@@ -30,19 +31,75 @@ def send_text_message(to: str, text: str, *, phone_number_id: str | None = None,
         return
 
     url = f"{GRAPH_API_BASE}/{phone_number_id}/messages"
-    payload = {
-        "messaging_product": "whatsapp",
-        "to": to,
-        "type": "text",
-        "text": {"body": text},
-    }
     headers = {"Authorization": f"Bearer {access_token}"}
+    payload = {"messaging_product": "whatsapp", "to": to, **payload}
 
     try:
         response = httpx.post(url, json=payload, headers=headers, timeout=10)
         response.raise_for_status()
     except httpx.HTTPError as e:
-        logger.error(f"Failed to send WhatsApp message to {to}: {e}")
+        detail = _meta_error_message(e.response) if isinstance(e, httpx.HTTPStatusError) else str(e)
+        logger.error(f"Failed to send WhatsApp message to {to}: {detail}")
+
+
+def send_text_message(to: str, text: str, *, phone_number_id: str | None = None, access_token: str | None = None) -> None:
+    """Send a plain-text WhatsApp message via the Cloud API."""
+    _send({"type": "text", "text": {"body": text}}, to, phone_number_id=phone_number_id, access_token=access_token)
+
+
+def send_list_message(
+    to: str,
+    *,
+    body: str,
+    button_text: str,
+    rows: list[dict],
+    phone_number_id: str | None = None,
+    access_token: str | None = None,
+) -> None:
+    """Send an interactive List Message — up to 10 rows, each
+    {id, title, description?}. Used for category selection: the
+    customer taps the list instead of typing a category name."""
+    _send(
+        {
+            "type": "interactive",
+            "interactive": {
+                "type": "list",
+                "body": {"text": body},
+                "action": {"button": button_text, "sections": [{"rows": rows}]},
+            },
+        },
+        to,
+        phone_number_id=phone_number_id,
+        access_token=access_token,
+    )
+
+
+def send_button_message(
+    to: str,
+    *,
+    body: str,
+    buttons: list[dict],
+    phone_number_id: str | None = None,
+    access_token: str | None = None,
+) -> None:
+    """Send up to 3 Reply Buttons — each {id, title} (title max 20 chars,
+    a WhatsApp API limit). Used for 'Next product' / 'Select this one'
+    style choices while browsing."""
+    _send(
+        {
+            "type": "interactive",
+            "interactive": {
+                "type": "button",
+                "body": {"text": body},
+                "action": {
+                    "buttons": [{"type": "reply", "reply": {"id": b["id"], "title": b["title"][:20]}} for b in buttons]
+                },
+            },
+        },
+        to,
+        phone_number_id=phone_number_id,
+        access_token=access_token,
+    )
 
 
 def verify_signature(payload_body: bytes, signature_header: str | None) -> bool:

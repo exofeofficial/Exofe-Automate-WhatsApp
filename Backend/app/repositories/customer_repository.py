@@ -1,6 +1,7 @@
 # app/repositories/customer_repository.py
 # Raw SQL queries for the customers and customer_notes tables.
 
+import json
 from datetime import datetime, timedelta
 
 from sqlalchemy import text
@@ -48,6 +49,32 @@ def get_or_create_by_whatsapp(db: Session, business_id: str, whatsapp_number: st
     ).fetchone()
     db.commit()
     return dict(row._mapping)
+
+
+def get_browse_state(db: Session, customer_id: str) -> dict | None:
+    """The in-progress catalog browsing session (which category, which
+    product index) — None means this customer isn't mid-browse."""
+    row = db.execute(
+        text("SELECT browse_state FROM customers WHERE id = :customer_id"),
+        {"customer_id": customer_id},
+    ).fetchone()
+    return row.browse_state if row and row.browse_state else None
+
+
+def set_browse_state(db: Session, customer_id: str, state: dict) -> None:
+    db.execute(
+        text("UPDATE customers SET browse_state = :state WHERE id = :customer_id"),
+        {"customer_id": customer_id, "state": json.dumps(state)},
+    )
+    db.commit()
+
+
+def clear_browse_state(db: Session, customer_id: str) -> None:
+    db.execute(
+        text("UPDATE customers SET browse_state = NULL WHERE id = :customer_id"),
+        {"customer_id": customer_id},
+    )
+    db.commit()
 
 
 def set_name_if_missing(db: Session, customer_id: str, name: str) -> None:

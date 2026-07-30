@@ -2,8 +2,21 @@
 from sqlalchemy.orm import Session
 
 from app.ai import classify_intent, extract_order_update
-from app.repositories import ai_repository, draft_order_repository, order_repository, product_repository, user_repository
+from app.ai import whatsapp_client
+from app.repositories import (
+    ai_repository,
+    customer_repository,
+    draft_order_repository,
+    order_repository,
+    product_repository,
+    user_repository,
+)
 from app.services import ai_service, ai_usage_service
+
+# Sentinel: "this wasn't a browsing action, fall through to normal intent
+# handling" — distinct from a real `None` return, which means a reply
+# (interactive message) was already sent and nothing more is needed.
+_FALLTHROUGH = object()
 
 def _active_catalog(db: Session, business_id: str) -> list[dict]:
     """Every active product, with full variant/stock detail. Deliberately
@@ -168,10 +181,126 @@ def _continue_draft(
 
     return _finalize_order(db, business_id, customer_id, draft["id"], result, merged_data)
 
+
+# ── Catalog browsing ─────────────────────────────────────────────────────────
+# A customer who doesn't already know what they want ("show me the catalog")
+# gets a tap-through browse: category list -> products one at a time -> pick
+# one, which then hands off into the existing draft-order flow above exactly
+# as if they'd typed "I want to order <product>" themselves.
+
+def _format_product_message(product: dict) -> str:
+    lines = [f"*{product['name']}*", f"Price: PKR {product['price']:,.0f}"]
+    if product.get("description"):
+        lines.append(product["description"])
+    for opt in product.get("options") or []:
+        lines.append(f"{opt['name']}: {', '.join(opt['values'])}")
+    if product["stock"] <= 0 and not product.get("has_variants"):
+        lines.append("_Currently out of stock._")
+    return "\n".join(lines)
+
+
+def _start_browsing(db: Session, business: dict, customer_id: str, to: str) -> None:
+    categories = product_repository.get_categories(db, business["id"])
+    if not categories:
+        # No categories configured — skip straight to browsing every
+        # active product instead of telling the customer the store looks
+        # unfinished. "_all" is a sentinel category_id, not a real row.
+        return _show_product_at_index(db, business, customer_id, to, category_id="_all", index=0)
+
+    rows = [{"id": f"category:{c['id']}", "title": c["name"][:24]} for c in categories[:10]]
+    whatsapp_client.send_list_message(
+        to,
+        body="Sure! Which category are you interested in? 😊",
+        button_text="Browse",
+        rows=rows,
+        phone_number_id=business["whatsapp_phone_number_id"],
+        access_token=business["whatsapp_access_token"],
+    )
+    customer_repository.set_browse_state(db, customer_id, {"stage": "awaiting_category"})
+    return None
+
+
+def _show_product_at_index(db: Session, business: dict, customer_id: str, to: str, category_id: str, index: int) -> None:
+    if category_id == "_all":
+        products = product_repository.get_all_products(db, business["id"], status="active")
+    else:
+        categories = {c["id"]: c["name"] for c in product_repository.get_categories(db, business["id"])}
+        category_name = categories.get(category_id)
+        products = product_repository.get_all_products(db, business["id"], category=category_name, status="active") if category_name else []
+
+    if not products:
+        customer_repository.clear_browse_state(db, customer_id)
+        whatsapp_client.send_text_message(
+            to, "No products in that category right now.",
+            phone_number_id=business["whatsapp_phone_number_id"], access_token=business["whatsapp_access_token"],
+        )
+        return None
+
+    if index >= len(products):
+        whatsapp_client.send_button_message(
+            to,
+            body="That's every product in this category! Want to see other categories?",
+            buttons=[{"id": "browse_categories", "title": "Other categories"}],
+            phone_number_id=business["whatsapp_phone_number_id"],
+            access_token=business["whatsapp_access_token"],
+        )
+        customer_repository.set_browse_state(
+            db, customer_id, {"stage": "browsing_products", "category_id": category_id, "index": index}
+        )
+        return None
+
+    product = products[index]
+    buttons = [{"id": f"select:{product['id']}", "title": "Select this one"}]
+    if index + 1 < len(products):
+        buttons.append({"id": "next", "title": "Next product"})
+
+    whatsapp_client.send_button_message(
+        to,
+        body=_format_product_message(product),
+        buttons=buttons,
+        phone_number_id=business["whatsapp_phone_number_id"],
+        access_token=business["whatsapp_access_token"],
+    )
+    customer_repository.set_browse_state(
+        db, customer_id, {"stage": "browsing_products", "category_id": category_id, "index": index}
+    )
+    return None
+
+
+def _handle_browse_reply(db: Session, business: dict, customer_id: str, to: str, message: str, state: dict, settings: dict):
+    """Returns _FALLTHROUGH when `message` isn't one of the taps we're
+    waiting for — the caller then clears the stale state and processes
+    the message as a normal fresh one instead of silently dropping it."""
+    if message.startswith("category:"):
+        category_id = message.split(":", 1)[1]
+        return _show_product_at_index(db, business, customer_id, to, category_id, index=0)
+
+    if message == "browse_categories":
+        customer_repository.clear_browse_state(db, customer_id)
+        return _start_browsing(db, business, customer_id, to)
+
+    if state.get("stage") == "browsing_products":
+        if message == "next":
+            return _show_product_at_index(db, business, customer_id, to, state["category_id"], state["index"] + 1)
+
+        if message.startswith("select:"):
+            product_id = message.split(":", 1)[1]
+            product = product_repository.get_product_by_id(db, product_id, business["id"])
+            customer_repository.clear_browse_state(db, customer_id)
+            if not product:
+                return "Sorry, that item isn't available anymore — anything else I can help with?"
+            # Hand off into the normal order-collection flow, pre-seeding
+            # the product exactly like a customer typing it themselves.
+            return _start_new_draft(db, business["id"], business, customer_id, f"I want to order {product['name']}", settings)
+
+    customer_repository.clear_browse_state(db, customer_id)
+    return _FALLTHROUGH
+
+
 def handle_inbound_message(db: Session, business_id: str, customer_id: str, message: str) -> str | None:
-    """The orchestrator. Returns the reply text (or, once Phase 8's
-    button-sending exists, this becomes the trigger for an interactive
-    message instead of plain text). This is what the webhook calls.
+    """The orchestrator. Returns the reply text to send as a plain message,
+    or None when a reply (interactive list/buttons, or nothing at all) was
+    already handled inside this call. This is what the webhook calls.
 
     Returns None when this business has hit its plan's monthly AI
     conversation limit (see ai_usage_service) — no automated reply
@@ -186,10 +315,23 @@ def handle_inbound_message(db: Session, business_id: str, customer_id: str, mess
     if draft:
         return _continue_draft(db, business_id, business, customer_id, message, draft, settings)
 
+    browse_state = customer_repository.get_browse_state(db, customer_id)
+    if browse_state:
+        customer = customer_repository.get_customer(db, business_id, customer_id)
+        reply = _handle_browse_reply(db, business, customer_id, customer["whatsapp_number"], message, browse_state, settings)
+        if reply is not _FALLTHROUGH:
+            return reply
+        # not a recognized browse tap (state already cleared inside) — treat
+        # this message as brand new below, same as if browsing never started
+
     intent = classify_intent(message, has_active_draft=False)
 
     if intent.kind == "greeting":
         return settings["greeting_message"] or "Hi! How can we help you today?"
+
+    if intent.kind == "browse_catalog":
+        customer = customer_repository.get_customer(db, business_id, customer_id)
+        return _start_browsing(db, business, customer_id, customer["whatsapp_number"])
 
     if intent.kind == "faq":
         faq = _best_matching_faq(db, business_id, message)

@@ -227,6 +227,7 @@ CREATE TABLE customers (
     id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     business_id           UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
     whatsapp_number       TEXT NOT NULL,
+    browse_state          JSONB,          -- in-progress catalog browsing session (category/product/index), NULL when not browsing
     name                  TEXT,           -- pulled from WhatsApp profile if available
     total_spent           NUMERIC(10,2) NOT NULL DEFAULT 0,  -- running total, updated on order completion
     ai_window_started_at  TIMESTAMPTZ,    -- start of this customer's current 24h AI-billing

@@ -182,11 +182,14 @@ def _continue_draft(
     return _finalize_order(db, business_id, customer_id, draft["id"], result, merged_data)
 
 
-# ── Catalog browsing ─────────────────────────────────────────────────────────
+# ── Catalog browsing + cart ──────────────────────────────────────────────────
 # A customer who doesn't already know what they want ("show me the catalog")
-# gets a tap-through browse: category list -> products one at a time -> pick
-# one, which then hands off into the existing draft-order flow above exactly
-# as if they'd typed "I want to order <product>" themselves.
+# gets a tap-through browse: category list -> products one at a time -> add
+# to a cart that survives across categories -> checkout everything at once.
+# All of this is deterministic (button/list taps, not Gemini) right up until
+# checkout, where cart items are handed straight to order_repository — no
+# natural-language matching needed since every item is already a real
+# product_id/variant_id/quantity by the time we get there.
 
 def _format_product_message(product: dict) -> str:
     lines = [f"*{product['name']}*", f"Price: PKR {product['price']:,.0f}"]
@@ -199,13 +202,24 @@ def _format_product_message(product: dict) -> str:
     return "\n".join(lines)
 
 
-def _start_browsing(db: Session, business: dict, customer_id: str, to: str) -> None:
+def _cart_total(cart: list[dict]) -> float:
+    return sum(item["price"] * item["quantity"] for item in cart)
+
+
+def _cart_summary(cart: list[dict]) -> str:
+    lines = [f"• {item['name']} x{item['quantity']} — PKR {item['price'] * item['quantity']:,.0f}" for item in cart]
+    lines.append(f"\n*Total: PKR {_cart_total(cart):,.0f}*")
+    return "\n".join(lines)
+
+
+def _start_browsing(db: Session, business: dict, customer_id: str, to: str, cart: list[dict] | None = None) -> None:
+    cart = cart or []
     categories = product_repository.get_categories(db, business["id"])
     if not categories:
         # No categories configured — skip straight to browsing every
         # active product instead of telling the customer the store looks
         # unfinished. "_all" is a sentinel category_id, not a real row.
-        return _show_product_at_index(db, business, customer_id, to, category_id="_all", index=0)
+        return _show_product_at_index(db, business, customer_id, to, category_id="_all", index=0, cart=cart)
 
     rows = [{"id": f"category:{c['id']}", "title": c["name"][:24]} for c in categories[:10]]
     whatsapp_client.send_list_message(
@@ -216,11 +230,13 @@ def _start_browsing(db: Session, business: dict, customer_id: str, to: str) -> N
         phone_number_id=business["whatsapp_phone_number_id"],
         access_token=business["whatsapp_access_token"],
     )
-    customer_repository.set_browse_state(db, customer_id, {"stage": "awaiting_category"})
+    customer_repository.set_browse_state(db, customer_id, {"stage": "awaiting_category", "cart": cart})
     return None
 
 
-def _show_product_at_index(db: Session, business: dict, customer_id: str, to: str, category_id: str, index: int) -> None:
+def _show_product_at_index(
+    db: Session, business: dict, customer_id: str, to: str, category_id: str, index: int, cart: list[dict]
+) -> None:
     if category_id == "_all":
         products = product_repository.get_all_products(db, business["id"], status="active")
     else:
@@ -237,15 +253,18 @@ def _show_product_at_index(db: Session, business: dict, customer_id: str, to: st
         return None
 
     if index >= len(products):
+        buttons = [{"id": "browse_categories", "title": "Other categories"}]
+        if cart:
+            buttons.append({"id": "checkout", "title": f"Checkout ({len(cart)})"})
         whatsapp_client.send_button_message(
             to,
             body="That's every product in this category! Want to see other categories?",
-            buttons=[{"id": "browse_categories", "title": "Other categories"}],
+            buttons=buttons,
             phone_number_id=business["whatsapp_phone_number_id"],
             access_token=business["whatsapp_access_token"],
         )
         customer_repository.set_browse_state(
-            db, customer_id, {"stage": "browsing_products", "category_id": category_id, "index": index}
+            db, customer_id, {"stage": "browsing_products", "category_id": category_id, "index": index, "cart": cart}
         )
         return None
 
@@ -262,36 +281,229 @@ def _show_product_at_index(db: Session, business: dict, customer_id: str, to: st
         access_token=business["whatsapp_access_token"],
     )
     customer_repository.set_browse_state(
-        db, customer_id, {"stage": "browsing_products", "category_id": category_id, "index": index}
+        db, customer_id, {"stage": "browsing_products", "category_id": category_id, "index": index, "cart": cart}
+    )
+    return None
+
+
+def _begin_add_to_cart(db: Session, business: dict, customer_id: str, to: str, product: dict, cart: list[dict]) -> None:
+    """Either asks which variant (size/color/etc, via a tappable list) or,
+    for a simple product, goes straight to asking quantity."""
+    if product.get("has_variants") and product.get("variants"):
+        rows = [
+            {"id": f"variant:{v['id']}", "title": " / ".join(v["option_values"])[:24]}
+            for v in product["variants"]
+            if v["stock"] > 0
+        ][:10]
+        if not rows:
+            whatsapp_client.send_text_message(
+                to, f"Sorry, *{product['name']}* is out of stock in every option right now.",
+                phone_number_id=business["whatsapp_phone_number_id"], access_token=business["whatsapp_access_token"],
+            )
+            return None
+        whatsapp_client.send_list_message(
+            to,
+            body=f"Which option for *{product['name']}*?",
+            button_text="Choose",
+            rows=rows,
+            phone_number_id=business["whatsapp_phone_number_id"],
+            access_token=business["whatsapp_access_token"],
+        )
+        customer_repository.set_browse_state(
+            db, customer_id, {"stage": "awaiting_variant", "pending_product_id": product["id"], "cart": cart}
+        )
+        return None
+
+    whatsapp_client.send_text_message(
+        to, f"Great! How many *{product['name']}* would you like?",
+        phone_number_id=business["whatsapp_phone_number_id"], access_token=business["whatsapp_access_token"],
+    )
+    customer_repository.set_browse_state(
+        db, customer_id, {"stage": "awaiting_quantity", "pending_product_id": product["id"], "cart": cart}
+    )
+    return None
+
+
+def _ask_quantity_for_variant(db, business, customer_id, to, product, variant, cart) -> None:
+    whatsapp_client.send_text_message(
+        to, f"Great! How many *{product['name']} ({' / '.join(variant['option_values'])})* would you like?",
+        phone_number_id=business["whatsapp_phone_number_id"], access_token=business["whatsapp_access_token"],
+    )
+    customer_repository.set_browse_state(
+        db,
+        customer_id,
+        {
+            "stage": "awaiting_quantity",
+            "pending_product_id": product["id"],
+            "pending_variant_id": variant["id"],
+            "cart": cart,
+        },
+    )
+
+
+def _add_to_cart_and_show_menu(db, business, customer_id, to, item: dict, cart: list[dict]) -> None:
+    cart = [*cart, item]
+    whatsapp_client.send_button_message(
+        to,
+        body=f"Added to cart ✅\n\n{_cart_summary(cart)}\n\nKeep browsing or check out?",
+        buttons=[{"id": "browse_categories", "title": "Keep browsing"}, {"id": "checkout", "title": "Checkout"}],
+        phone_number_id=business["whatsapp_phone_number_id"],
+        access_token=business["whatsapp_access_token"],
+    )
+    customer_repository.set_browse_state(db, customer_id, {"stage": "cart_menu", "cart": cart})
+
+
+def _start_checkout(db, business, customer_id, to, cart: list[dict]) -> None:
+    if not cart:
+        whatsapp_client.send_text_message(
+            to, "Your cart's empty — add something first!",
+            phone_number_id=business["whatsapp_phone_number_id"], access_token=business["whatsapp_access_token"],
+        )
+        return None
+    whatsapp_client.send_text_message(
+        to, f"Here's your order so far:\n\n{_cart_summary(cart)}\n\nWhat's the delivery address?",
+        phone_number_id=business["whatsapp_phone_number_id"], access_token=business["whatsapp_access_token"],
+    )
+    customer_repository.set_browse_state(db, customer_id, {"stage": "awaiting_address", "cart": cart})
+    return None
+
+
+def _finalize_cart_order(db, business_id, business, customer_id, to, cart, delivery_address, payment_method) -> None:
+    items = [
+        {"product_id": item["product_id"], "variant_id": item.get("variant_id"), "quantity": item["quantity"]}
+        for item in cart
+    ]
+    try:
+        order = order_repository.create_order(
+            db,
+            business_id=business_id,
+            customer_id=customer_id,
+            items=items,
+            delivery_address=delivery_address,
+            payment_method=payment_method,
+        )
+    except ValueError as e:
+        customer_repository.clear_browse_state(db, customer_id)
+        whatsapp_client.send_text_message(
+            to, f"Sorry — {e} Someone from our team will follow up with you shortly.",
+            phone_number_id=business["whatsapp_phone_number_id"], access_token=business["whatsapp_access_token"],
+        )
+        return None
+
+    customer_repository.clear_browse_state(db, customer_id)
+    whatsapp_client.send_text_message(
+        to, f"Your order is confirmed! ✅ Total: PKR {order['total']:,.0f}. Thanks for shopping with us!",
+        phone_number_id=business["whatsapp_phone_number_id"], access_token=business["whatsapp_access_token"],
     )
     return None
 
 
 def _handle_browse_reply(db: Session, business: dict, customer_id: str, to: str, message: str, state: dict, settings: dict):
-    """Returns _FALLTHROUGH when `message` isn't one of the taps we're
-    waiting for — the caller then clears the stale state and processes
-    the message as a normal fresh one instead of silently dropping it."""
+    """Returns _FALLTHROUGH when `message` isn't one of the taps/answers
+    we're waiting for — the caller then clears the stale state and
+    processes the message as a normal fresh one instead of silently
+    dropping it."""
+    cart = state.get("cart") or []
+    stage = state.get("stage")
+
+    is_tap = message.startswith(("category:", "select:", "variant:", "pay:")) or message in (
+        "next", "browse_categories", "checkout",
+    )
+    if not is_tap and ("catalog" in message.lower() or "catelog" in message.lower()):
+        # A free-typed "show me the catalog again" mid-checkout (e.g. while
+        # we're waiting for an address) shouldn't get swallowed as if it
+        # were the answer to whatever we just asked — restart browsing,
+        # keeping whatever's already in the cart.
+        return _start_browsing(db, business, customer_id, to, cart=cart)
+
     if message.startswith("category:"):
         category_id = message.split(":", 1)[1]
-        return _show_product_at_index(db, business, customer_id, to, category_id, index=0)
+        return _show_product_at_index(db, business, customer_id, to, category_id, index=0, cart=cart)
 
     if message == "browse_categories":
-        customer_repository.clear_browse_state(db, customer_id)
-        return _start_browsing(db, business, customer_id, to)
+        return _start_browsing(db, business, customer_id, to, cart=cart)
 
-    if state.get("stage") == "browsing_products":
+    if message == "checkout":
+        return _start_checkout(db, business, customer_id, to, cart)
+
+    if stage == "browsing_products":
         if message == "next":
-            return _show_product_at_index(db, business, customer_id, to, state["category_id"], state["index"] + 1)
+            return _show_product_at_index(db, business, customer_id, to, state["category_id"], state["index"] + 1, cart=cart)
 
         if message.startswith("select:"):
             product_id = message.split(":", 1)[1]
             product = product_repository.get_product_by_id(db, product_id, business["id"])
-            customer_repository.clear_browse_state(db, customer_id)
             if not product:
+                customer_repository.clear_browse_state(db, customer_id)
                 return "Sorry, that item isn't available anymore — anything else I can help with?"
-            # Hand off into the normal order-collection flow, pre-seeding
-            # the product exactly like a customer typing it themselves.
-            return _start_new_draft(db, business["id"], business, customer_id, f"I want to order {product['name']}", settings)
+            return _begin_add_to_cart(db, business, customer_id, to, product, cart)
+
+    if stage == "awaiting_variant" and message.startswith("variant:"):
+        variant_id = message.split(":", 1)[1]
+        product = product_repository.get_product_by_id(db, state["pending_product_id"], business["id"])
+        variant = next((v for v in (product["variants"] if product else []) if v["id"] == variant_id), None)
+        if not product or not variant:
+            customer_repository.clear_browse_state(db, customer_id)
+            return "Sorry, that option isn't available anymore — anything else I can help with?"
+        return _ask_quantity_for_variant(db, business, customer_id, to, product, variant, cart)
+
+    if stage == "awaiting_quantity":
+        try:
+            quantity = int("".join(ch for ch in message if ch.isdigit()) or "0")
+        except ValueError:
+            quantity = 0
+        if quantity <= 0:
+            whatsapp_client.send_text_message(
+                to, "Just a number please — how many would you like?",
+                phone_number_id=business["whatsapp_phone_number_id"], access_token=business["whatsapp_access_token"],
+            )
+            return None
+
+        product = product_repository.get_product_by_id(db, state["pending_product_id"], business["id"])
+        if not product:
+            customer_repository.clear_browse_state(db, customer_id)
+            return "Sorry, that item isn't available anymore — anything else I can help with?"
+
+        variant_id = state.get("pending_variant_id")
+        if variant_id:
+            variant = next((v for v in product["variants"] if v["id"] == variant_id), None)
+            if not variant or variant["stock"] < quantity:
+                whatsapp_client.send_text_message(
+                    to, "Sorry, there isn't enough stock for that — try a smaller quantity?",
+                    phone_number_id=business["whatsapp_phone_number_id"], access_token=business["whatsapp_access_token"],
+                )
+                return None
+            item = {
+                "product_id": product["id"], "variant_id": variant_id,
+                "name": f"{product['name']} ({' / '.join(variant['option_values'])})",
+                "price": variant["price"], "quantity": quantity,
+            }
+        else:
+            if product["stock"] < quantity:
+                whatsapp_client.send_text_message(
+                    to, "Sorry, there isn't enough stock for that — try a smaller quantity?",
+                    phone_number_id=business["whatsapp_phone_number_id"], access_token=business["whatsapp_access_token"],
+                )
+                return None
+            item = {"product_id": product["id"], "variant_id": None, "name": product["name"], "price": product["price"], "quantity": quantity}
+
+        _add_to_cart_and_show_menu(db, business, customer_id, to, item, cart)
+        return None
+
+    if stage == "awaiting_address" and message.strip():
+        new_state = {"stage": "awaiting_payment", "cart": cart, "delivery_address": message.strip()}
+        customer_repository.set_browse_state(db, customer_id, new_state)
+        whatsapp_client.send_button_message(
+            to, body="Cash on Delivery or Online Payment?",
+            buttons=[{"id": "pay:cod", "title": "Cash on Delivery"}, {"id": "pay:online", "title": "Online Payment"}],
+            phone_number_id=business["whatsapp_phone_number_id"], access_token=business["whatsapp_access_token"],
+        )
+        return None
+
+    if stage == "awaiting_payment" and message in ("pay:cod", "pay:online"):
+        payment_method = "cod" if message == "pay:cod" else "online"
+        _finalize_cart_order(db, business["id"], business, customer_id, to, cart, state.get("delivery_address", ""), payment_method)
+        return None
 
     customer_repository.clear_browse_state(db, customer_id)
     return _FALLTHROUGH

@@ -4,6 +4,14 @@ import { useEffect, useState } from "react";
 import { motion, type Variants } from "framer-motion";
 import { Bot, CheckCircle2, Clock, Inbox, MessageCircle, Package, Wallet } from "lucide-react";
 import { getUserProfile } from "@/lib/user";
+import {
+  ApiError,
+  getDashboardActivity,
+  getDashboardSummary,
+  type ActivityItem,
+  type DashboardSummary,
+  type MetricValue,
+} from "@/lib/api";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -17,25 +25,27 @@ const item: Variants = {
   show: { y: 0, opacity: 1, transition: { duration: 0.35, ease: EASE } },
 };
 
-// Zero state on purpose, a real new account has no orders or revenue yet.
-// Backend developer: swap this for a real fetch to GET /dashboard/summary,
-// the shape is {label, value, subtitle, change, icon} per card, see
-// API.md. change is a signed percentage string like "+12%" or "-4%",
-// null when there isn't enough data yet to compare against.
-const STATS: {
-  label: string;
-  value: string;
-  subtitle: string;
-  change: string | null;
-  icon: typeof Package;
-}[] = [
-  { label: "Today's Orders", value: "0", subtitle: "vs last month", change: null, icon: Package },
-  { label: "Pending Orders", value: "0", subtitle: "needs action", change: null, icon: Clock },
-  { label: "Completed Orders", value: "0", subtitle: "all time", change: null, icon: CheckCircle2 },
-  { label: "Total Conversations", value: "0", subtitle: "vs last week", change: null, icon: MessageCircle },
-  { label: "Revenue", value: "PKR 0", subtitle: "this month", change: null, icon: Wallet },
-  { label: "AI Response Rate", value: "—", subtitle: "last 7 days", change: null, icon: Bot },
-];
+function formatChange(changePercent: number | null): string | null {
+  if (changePercent === null) return null;
+  const sign = changePercent >= 0 ? "+" : "";
+  return `${sign}${changePercent}%`;
+}
+
+function buildStats(summary: DashboardSummary) {
+  const metric = (m: MetricValue, format: (v: number) => string) => ({
+    value: m.value === null ? "—" : format(m.value),
+    change: formatChange(m.changePercent),
+  });
+
+  return [
+    { label: "Today's Orders", subtitle: "vs last month", icon: Package, ...metric(summary.todaysOrders, (v) => String(v)) },
+    { label: "Pending Orders", subtitle: "needs action", icon: Clock, ...metric(summary.pendingOrders, (v) => String(v)) },
+    { label: "Completed Orders", subtitle: "all time", icon: CheckCircle2, ...metric(summary.completedOrders, (v) => String(v)) },
+    { label: "Total Conversations", subtitle: "vs last week", icon: MessageCircle, ...metric(summary.totalConversations, (v) => String(v)) },
+    { label: "Revenue", subtitle: "this month", icon: Wallet, ...metric(summary.revenueThisMonth, (v) => `PKR ${v.toLocaleString()}`) },
+    { label: "AI Response Rate", subtitle: "last 7 days", icon: Bot, ...metric(summary.aiResponseRate, (v) => `${v}%`) },
+  ];
+}
 
 function ChangeBadge({ change, onDark }: { change: string | null; onDark?: boolean }) {
   if (!change) {
@@ -61,9 +71,6 @@ function ChangeBadge({ change, onDark }: { change: string | null; onDark?: boole
   );
 }
 
-// Same idea, empty by default until GET /dashboard/activity has real events.
-const ACTIVITY: { text: string; time: string; tag: string }[] = [];
-
 function getGreeting(hour: number) {
   if (hour < 12) return "Good morning";
   if (hour < 17) return "Good afternoon";
@@ -73,16 +80,26 @@ function getGreeting(hour: number) {
 export default function DashboardHome() {
   const [firstName, setFirstName] = useState("there");
   const [now, setNow] = useState<Date | null>(null);
+  const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [activity, setActivity] = useState<ActivityItem[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Reads localStorage and the current time, has to happen after mount so
-  // the server render and first client render match.
   useEffect(() => {
     setFirstName(getUserProfile()?.firstName ?? "there");
     setNow(new Date());
+
+    getDashboardSummary()
+      .then((res) => setSummary(res.summary))
+      .catch((err) => setError(err instanceof ApiError ? err.message : "Couldn't load dashboard stats."));
+
+    getDashboardActivity()
+      .then((res) => setActivity(res.activity))
+      .catch(() => setActivity([]));
   }, []);
 
   const greeting = getGreeting(now?.getHours() ?? 9);
   const dateLabel = now?.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }) ?? "";
+  const stats = summary ? buildStats(summary) : null;
 
   return (
     <motion.div initial="hidden" animate="show" variants={container} className="flex flex-col gap-6">
@@ -93,13 +110,19 @@ export default function DashboardHome() {
         </h1>
       </motion.div>
 
+      {error && (
+        <motion.div variants={item} className="rounded-2xl border border-red-200 dark:border-red-500/25 bg-red-50 dark:bg-red-500/10 p-4 text-sm text-red-600 dark:text-red-400">
+          {error}
+        </motion.div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {STATS.map((s, i) => {
-          const Icon = s.icon;
+        {(stats ?? Array.from({ length: 6 })).map((s, i) => {
           const featured = i === 0;
+          const Icon = s ? s.icon : Package;
           return (
             <motion.div
-              key={s.label}
+              key={s ? s.label : i}
               variants={item}
               whileHover={{ y: -3 }}
               transition={{ duration: 0.2, ease: EASE }}
@@ -107,7 +130,7 @@ export default function DashboardHome() {
                 featured
                   ? "bg-gradient-to-br from-[#5B4FE9] to-[#4338CA] shadow-indigo-900/20"
                   : "border border-ink/[.06] bg-surface"
-              }`}
+              } ${!s ? "animate-pulse" : ""}`}
             >
               <div className="flex items-center justify-between">
                 <span
@@ -117,14 +140,14 @@ export default function DashboardHome() {
                 >
                   <Icon className="h-4 w-4" strokeWidth={2} />
                 </span>
-                <ChangeBadge change={s.change} onDark={featured} />
+                {s && <ChangeBadge change={s.change} onDark={featured} />}
               </div>
-              <p className={`mt-4 text-xs ${featured ? "text-white/70" : "text-foreground/45"}`}>{s.label}</p>
+              <p className={`mt-4 text-xs ${featured ? "text-white/70" : "text-foreground/45"}`}>{s ? s.label : ""}</p>
               <div className="mt-1 flex items-baseline gap-2">
                 <p className={`text-2xl font-extrabold tracking-tight ${featured ? "text-white" : "text-foreground"}`}>
-                  {s.value}
+                  {s ? s.value : ""}
                 </p>
-                <p className={`text-[11px] ${featured ? "text-white/60" : "text-foreground/40"}`}>{s.subtitle}</p>
+                <p className={`text-[11px] ${featured ? "text-white/60" : "text-foreground/40"}`}>{s ? s.subtitle : ""}</p>
               </div>
             </motion.div>
           );
@@ -134,7 +157,7 @@ export default function DashboardHome() {
       <motion.div variants={item} className="rounded-2xl border border-ink/[.06] bg-surface p-5 shadow-sm sm:p-6">
         <p className="text-sm font-bold text-foreground">Recent Activity</p>
 
-        {ACTIVITY.length === 0 ? (
+        {!activity || activity.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-ink/[.03] text-foreground/30">
               <Inbox className="h-5 w-5" strokeWidth={2} />
@@ -145,11 +168,11 @@ export default function DashboardHome() {
           </div>
         ) : (
           <div className="mt-4 flex flex-col divide-y divide-ink/[.05]">
-            {ACTIVITY.map((a) => (
-              <div key={a.text} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
+            {activity.map((a, i) => (
+              <div key={i} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
                 <div className="min-w-0">
                   <p className="truncate text-sm text-foreground/80">{a.text}</p>
-                  <p className="mt-0.5 text-xs text-foreground/40">{a.time}</p>
+                  <p className="mt-0.5 text-xs text-foreground/40">{new Date(a.time).toLocaleString()}</p>
                 </div>
                 <span className="shrink-0 rounded-full bg-ink/[.04] px-2.5 py-1 text-[11px] font-medium text-foreground/55">
                   {a.tag}

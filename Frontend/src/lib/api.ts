@@ -62,6 +62,29 @@ async function adminRequest<T>(path: string, options?: RequestInit): Promise<T> 
   return res.status === 204 ? (undefined as T) : res.json();
 }
 
+// ── Dashboard ────────────────────────────────────────────────────────────────
+
+export type MetricValue = { value: number | null; changePercent: number | null };
+
+export type DashboardSummary = {
+  todaysOrders: MetricValue;
+  pendingOrders: MetricValue;
+  completedOrders: MetricValue;
+  totalConversations: MetricValue;
+  revenueThisMonth: MetricValue;
+  aiResponseRate: MetricValue;
+};
+
+export function getDashboardSummary() {
+  return request<{ summary: DashboardSummary }>("/dashboard/summary");
+}
+
+export type ActivityItem = { text: string; time: string; tag: string };
+
+export function getDashboardActivity() {
+  return request<{ activity: ActivityItem[] }>("/dashboard/activity");
+}
+
 // ── WhatsApp integration ─────────────────────────────────────────────────────
 // The webhook itself is one shared URL Meta calls directly, nothing here.
 // These are what the dashboard's Connect WhatsApp wizard talks to.

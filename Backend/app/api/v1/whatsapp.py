@@ -12,7 +12,7 @@ from app.ai.whatsapp_client import send_text_message, verify_signature
 from app.config import settings
 from app.core.logger import get_logger
 from app.database.session import get_db
-from app.repositories import customer_repository, user_repository
+from app.repositories import customer_repository, message_repository, user_repository
 from app.services.conversation_service import handle_inbound_message
 
 logger = get_logger(__name__)
@@ -63,12 +63,25 @@ async def receive_webhook(request: Request, db: Annotated[Session, Depends(get_d
                 if message.get("type") != "text":
                     continue  # images/audio/interactive replies come later
 
+                wamid = message.get("id")
+                if wamid and message_repository.message_exists(db, wamid):
+                    continue  # Meta retried a delivery we already handled
+
                 sender = message["from"]
                 text_body = message["text"]["body"]
                 contact = next((c for c in contacts if c.get("wa_id") == sender), None)
                 name = contact["profile"]["name"] if contact else None
 
                 customer = customer_repository.get_or_create_by_whatsapp(db, business["id"], sender, name)
+                message_repository.log_message(
+                    db,
+                    business_id=business["id"],
+                    customer_id=customer["id"],
+                    direction="inbound",
+                    content=text_body,
+                    whatsapp_message_id=wamid,
+                )
+
                 reply = handle_inbound_message(db, business["id"], customer["id"], text_body)
                 if reply:
                     send_text_message(
@@ -76,6 +89,14 @@ async def receive_webhook(request: Request, db: Annotated[Session, Depends(get_d
                         reply,
                         phone_number_id=business["whatsapp_phone_number_id"],
                         access_token=business["whatsapp_access_token"],
+                    )
+                    message_repository.log_message(
+                        db,
+                        business_id=business["id"],
+                        customer_id=customer["id"],
+                        direction="outbound",
+                        content=reply,
+                        ai_generated=True,
                     )
 
     return {"status": "received"}

@@ -45,16 +45,16 @@ export function DecisionNode({ data }: NodeProps) {
 
 export function AINode({ data }: NodeProps) {
   return (
-    <div className={`${baseNode} border-[#5B4FE9]/40 bg-gradient-to-br from-[#5B4FE9]/10 to-[#7C6FF5]/10`}>
-      <Handle type="target" position={Position.Left} className={`${handleClass} !bg-[#5B4FE9]`} />
+    <div className={`${baseNode} border-[#45157b]/40 bg-gradient-to-br from-[#45157b]/10 to-[#45157b]/10`}>
+      <Handle type="target" position={Position.Left} className={`${handleClass} !bg-[#45157b]`} />
       <div className="flex items-center gap-2">
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] text-white">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#45157b] text-white">
           <Sparkles className="h-3.5 w-3.5" strokeWidth={2.5} />
         </span>
         <p className="text-sm font-bold text-foreground">{data.label as string}</p>
       </div>
       {!!data.sub && <p className="mt-1 pl-9 text-xs text-foreground/50">{data.sub as string}</p>}
-      <Handle type="source" position={Position.Right} className={`${handleClass} !bg-[#5B4FE9]`} />
+      <Handle type="source" position={Position.Right} className={`${handleClass} !bg-[#45157b]`} />
     </div>
   );
 }

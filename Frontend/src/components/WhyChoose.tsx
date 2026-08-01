@@ -40,8 +40,8 @@ const STATS = [
 
 function Dot() {
   return (
-    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-[#5B4FE9]/25">
-      <span className="h-2 w-2 rounded-full bg-[#5B4FE9]" />
+    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-[#45157b]/25">
+      <span className="h-2 w-2 rounded-full bg-[#45157b]" />
     </span>
   );
 }

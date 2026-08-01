@@ -152,7 +152,7 @@ export default function Features() {
 
           <ScaleCard className="flex flex-col rounded-[20px] bg-[#F1F2F4] p-[18px] lg:row-span-2">
             <h3 className="flex items-center gap-2 text-lg font-bold text-foreground">
-              <MessageCircle className="h-5 w-5 text-[#5B4FE9]" strokeWidth={2} />
+              <MessageCircle className="h-5 w-5 text-[#45157b]" strokeWidth={2} />
               Customer Chat Management
             </h3>
             <p className="mt-1.5 text-sm text-foreground/55">

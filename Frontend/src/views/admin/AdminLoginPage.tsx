@@ -86,7 +86,7 @@ export default function AdminLoginPage() {
                 clearError("email");
               }}
               placeholder="you@exofe.com"
-              className={`mt-1.5 w-full rounded-lg border bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/40 ${
+              className={`mt-1.5 w-full rounded-lg border bg-white/5 px-3.5 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:ring-2 focus:ring-[#45157b]/40 ${
                 errors.email ? "border-red-500/60" : "border-white/10"
               }`}
             />
@@ -104,7 +104,7 @@ export default function AdminLoginPage() {
                   clearError("password");
                 }}
                 placeholder="Enter your password"
-                className={`w-full rounded-lg border bg-white/5 px-3.5 py-2.5 pr-10 text-sm text-white placeholder:text-white/25 focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/40 ${
+                className={`w-full rounded-lg border bg-white/5 px-3.5 py-2.5 pr-10 text-sm text-white placeholder:text-white/25 focus:outline-none focus:ring-2 focus:ring-[#45157b]/40 ${
                   errors.password ? "border-red-500/60" : "border-white/10"
                 }`}
               />
@@ -127,7 +127,7 @@ export default function AdminLoginPage() {
             disabled={status === "loading"}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            className="mt-1 flex w-full items-center justify-center gap-2 rounded-lg bg-[#5B4FE9] py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#5B4FE9]/20 transition-colors hover:bg-[#4a3fd6] disabled:opacity-70"
+            className="mt-1 flex w-full items-center justify-center gap-2 rounded-lg bg-[#45157b] py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#45157b]/20 transition-colors hover:opacity-90 disabled:opacity-70"
           >
             {status === "loading" && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.4} />}
             {status === "loading" ? "Logging in..." : "Log in"}

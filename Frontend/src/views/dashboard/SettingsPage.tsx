@@ -50,7 +50,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex h-[calc(100vh-10rem)] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
-        <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
+        <Loader2 className="h-6 w-6 animate-spin text-[#45157b]" strokeWidth={2} />
       </div>
     );
   }
@@ -67,7 +67,7 @@ export default function SettingsPage() {
               type="button"
               onClick={() => setTab(t.id)}
               className={`flex shrink-0 items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                isActive ? "bg-indigo-50 dark:bg-indigo-500/15 text-[#5B4FE9]" : "text-foreground/60 hover:bg-ink/[.03]"
+                isActive ? "bg-indigo-50 dark:bg-indigo-500/15 text-[#45157b]" : "text-foreground/60 hover:bg-ink/[.03]"
               }`}
             >
               <Icon className="h-4 w-4 shrink-0" strokeWidth={2} />

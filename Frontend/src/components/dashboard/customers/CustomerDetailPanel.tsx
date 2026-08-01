@@ -16,7 +16,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 
 const STATUS_BADGE: Record<OrderStatus, string> = {
   new: "bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400",
-  confirmed: "bg-indigo-50 dark:bg-indigo-500/15 text-[#5B4FE9]",
+  confirmed: "bg-indigo-50 dark:bg-indigo-500/15 text-[#45157b]",
   shipped: "bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400",
   delivered: "bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
   canceled: "bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-400",
@@ -150,13 +150,13 @@ export default function CustomerDetailPanel({
                 onChange={(e) => setNewNote(e.target.value)}
                 rows={2}
                 placeholder="Add a note about this customer..."
-                className="flex-1 rounded-lg border border-ink/[.12] px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                className="flex-1 rounded-lg border border-ink/[.12] px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
               />
               <button
                 type="submit"
                 disabled={saving || !newNote.trim()}
                 aria-label="Add note"
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg shine-btn-gold relative overflow-hidden bg-[#5B4FE9] text-white transition-colors hover:bg-[#4a3fd6] disabled:opacity-50"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg shine-btn-gold relative overflow-hidden bg-[#45157b] text-white transition-colors hover:opacity-90 disabled:opacity-50"
               >
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} /> : <Send className="h-4 w-4" strokeWidth={2} />}
               </button>

@@ -74,7 +74,7 @@ function OrdersRevenueChart({ points }: { points: AnalyticsPoint[] }) {
             width={barWidth * 0.6}
             height={barHeight}
             rx={3}
-            fill="#5B4FE9"
+            fill="#45157b"
             opacity={0.85}
           />
         );
@@ -129,7 +129,7 @@ export default function AnalyticsPage() {
               type="button"
               onClick={() => setDays(r.value)}
               className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-                days === r.value ? "bg-[#5B4FE9] text-white" : "bg-surface text-foreground/60 shadow-sm hover:bg-ink/[.03]"
+                days === r.value ? "bg-[#45157b] text-white" : "bg-surface text-foreground/60 shadow-sm hover:bg-ink/[.03]"
               }`}
             >
               {r.label}
@@ -146,12 +146,12 @@ export default function AnalyticsPage() {
 
       {!points ? (
         <div className="flex h-[calc(100vh-16rem)] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
-          <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
+          <Loader2 className="h-6 w-6 animate-spin text-[#45157b]" strokeWidth={2} />
         </div>
       ) : (
         <>
           <motion.div variants={item} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl bg-gradient-to-br from-[#5B4FE9] to-[#4338CA] p-5 text-white shadow-sm">
+            <div className="rounded-2xl bg-gradient-to-br from-[#45157b] to-[#4338CA] p-5 text-white shadow-sm">
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15">
                 <Package className="h-4 w-4" strokeWidth={2} />
               </span>
@@ -179,7 +179,7 @@ export default function AnalyticsPage() {
               <p className="text-sm font-bold text-foreground">Orders & Revenue</p>
               <div className="flex items-center gap-4 text-xs text-foreground/50">
                 <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-[#5B4FE9]" />
+                  <span className="h-2 w-2 rounded-full bg-[#45157b]" />
                   Orders
                 </span>
                 <span className="flex items-center gap-1.5">

@@ -132,8 +132,8 @@ export default function Sidebar({ onClose, trial }: { onClose?: () => void; tria
                     className="absolute inset-0 rounded-xl bg-indigo-50 dark:bg-indigo-500/15"
                   />
                 )}
-                <Icon className={`relative h-[18px] w-[18px] shrink-0 ${isActive ? "text-[#5B4FE9]" : "text-foreground/45"}`} strokeWidth={2} />
-                <span className={`relative ${isActive ? "text-[#5B4FE9]" : "text-foreground/70"}`}>{entry.label}</span>
+                <Icon className={`relative h-[18px] w-[18px] shrink-0 ${isActive ? "text-[#45157b]" : "text-foreground/45"}`} strokeWidth={2} />
+                <span className={`relative ${isActive ? "text-[#45157b]" : "text-foreground/70"}`}>{entry.label}</span>
               </Link>
             );
           }
@@ -147,10 +147,10 @@ export default function Sidebar({ onClose, trial }: { onClose?: () => void; tria
                 type="button"
                 onClick={() => setOpenGroup(isOpen ? null : entry.label)}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-ink/[.03] ${
-                  hasActiveChild ? "text-[#5B4FE9]" : "text-foreground/70"
+                  hasActiveChild ? "text-[#45157b]" : "text-foreground/70"
                 }`}
               >
-                <Icon className={`h-[18px] w-[18px] shrink-0 ${hasActiveChild ? "text-[#5B4FE9]" : "text-foreground/45"}`} strokeWidth={2} />
+                <Icon className={`h-[18px] w-[18px] shrink-0 ${hasActiveChild ? "text-[#45157b]" : "text-foreground/45"}`} strokeWidth={2} />
                 <span className="flex-1 text-left">{entry.label}</span>
                 <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} strokeWidth={2} />
               </button>
@@ -172,7 +172,7 @@ export default function Sidebar({ onClose, trial }: { onClose?: () => void; tria
                             href={child.href}
                             onClick={onClose}
                             className={`rounded-lg px-2.5 py-2 text-sm transition-colors ${
-                              isActive ? "bg-indigo-50 dark:bg-indigo-500/15 font-medium text-[#5B4FE9]" : "text-foreground/60 hover:bg-ink/[.03]"
+                              isActive ? "bg-indigo-50 dark:bg-indigo-500/15 font-medium text-[#45157b]" : "text-foreground/60 hover:bg-ink/[.03]"
                             }`}
                           >
                             {child.label}

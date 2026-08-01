@@ -199,7 +199,7 @@ export default function SignupPage() {
           transition={{ duration: 0.5, ease: EASE }}
           className="w-full max-w-md overflow-hidden rounded-2xl border border-black/[.06] bg-white shadow-xl shadow-indigo-900/10"
         >
-          <div className="bg-gradient-to-br from-[#5B4FE9] to-[#4338CA] px-8 pb-8 pt-9 text-center">
+          <div className="bg-gradient-to-br from-[#45157b] to-[#4338CA] px-8 pb-8 pt-9 text-center">
             <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/15 backdrop-blur">
               <MailCheck className="h-7 w-7 text-white" strokeWidth={2} />
             </span>
@@ -229,7 +229,7 @@ export default function SignupPage() {
                 disabled={verifyStatus === "loading" || code.length !== 6}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#5B4FE9] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:bg-[#4a3fd6] disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#45157b] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:opacity-90 disabled:opacity-50"
               >
                 {verifyStatus === "loading" && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.4} />}
                 {verifyStatus === "loading" ? "Verifying..." : "Verify & Continue"}
@@ -292,7 +292,7 @@ export default function SignupPage() {
                   type="text"
                   value={form.firstName}
                   onChange={(e) => setField("firstName", e.target.value)}
-                  className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+                  className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
                     errors.firstName ? "border-red-400" : "border-black/[.12]"
                   }`}
                 />
@@ -304,7 +304,7 @@ export default function SignupPage() {
                   type="text"
                   value={form.lastName}
                   onChange={(e) => setField("lastName", e.target.value)}
-                  className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+                  className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
                     errors.lastName ? "border-red-400" : "border-black/[.12]"
                   }`}
                 />
@@ -318,7 +318,7 @@ export default function SignupPage() {
                 type="email"
                 value={form.email}
                 onChange={(e) => setField("email", e.target.value)}
-                className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+                className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
                   errors.email ? "border-red-400" : "border-black/[.12]"
                 }`}
               />
@@ -332,7 +332,7 @@ export default function SignupPage() {
                   type={showPassword ? "text" : "password"}
                   value={form.password}
                   onChange={(e) => setField("password", e.target.value)}
-                  className={`w-full rounded-lg border px-3.5 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+                  className={`w-full rounded-lg border px-3.5 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
                     errors.password ? "border-red-400" : "border-black/[.12]"
                   }`}
                 />
@@ -364,7 +364,7 @@ export default function SignupPage() {
                   value={form.phone}
                   onChange={(e) => setField("phone", e.target.value)}
                   placeholder={PHONE_PLACEHOLDER[form.countryCode]}
-                  className={`flex-1 rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+                  className={`flex-1 rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
                     errors.phone ? "border-red-400" : "border-black/[.12]"
                   }`}
                 />
@@ -387,11 +387,11 @@ export default function SignupPage() {
 
             <p className="rounded-lg bg-black/[.03] p-3 text-xs leading-relaxed text-foreground/50">
               By signing up, you agree to Exofe&apos;s{" "}
-              <Link href="/terms" className="font-medium text-[#5B4FE9] underline underline-offset-2">
+              <Link href="/terms" className="font-medium text-[#45157b] underline underline-offset-2">
                 Terms & Conditions
               </Link>{" "}
               and{" "}
-              <Link href="/privacy" className="font-medium text-[#5B4FE9] underline underline-offset-2">
+              <Link href="/privacy" className="font-medium text-[#45157b] underline underline-offset-2">
                 Privacy Policy
               </Link>
               .
@@ -406,7 +406,7 @@ export default function SignupPage() {
               disabled={status === "loading"}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
-              className="mt-1 flex w-full items-center justify-center gap-2 rounded-full bg-[#5B4FE9] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:bg-[#4a3fd6] disabled:opacity-70"
+              className="mt-1 flex w-full items-center justify-center gap-2 rounded-full bg-[#45157b] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:opacity-90 disabled:opacity-70"
             >
               {status === "loading" && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.4} />}
               {status === "loading" ? "Creating account..." : "Start My Trial"}
@@ -414,7 +414,7 @@ export default function SignupPage() {
 
             <p className="text-center text-sm text-foreground/55">
               Already have an account?{" "}
-              <Link href="/login" className="font-semibold text-[#5B4FE9] hover:underline">
+              <Link href="/login" className="font-semibold text-[#45157b] hover:underline">
                 Login
               </Link>
             </p>
@@ -431,7 +431,7 @@ export default function SignupPage() {
           <motion.h2 variants={item} className="text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-4xl">
             WhatsApp orders made simple,
             <br />
-            <span className="text-[#5B4FE9]">powered by AI</span>
+            <span className="text-[#45157b]">powered by AI</span>
           </motion.h2>
 
           <ul className="mt-8 flex flex-col gap-4">

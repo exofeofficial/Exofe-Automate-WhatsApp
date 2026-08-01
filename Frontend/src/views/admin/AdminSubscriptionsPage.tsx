@@ -47,7 +47,7 @@ function ActivatePlanControl({
           value={selectedPlan}
           onChange={(e) => setSelectedPlan(e.target.value as PlanId)}
           disabled={saving}
-          className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white capitalize focus:outline-none focus:ring-2 focus:ring-[#7C6FF5]/40 disabled:opacity-60"
+          className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white capitalize focus:outline-none focus:ring-2 focus:ring-[#45157b]/40 disabled:opacity-60"
         >
           {PLANS.map((p) => (
             <option key={p.id} value={p.id} className="bg-zinc-900">
@@ -59,7 +59,7 @@ function ActivatePlanControl({
           type="button"
           onClick={handleActivate}
           disabled={saving}
-          className="flex items-center gap-1.5 rounded-lg bg-[#5B4FE9] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#4a3fd6] disabled:opacity-60"
+          className="flex items-center gap-1.5 rounded-lg bg-[#45157b] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-60"
         >
           {saving && <Loader2 className="h-3 w-3 animate-spin" strokeWidth={2.5} />}
           Activate
@@ -95,7 +95,7 @@ export default function AdminSubscriptionsPage() {
   if (!subscriptions) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-950">
-        <Loader2 className="h-6 w-6 animate-spin text-[#7C6FF5]" strokeWidth={2} />
+        <Loader2 className="h-6 w-6 animate-spin text-[#45157b]" strokeWidth={2} />
       </div>
     );
   }
@@ -103,7 +103,7 @@ export default function AdminSubscriptionsPage() {
   if (subscriptions.length === 0) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-950 p-8 text-center">
-        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#5B4FE9]/15 text-[#7C6FF5]">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#45157b]/15 text-[#45157b]">
           <CreditCard className="h-6 w-6" strokeWidth={2} />
         </span>
         <h2 className="mt-4 text-lg font-bold text-white">No subscriptions yet</h2>

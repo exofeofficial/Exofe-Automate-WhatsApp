@@ -65,7 +65,7 @@ export default function BusinessHoursSection({
                   type="checkbox"
                   checked={row.closed}
                   onChange={(e) => updateRow(row.day, { closed: e.target.checked })}
-                  className="h-4 w-4 rounded border-ink/[.2] text-[#5B4FE9] focus:ring-[#5B4FE9]/30"
+                  className="h-4 w-4 rounded border-ink/[.2] text-[#45157b] focus:ring-[#45157b]/30"
                 />
                 Closed
               </label>
@@ -75,14 +75,14 @@ export default function BusinessHoursSection({
                     type="time"
                     value={row.open}
                     onChange={(e) => updateRow(row.day, { open: e.target.value })}
-                    className="w-[124px] rounded-md border border-ink/[.12] px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                    className="w-[124px] rounded-md border border-ink/[.12] px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
                   />
                   <span className="text-xs text-foreground/35">to</span>
                   <input
                     type="time"
                     value={row.close}
                     onChange={(e) => updateRow(row.day, { close: e.target.value })}
-                    className="w-[124px] rounded-md border border-ink/[.12] px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                    className="w-[124px] rounded-md border border-ink/[.12] px-2.5 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
                   />
                 </div>
               )}

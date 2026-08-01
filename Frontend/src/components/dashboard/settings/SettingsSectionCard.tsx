@@ -34,7 +34,7 @@ export default function SettingsSectionCard({
           type="button"
           onClick={onSave}
           disabled={saving}
-          className="flex items-center gap-2 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-70"
+          className="flex items-center gap-2 rounded-xl shine-btn-gold relative overflow-hidden bg-[#45157b] px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-70"
         >
           {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />}
           {saving ? "Saving..." : "Save changes"}

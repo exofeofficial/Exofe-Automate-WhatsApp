@@ -2,6 +2,7 @@
 from sqlalchemy.orm import Session
 
 from app.ai import whatsapp_client
+from app.core.exceptions import AppError
 from app.repositories import user_repository
 
 
@@ -34,6 +35,14 @@ def connect(
 
     whatsapp_client.subscribe_app_to_waba(business_account_id, access_token)
     details = whatsapp_client.get_phone_number_details(phone_number_id, access_token)
+
+    existing = user_repository.get_business_by_whatsapp_number(db, details["display_phone_number"])
+    if existing and existing["id"] != business_id:
+        raise AppError(
+            400,
+            "This WhatsApp number is already connected to another Exofe business account. "
+            "Disconnect it there first, or use a different number.",
+        )
 
     return user_repository.update_whatsapp_connection(
         db,

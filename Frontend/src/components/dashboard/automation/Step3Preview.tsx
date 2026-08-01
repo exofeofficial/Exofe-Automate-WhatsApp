@@ -55,7 +55,7 @@ export default function Step3Preview({
               value={bodyText}
               onChange={(e) => onBodyChange(e.target.value)}
               rows={3}
-              className="mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+              className="mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
             />
           </div>
 
@@ -64,7 +64,7 @@ export default function Step3Preview({
               type="button"
               onClick={() => onKindChange("buttons")}
               className={`flex flex-1 items-center justify-center gap-1.5 py-2 text-xs font-semibold transition-colors ${
-                kind === "buttons" ? "bg-[#5B4FE9] text-white" : "bg-surface text-foreground/60 hover:bg-ink/[.03]"
+                kind === "buttons" ? "bg-[#45157b] text-white" : "bg-surface text-foreground/60 hover:bg-ink/[.03]"
               }`}
             >
               <MessageSquareText className="h-3.5 w-3.5" strokeWidth={2} />
@@ -74,7 +74,7 @@ export default function Step3Preview({
               type="button"
               onClick={() => onKindChange("list")}
               className={`flex flex-1 items-center justify-center gap-1.5 py-2 text-xs font-semibold transition-colors ${
-                kind === "list" ? "bg-[#5B4FE9] text-white" : "bg-surface text-foreground/60 hover:bg-ink/[.03]"
+                kind === "list" ? "bg-[#45157b] text-white" : "bg-surface text-foreground/60 hover:bg-ink/[.03]"
               }`}
             >
               <List className="h-3.5 w-3.5" strokeWidth={2} />
@@ -93,7 +93,7 @@ export default function Step3Preview({
                     onChange={(e) =>
                       onButtonsChange(buttons.map((btn, idx) => (idx === i ? { ...btn, text: e.target.value } : btn)))
                     }
-                    className="flex-1 rounded-lg border border-ink/[.12] px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                    className="flex-1 rounded-lg border border-ink/[.12] px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
                   />
                   <button
                     type="button"
@@ -109,7 +109,7 @@ export default function Step3Preview({
                 <button
                   type="button"
                   onClick={() => onButtonsChange([...buttons, makeButton("")])}
-                  className="flex items-center gap-1 self-start text-xs font-semibold text-[#5B4FE9] hover:underline"
+                  className="flex items-center gap-1 self-start text-xs font-semibold text-[#45157b] hover:underline"
                 >
                   <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
                   Add button
@@ -124,7 +124,7 @@ export default function Step3Preview({
                   type="text"
                   value={listButtonLabel}
                   onChange={(e) => onListButtonLabelChange(e.target.value)}
-                  className="mt-1.5 w-full rounded-lg border border-ink/[.12] px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                  className="mt-1.5 w-full rounded-lg border border-ink/[.12] px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
                 />
               </div>
               <label className="text-xs font-semibold text-foreground/70">Options (up to {MAX_LIST_ROWS})</label>
@@ -136,7 +136,7 @@ export default function Step3Preview({
                     onChange={(e) =>
                       onListRowsChange(listRows.map((r, idx) => (idx === i ? { ...r, title: e.target.value } : r)))
                     }
-                    className="flex-1 rounded-lg border border-ink/[.12] px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                    className="flex-1 rounded-lg border border-ink/[.12] px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
                   />
                   <button
                     type="button"
@@ -152,7 +152,7 @@ export default function Step3Preview({
                 <button
                   type="button"
                   onClick={() => onListRowsChange([...listRows, makeListRow("")])}
-                  className="flex items-center gap-1 self-start text-xs font-semibold text-[#5B4FE9] hover:underline"
+                  className="flex items-center gap-1 self-start text-xs font-semibold text-[#45157b] hover:underline"
                 >
                   <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
                   Add option
@@ -183,7 +183,7 @@ export default function Step3Preview({
           type="button"
           onClick={onNext}
           disabled={!canContinue}
-          className="flex-1 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
+          className="flex-1 rounded-xl shine-btn-gold relative overflow-hidden bg-[#45157b] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
         >
           Continue
         </button>

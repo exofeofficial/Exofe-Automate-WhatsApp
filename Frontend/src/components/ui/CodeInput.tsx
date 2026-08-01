@@ -61,8 +61,8 @@ export default function CodeInput({
           onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)}
           onPaste={handlePaste}
-          className={`h-14 w-11 rounded-xl border bg-zinc-50 text-center text-xl font-bold text-foreground transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 disabled:opacity-60 sm:h-16 sm:w-12 ${
-            error ? "border-red-400" : "border-black/[.12] focus:border-[#5B4FE9]"
+          className={`h-14 w-11 rounded-xl border bg-zinc-50 text-center text-xl font-bold text-foreground transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 disabled:opacity-60 sm:h-16 sm:w-12 ${
+            error ? "border-red-400" : "border-black/[.12] focus:border-[#45157b]"
           }`}
         />
       ))}

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ApiError, updateDeliverySettings, type DeliverySettings } from "@/lib/api";
 import SettingsSectionCard from "./SettingsSectionCard";
 
-const inputClass = "mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30";
+const inputClass = "mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30";
 
 export default function DeliverySection({
   initial,
@@ -86,7 +86,7 @@ export default function DeliverySection({
             type="checkbox"
             checked={form.cashOnDelivery}
             onChange={(e) => setField("cashOnDelivery", e.target.checked)}
-            className="h-4 w-4 rounded border-ink/[.2] text-[#5B4FE9] focus:ring-[#5B4FE9]/30"
+            className="h-4 w-4 rounded border-ink/[.2] text-[#45157b] focus:ring-[#45157b]/30"
           />
           Cash on delivery available
         </label>
@@ -95,7 +95,7 @@ export default function DeliverySection({
             type="checkbox"
             checked={form.pickupAvailable}
             onChange={(e) => setField("pickupAvailable", e.target.checked)}
-            className="h-4 w-4 rounded border-ink/[.2] text-[#5B4FE9] focus:ring-[#5B4FE9]/30"
+            className="h-4 w-4 rounded border-ink/[.2] text-[#45157b] focus:ring-[#45157b]/30"
           />
           Customers can pick up their order
         </label>

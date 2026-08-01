@@ -40,18 +40,18 @@ export default function Step4Trigger({
               type="button"
               onClick={() => onChange(t)}
               className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
-                active ? "border-[#5B4FE9] bg-indigo-50 dark:bg-indigo-500/15" : "border-ink/[.1] hover:bg-ink/[.03]"
+                active ? "border-[#45157b] bg-indigo-50 dark:bg-indigo-500/15" : "border-ink/[.1] hover:bg-ink/[.03]"
               }`}
             >
               <span
                 className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${
-                  active ? "border-[#5B4FE9]" : "border-ink/[.2]"
+                  active ? "border-[#45157b]" : "border-ink/[.2]"
                 }`}
               >
-                {active && <span className="h-2 w-2 rounded-full bg-[#5B4FE9]" />}
+                {active && <span className="h-2 w-2 rounded-full bg-[#45157b]" />}
               </span>
               <div>
-                <p className={`text-sm font-semibold ${active ? "text-[#5B4FE9]" : "text-foreground/80"}`}>{meta.label}</p>
+                <p className={`text-sm font-semibold ${active ? "text-[#45157b]" : "text-foreground/80"}`}>{meta.label}</p>
                 <p className="mt-0.5 text-xs text-foreground/45">{meta.description}</p>
               </div>
             </button>
@@ -73,7 +73,7 @@ export default function Step4Trigger({
           type="button"
           onClick={onSave}
           disabled={saving}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-70"
+          className="flex flex-1 items-center justify-center gap-2 rounded-xl shine-btn-gold relative overflow-hidden bg-[#45157b] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-70"
         >
           {saving && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.4} />}
           {saving ? "Saving..." : isEdit ? "Save changes" : "Save Automation"}

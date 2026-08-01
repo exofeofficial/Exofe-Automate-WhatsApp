@@ -10,7 +10,7 @@ export default function UpgradeCard({ trial }: { trial: TrialStatus }) {
   if (trial.currentPlan !== "trial") return null;
 
   return (
-    <div className="relative mb-3 overflow-hidden rounded-2xl bg-gradient-to-br from-[#4a3fd6] via-[#5B4FE9] to-[#7C6FF5] p-4">
+    <div className="relative mb-3 overflow-hidden rounded-2xl bg-[#45157b] p-4">
       <span className="pointer-events-none absolute -right-6 -top-8 h-20 w-20 rounded-full bg-white/10 blur-2xl" />
 
       <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-secondary/20 text-secondary">

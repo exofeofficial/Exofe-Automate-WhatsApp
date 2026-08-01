@@ -7,7 +7,7 @@ import { validateImageFile } from "@/lib/imageValidation";
 import SettingsSectionCard from "./SettingsSectionCard";
 
 const inputClass = (hasError: boolean) =>
-  `mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+  `mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
     hasError ? "border-red-400 dark:border-red-500/50" : "border-ink/[.12]"
   }`;
 
@@ -144,7 +144,7 @@ export default function BusinessProfileSection({
           onChange={(e) => setField("description", e.target.value)}
           rows={3}
           placeholder="We sell premium clothing for women."
-          className="mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+          className="mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
         />
       </div>
 

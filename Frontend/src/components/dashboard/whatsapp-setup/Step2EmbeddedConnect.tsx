@@ -99,7 +99,7 @@ export default function Step2EmbeddedConnect({
   if (state === "connecting") {
     return (
       <div className="flex flex-col items-center gap-4 py-10 text-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#5B4FE9]" strokeWidth={2} />
+        <Loader2 className="h-8 w-8 animate-spin text-[#45157b]" strokeWidth={2} />
         <p className="text-sm font-medium text-foreground/70">{PHASES[phase]}</p>
       </div>
     );

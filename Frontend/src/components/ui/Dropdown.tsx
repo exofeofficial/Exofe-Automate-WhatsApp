@@ -34,7 +34,7 @@ export default function Dropdown({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`flex w-full items-center justify-between gap-2 rounded-lg border bg-ink/[.03] px-3.5 py-2.5 text-left text-sm text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+        className={`flex w-full items-center justify-between gap-2 rounded-lg border bg-ink/[.03] px-3.5 py-2.5 text-left text-sm text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
           error ? "border-red-400 dark:border-red-500/50" : "border-ink/[.1] hover:border-ink/20"
         } ${selected ? "text-foreground" : "text-foreground/40"}`}
       >
@@ -75,7 +75,7 @@ export default function Dropdown({
                     }}
                     className={`flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
                       isSelected
-                        ? "bg-indigo-50 dark:bg-indigo-500/15 font-medium text-[#5B4FE9]"
+                        ? "bg-indigo-50 dark:bg-indigo-500/15 font-medium text-[#45157b]"
                         : "text-foreground/75 hover:bg-ink/[.03]"
                     }`}
                   >

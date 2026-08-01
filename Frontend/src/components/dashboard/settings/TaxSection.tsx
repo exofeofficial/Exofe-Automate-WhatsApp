@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ApiError, updateTaxSettings, type TaxSettings } from "@/lib/api";
 import SettingsSectionCard from "./SettingsSectionCard";
 
-const inputClass = "mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30";
+const inputClass = "mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30";
 
 export default function TaxSection({
   initial,
@@ -76,7 +76,7 @@ export default function TaxSection({
           type="checkbox"
           checked={form.pricesIncludeTax}
           onChange={(e) => setField("pricesIncludeTax", e.target.checked)}
-          className="h-4 w-4 rounded border-ink/[.2] text-[#5B4FE9] focus:ring-[#5B4FE9]/30"
+          className="h-4 w-4 rounded border-ink/[.2] text-[#45157b] focus:ring-[#45157b]/30"
         />
         Product prices already include tax
       </label>

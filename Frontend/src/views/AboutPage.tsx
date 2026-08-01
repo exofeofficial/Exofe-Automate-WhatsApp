@@ -47,7 +47,7 @@ export default function AboutPage() {
           variants={container}
           className="mx-auto flex max-w-3xl flex-col items-center text-center"
         >
-          <motion.p variants={item} className="text-xs font-semibold uppercase tracking-wide text-[#5B4FE9]">
+          <motion.p variants={item} className="text-xs font-semibold uppercase tracking-wide text-[#45157b]">
             About Us
           </motion.p>
           <motion.h1
@@ -112,7 +112,7 @@ export default function AboutPage() {
                 variants={item}
                 className="rounded-3xl border border-black/[.06] bg-white p-6 shadow-sm"
               >
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-[#5B4FE9]">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-[#45157b]">
                   <v.icon className="h-5 w-5" strokeWidth={2} />
                 </span>
                 <h3 className="mt-4 text-sm font-bold text-foreground">{v.title}</h3>

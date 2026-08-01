@@ -5,7 +5,7 @@ import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { ApiError, createFaq, deleteFaq, updateFaq, type Faq } from "@/lib/api";
 
 const inputClass =
-  "w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30";
+  "w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30";
 
 function FaqForm({
   initial,
@@ -57,7 +57,7 @@ function FaqForm({
         <button
           type="submit"
           disabled={saving || !question.trim() || !answer.trim()}
-          className="flex items-center gap-1.5 rounded-lg shine-btn-gold relative overflow-hidden bg-[#5B4FE9] px-3.5 py-2 text-xs font-semibold text-white hover:bg-[#4a3fd6] disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-lg shine-btn-gold relative overflow-hidden bg-[#45157b] px-3.5 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
         >
           {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />}
           {submitLabel}

@@ -80,7 +80,7 @@ export default function DocsPage() {
                   onClick={(e) => goTo(e, s.id)}
                   className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
                     isActive
-                      ? "bg-indigo-50 font-semibold text-[#5B4FE9]"
+                      ? "bg-indigo-50 font-semibold text-[#45157b]"
                       : "text-foreground/60 hover:bg-black/[.03] hover:text-foreground"
                   }`}
                 >
@@ -101,7 +101,7 @@ export default function DocsPage() {
               onClick={(e) => goTo(e, s.id)}
               className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                 active === s.id
-                  ? "border-[#5B4FE9] bg-[#5B4FE9] text-white"
+                  ? "border-[#45157b] bg-[#45157b] text-white"
                   : "border-black/[.1] text-foreground/60"
               }`}
             >
@@ -135,7 +135,7 @@ export default function DocsPage() {
                 Business number, at least one product in your catalog, and a payment method turned on.
               </p>
               <ol className="mt-4 flex flex-col gap-2 text-sm text-foreground/65">
-                <li>1. Sign up at <Link href="/signup" className="font-medium text-[#5B4FE9] hover:underline">exofe.com/signup</Link></li>
+                <li>1. Sign up at <Link href="/signup" className="font-medium text-[#45157b] hover:underline">exofe.com/signup</Link></li>
                 <li>2. Confirm your business email</li>
                 <li>3. Follow the 3-step setup checklist in your dashboard</li>
               </ol>
@@ -287,14 +287,14 @@ export default function DocsPage() {
               <p className="text-sm font-semibold text-foreground">Still stuck?</p>
               <p className="mt-1 text-sm text-foreground/60">
                 Check the{" "}
-                <a href="/#faq" className="font-medium text-[#5B4FE9] hover:underline">
+                <a href="/#faq" className="font-medium text-[#45157b] hover:underline">
                   FAQ
                 </a>{" "}
                 or reach out and we&apos;ll help you get set up.
               </p>
               <a
                 href="mailto:hello@exofe.com"
-                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[#5B4FE9] hover:underline"
+                className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[#45157b] hover:underline"
               >
                 hello@exofe.com
                 <ExternalLink className="h-3.5 w-3.5" strokeWidth={2} />

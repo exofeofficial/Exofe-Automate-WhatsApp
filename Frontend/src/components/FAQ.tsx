@@ -117,7 +117,7 @@ export default function FAQ() {
                 variants={item}
                 transition={{ delay: i * 0.06 }}
                 className={`overflow-hidden rounded-2xl border shadow-sm transition-colors duration-300 ${
-                  isOpen ? "border-[#5B4FE9]/25 bg-gradient-to-br from-indigo-50 to-white" : "border-black/[.06] bg-white"
+                  isOpen ? "border-[#45157b]/25 bg-gradient-to-br from-indigo-50 to-white" : "border-black/[.06] bg-white"
                 }`}
               >
                 <button
@@ -130,7 +130,7 @@ export default function FAQ() {
                     animate={{ rotate: isOpen ? 45 : 0 }}
                     transition={{ duration: 0.3, ease: EASE }}
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors duration-300 ${
-                      isOpen ? "bg-[#5B4FE9] text-white" : "bg-black/[.05] text-foreground/60"
+                      isOpen ? "bg-[#45157b] text-white" : "bg-black/[.05] text-foreground/60"
                     }`}
                   >
                     <Plus className="h-4 w-4" strokeWidth={2.4} />

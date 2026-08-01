@@ -27,7 +27,7 @@ export default function StepComplete({ businessNumber }: { businessNumber: strin
         <button
           type="button"
           onClick={() => router.push("/dashboard/conversations")}
-          className="w-full rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+          className="w-full rounded-xl shine-btn-gold relative overflow-hidden bg-[#45157b] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90"
         >
           Go to Conversations
         </button>

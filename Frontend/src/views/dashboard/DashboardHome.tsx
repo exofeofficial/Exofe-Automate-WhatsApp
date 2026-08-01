@@ -128,7 +128,7 @@ export default function DashboardHome() {
               transition={{ duration: 0.2, ease: EASE }}
               className={`rounded-2xl p-5 shadow-sm transition-shadow hover:shadow-md ${
                 featured
-                  ? "bg-gradient-to-br from-[#5B4FE9] to-[#4338CA] shadow-indigo-900/20"
+                  ? "bg-gradient-to-br from-[#45157b] to-[#4338CA] shadow-indigo-900/20"
                   : "border border-ink/[.06] bg-surface"
               } ${!s ? "animate-pulse" : ""}`}
             >

@@ -126,7 +126,7 @@ export default function ForgotPasswordPage() {
                     if (emailError) setEmailError(null);
                   }}
                   placeholder="Enter your email"
-                  className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+                  className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
                     emailError ? "border-red-400" : "border-black/[.12]"
                   }`}
                 />
@@ -138,7 +138,7 @@ export default function ForgotPasswordPage() {
                 disabled={status === "loading"}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#5B4FE9] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:bg-[#4a3fd6] disabled:opacity-70"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#45157b] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:opacity-90 disabled:opacity-70"
               >
                 {status === "loading" && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.4} />}
                 {status === "loading" ? "Sending..." : "Send Reset Code"}
@@ -178,7 +178,7 @@ export default function ForgotPasswordPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="At least 8 characters"
-                    className="w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                    className="w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
                   />
                   <button
                     type="button"
@@ -198,7 +198,7 @@ export default function ForgotPasswordPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter your new password"
-                  className="mt-1.5 w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                  className="mt-1.5 w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
                 />
               </div>
 
@@ -209,7 +209,7 @@ export default function ForgotPasswordPage() {
                 disabled={status === "loading"}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#5B4FE9] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:bg-[#4a3fd6] disabled:opacity-70"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#45157b] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:opacity-90 disabled:opacity-70"
               >
                 {status === "loading" && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.4} />}
                 {status === "loading" ? "Resetting..." : "Reset Password"}
@@ -218,7 +218,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="button"
                 onClick={handleResend}
-                className="text-center text-sm font-medium text-[#5B4FE9] hover:underline"
+                className="text-center text-sm font-medium text-[#45157b] hover:underline"
               >
                 Didn&apos;t get a code? Resend
               </button>
@@ -238,7 +238,7 @@ export default function ForgotPasswordPage() {
             </p>
             <Link
               href="/login"
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#5B4FE9] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:bg-[#4a3fd6]"
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#45157b] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:opacity-90"
             >
               <KeyRound className="h-4 w-4" strokeWidth={2} />
               Back to Login
@@ -249,7 +249,7 @@ export default function ForgotPasswordPage() {
         {step !== "done" && (
           <motion.p variants={item} className="mt-6 text-center text-sm text-foreground/55">
             Remembered your password?{" "}
-            <Link href="/login" className="font-semibold text-[#5B4FE9] hover:underline">
+            <Link href="/login" className="font-semibold text-[#45157b] hover:underline">
               Log In
             </Link>
           </motion.p>

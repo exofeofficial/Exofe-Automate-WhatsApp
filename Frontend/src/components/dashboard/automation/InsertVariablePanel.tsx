@@ -21,7 +21,7 @@ export default function InsertVariablePanel({ onInsert }: { onInsert: (key: stri
                   key={v.key}
                   type="button"
                   onClick={() => onInsert(v.key)}
-                  className="flex items-center gap-1 rounded-full border border-ink/[.1] bg-surface px-2.5 py-1 text-[11px] font-medium text-foreground/65 hover:border-[#5B4FE9] hover:text-[#5B4FE9]"
+                  className="flex items-center gap-1 rounded-full border border-ink/[.1] bg-surface px-2.5 py-1 text-[11px] font-medium text-foreground/65 hover:border-[#45157b] hover:text-[#45157b]"
                 >
                   <Plus className="h-3 w-3" strokeWidth={2.5} />
                   {v.label}

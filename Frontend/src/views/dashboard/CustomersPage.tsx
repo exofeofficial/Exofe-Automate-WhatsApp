@@ -68,7 +68,7 @@ export default function CustomersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name or number"
-            className="w-full rounded-full border border-ink/[.08] bg-surface py-2.5 pl-10 pr-4 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/25"
+            className="w-full rounded-full border border-ink/[.08] bg-surface py-2.5 pl-10 pr-4 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/25"
           />
         </div>
       </motion.div>
@@ -81,7 +81,7 @@ export default function CustomersPage() {
 
       {loading ? (
         <div className="flex h-[calc(100vh-14rem)] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
-          <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
+          <Loader2 className="h-6 w-6 animate-spin text-[#45157b]" strokeWidth={2} />
         </div>
       ) : customers.length === 0 ? (
         <motion.div

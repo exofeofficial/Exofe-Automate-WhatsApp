@@ -111,7 +111,7 @@ export default function TeamPage() {
   if (loading) {
     return (
       <div className="flex h-[calc(100vh-10rem)] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
-        <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
+        <Loader2 className="h-6 w-6 animate-spin text-[#45157b]" strokeWidth={2} />
       </div>
     );
   }
@@ -123,7 +123,7 @@ export default function TeamPage() {
         <button
           type="button"
           onClick={() => setShowInvite(true)}
-          className="flex items-center gap-1.5 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-90"
+          className="flex items-center gap-1.5 rounded-xl shine-btn-gold relative overflow-hidden bg-[#45157b] px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-90"
         >
           <UserPlus className="h-3.5 w-3.5" strokeWidth={2.5} />
           Invite Member
@@ -153,13 +153,13 @@ export default function TeamPage() {
 
               <div className="w-32 shrink-0">
                 {m.role === "owner" ? (
-                  <span className="rounded-full bg-indigo-50 dark:bg-indigo-500/15 px-2.5 py-1 text-[11px] font-semibold text-[#5B4FE9]">Owner</span>
+                  <span className="rounded-full bg-indigo-50 dark:bg-indigo-500/15 px-2.5 py-1 text-[11px] font-semibold text-[#45157b]">Owner</span>
                 ) : (
                   <select
                     value={m.role}
                     disabled={roleUpdatingId === m.id}
                     onChange={(e) => handleRoleChange(m, e.target.value as TeamRole)}
-                    className="rounded-lg border border-ink/[.1] bg-surface px-2 py-1.5 text-xs font-medium text-foreground/70 focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/25 disabled:opacity-50"
+                    className="rounded-lg border border-ink/[.1] bg-surface px-2 py-1.5 text-xs font-medium text-foreground/70 focus:outline-none focus:ring-2 focus:ring-[#45157b]/25 disabled:opacity-50"
                   >
                     <option value="admin">{ROLE_LABEL.admin}</option>
                     <option value="staff">{ROLE_LABEL.staff}</option>

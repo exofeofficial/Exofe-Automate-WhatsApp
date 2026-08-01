@@ -94,6 +94,15 @@ ALTER TABLE users
     ADD CONSTRAINT fk_users_business
     FOREIGN KEY (business_id) REFERENCES businesses(id) ON DELETE SET NULL;
 
+-- Prevents two businesses from ever being connected to the same real
+-- WhatsApp number at once (would silently misroute inbound webhook
+-- messages to whichever business Postgres happens to return first —
+-- see get_business_by_whatsapp_number). Indexed on digits-only so
+-- formatting differences (+92 vs 92, spaces, dashes) still collide.
+CREATE UNIQUE INDEX idx_businesses_whatsapp_number_unique
+    ON businesses (regexp_replace(whatsapp_number, '[^0-9]', '', 'g'))
+    WHERE whatsapp_number IS NOT NULL;
+
 -- ============================================================
 -- SUBSCRIPTIONS
 -- Tracks which Exofe plan a business is on.

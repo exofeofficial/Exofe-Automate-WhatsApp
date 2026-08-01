@@ -45,7 +45,7 @@ function swatchFor(value: string): string | null {
 }
 
 const inputClass = (hasError: boolean) =>
-  `mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+  `mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
     hasError ? "border-red-400 dark:border-red-500/50" : "border-ink/[.12]"
   }`;
 
@@ -159,7 +159,7 @@ function OptionCard({
           value={option.name}
           onChange={(e) => onChangeName(e.target.value)}
           placeholder="Option name, e.g. Size or Color"
-          className="flex-1 rounded-lg border border-ink/[.12] bg-surface px-3 py-2 text-sm text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+          className="flex-1 rounded-lg border border-ink/[.12] bg-surface px-3 py-2 text-sm text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
         />
         <button
           type="button"
@@ -175,7 +175,7 @@ function OptionCard({
         {option.values.map((v) => (
           <span
             key={v}
-            className="flex items-center gap-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/15 py-1 pl-2.5 pr-1.5 text-xs font-medium text-[#5B4FE9]"
+            className="flex items-center gap-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/15 py-1 pl-2.5 pr-1.5 text-xs font-medium text-[#45157b]"
           >
             {isColor && swatchFor(v) && (
               <span className="h-2.5 w-2.5 rounded-full border border-black/10" style={{ backgroundColor: swatchFor(v)! }} />
@@ -217,7 +217,7 @@ function OptionCard({
                 type="button"
                 onClick={() => (active ? onRemoveValue(p) : onAddValue(p))}
                 className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                  active ? "border-[#5B4FE9] bg-[#5B4FE9] text-white" : "border-ink/[.1] bg-surface text-foreground/55 hover:bg-ink/[.03]"
+                  active ? "border-[#45157b] bg-[#45157b] text-white" : "border-ink/[.1] bg-surface text-foreground/55 hover:bg-ink/[.03]"
                 }`}
               >
                 {isColor && swatchFor(p) && (
@@ -416,7 +416,7 @@ export default function ProductFormPage({ productId }: { productId?: string }) {
   if (loading) {
     return (
       <div className="flex h-[calc(100vh-10rem)] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
-        <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
+        <Loader2 className="h-6 w-6 animate-spin text-[#45157b]" strokeWidth={2} />
       </div>
     );
   }
@@ -453,7 +453,7 @@ export default function ProductFormPage({ productId }: { productId?: string }) {
             type="button"
             disabled={saving}
             onClick={() => handleSubmit("active")}
-            className="flex items-center gap-2 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-70"
+            className="flex items-center gap-2 rounded-xl shine-btn-gold relative overflow-hidden bg-[#45157b] px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-70"
           >
             {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2.4} />}
             {productId ? "Save changes" : "Add Product"}
@@ -485,7 +485,7 @@ export default function ProductFormPage({ productId }: { productId?: string }) {
                 onChange={(e) => setField("description", e.target.value)}
                 rows={4}
                 placeholder="What should the AI tell customers about this product?"
-                className="mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                className="mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
               />
             </div>
           </Card>
@@ -496,7 +496,7 @@ export default function ProductFormPage({ productId }: { productId?: string }) {
                 type="checkbox"
                 checked={form.hasVariants}
                 onChange={(e) => setField("hasVariants", e.target.checked)}
-                className="h-4 w-4 rounded border-ink/[.2] text-[#5B4FE9] focus:ring-[#5B4FE9]/30"
+                className="h-4 w-4 rounded border-ink/[.2] text-[#45157b] focus:ring-[#45157b]/30"
               />
               This product has options, like size or color
             </label>
@@ -548,7 +548,7 @@ export default function ProductFormPage({ productId }: { productId?: string }) {
                     <button
                       type="button"
                       onClick={() => addOption()}
-                      className="flex items-center gap-1 text-xs font-semibold text-[#5B4FE9] hover:underline"
+                      className="flex items-center gap-1 text-xs font-semibold text-[#45157b] hover:underline"
                     >
                       <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
                       Add another option
@@ -584,7 +584,7 @@ export default function ProductFormPage({ productId }: { productId?: string }) {
                             value={v.sku}
                             onChange={(e) => updateVariant(v.id, { sku: e.target.value })}
                             placeholder="SKU"
-                            className="w-28 shrink-0 rounded-md border border-ink/[.1] px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                            className="w-28 shrink-0 rounded-md border border-ink/[.1] px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
                           />
                           <input
                             type="number"
@@ -592,7 +592,7 @@ export default function ProductFormPage({ productId }: { productId?: string }) {
                             value={v.price}
                             onChange={(e) => updateVariant(v.id, { price: e.target.value })}
                             placeholder="PKR"
-                            className="w-24 shrink-0 rounded-md border border-ink/[.1] px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                            className="w-24 shrink-0 rounded-md border border-ink/[.1] px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
                           />
                           <input
                             type="number"
@@ -600,7 +600,7 @@ export default function ProductFormPage({ productId }: { productId?: string }) {
                             value={v.stock}
                             onChange={(e) => updateVariant(v.id, { stock: e.target.value })}
                             placeholder="Qty"
-                            className="w-20 shrink-0 rounded-md border border-ink/[.1] px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                            className="w-20 shrink-0 rounded-md border border-ink/[.1] px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
                           />
                         </div>
                       ))}
@@ -687,7 +687,7 @@ export default function ProductFormPage({ productId }: { productId?: string }) {
                   type="button"
                   onClick={() => setActiveImage(i)}
                   className={`h-14 w-14 shrink-0 overflow-hidden rounded-lg border-2 ${
-                    activeImage === i ? "border-[#5B4FE9]" : "border-transparent"
+                    activeImage === i ? "border-[#45157b]" : "border-transparent"
                   }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}

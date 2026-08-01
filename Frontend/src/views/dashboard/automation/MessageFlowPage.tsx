@@ -40,9 +40,9 @@ function FlowNode({ data }: NodeProps) {
   const isAdd = d.kind === "add";
   const styles: Record<NodeKind, string> = {
     trigger: "border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10",
-    message: "border-[#5B4FE9]/40 bg-gradient-to-br from-[#5B4FE9]/10 to-[#7C6FF5]/10",
+    message: "border-[#45157b]/40 bg-gradient-to-br from-[#45157b]/10 to-[#45157b]/10",
     choice: "border-secondary/40 bg-secondary/10",
-    add: "border-dashed border-ink/[.15] bg-ink/[.02] hover:border-[#5B4FE9]/40",
+    add: "border-dashed border-ink/[.15] bg-ink/[.02] hover:border-[#45157b]/40",
   };
   const icon = d.kind === "trigger" ? <Zap className="h-3.5 w-3.5" strokeWidth={2.5} /> : d.kind === "message" ? <MessageCircle className="h-3.5 w-3.5" strokeWidth={2.5} /> : d.kind === "add" ? <Plus className="h-3.5 w-3.5" strokeWidth={2.5} /> : null;
 
@@ -95,7 +95,7 @@ function TextFieldPanel({
   error: string | null;
 }) {
   const [value, setValue] = useState(initial);
-  const inputClass = "mt-3 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30";
+  const inputClass = "mt-3 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30";
 
   return (
     <>
@@ -114,7 +114,7 @@ function TextFieldPanel({
           type="button"
           onClick={() => onSave(value)}
           disabled={saving}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#5B4FE9] py-2.5 text-xs font-semibold text-white disabled:opacity-50"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-[#45157b] py-2.5 text-xs font-semibold text-white disabled:opacity-50"
         >
           {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />}
           {saving ? "Saving…" : "Save"}
@@ -247,7 +247,7 @@ export default function MessageFlowPage({ messageId }: { messageId: string }) {
   if (loading) {
     return (
       <div className="flex h-[calc(100vh-10rem)] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
-        <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
+        <Loader2 className="h-6 w-6 animate-spin text-[#45157b]" strokeWidth={2} />
       </div>
     );
   }
@@ -257,7 +257,7 @@ export default function MessageFlowPage({ messageId }: { messageId: string }) {
       <div className="flex h-[calc(100vh-10rem)] flex-col items-center justify-center gap-2 rounded-2xl border border-ink/[.06] bg-surface p-6 text-center shadow-sm">
         <p className="text-sm font-bold text-foreground">Couldn&apos;t load this flow</p>
         <p className="text-sm text-foreground/55">{loadError ?? "This message may have been deleted."}</p>
-        <Link href="/dashboard/automation/flow-builder" className="mt-2 text-xs font-semibold text-[#5B4FE9] hover:underline">
+        <Link href="/dashboard/automation/flow-builder" className="mt-2 text-xs font-semibold text-[#45157b] hover:underline">
           Back to all flows
         </Link>
       </div>

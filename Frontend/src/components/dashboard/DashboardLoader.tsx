@@ -29,12 +29,12 @@ export default function DashboardLoader() {
       <svg height="0" width="0" viewBox="0 0 64 64" className="absolute">
         <defs>
           <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="exofe-loader-a">
-            <stop stopColor="#5B4FE9" />
-            <stop stopColor="#7C6FF5" offset="1" />
+            <stop stopColor="#45157b" />
+            <stop stopColor="#45157b" offset="1" />
           </linearGradient>
           <linearGradient gradientUnits="userSpaceOnUse" y2="0" x2="0" y1="64" x1="0" id="exofe-loader-b">
             <stop stopColor="#fcba03" />
-            <stop stopColor="#5B4FE9" offset="1" />
+            <stop stopColor="#45157b" offset="1" />
             <animateTransform
               repeatCount="indefinite"
               keySplines=".42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1;.42,0,.58,1"
@@ -46,7 +46,7 @@ export default function DashboardLoader() {
             />
           </linearGradient>
           <linearGradient gradientUnits="userSpaceOnUse" y2="2" x2="0" y1="62" x1="0" id="exofe-loader-c">
-            <stop stopColor="#7C6FF5" />
+            <stop stopColor="#45157b" />
             <stop stopColor="#fcba03" offset="1" />
           </linearGradient>
         </defs>

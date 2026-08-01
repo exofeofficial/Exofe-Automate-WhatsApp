@@ -118,7 +118,7 @@ export default function OrderTakingFlowPage() {
               zoomable
               className="!bg-surface"
               maskColor="rgba(91, 79, 233, 0.06)"
-              nodeColor={(n) => (n.type === "end" ? "#9ca3af" : n.type === "decision" ? "#fcba03" : n.type === "ai" ? "#5B4FE9" : "#10b981")}
+              nodeColor={(n) => (n.type === "end" ? "#9ca3af" : n.type === "decision" ? "#fcba03" : n.type === "ai" ? "#45157b" : "#10b981")}
             />
           </ReactFlow>
           <FlowEdgeOverlay edges={EDGES} rects={NODE_RECTS} />

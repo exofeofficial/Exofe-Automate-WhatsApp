@@ -14,7 +14,7 @@ export default function LegalLayout({
   return (
     <main className="bg-white px-4 py-14 sm:px-6 lg:py-20">
       <div className="mx-auto w-full max-w-3xl">
-        <p className="text-xs font-semibold uppercase tracking-wide text-[#5B4FE9]">Legal</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-[#45157b]">Legal</p>
         <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{title}</h1>
         <p className="mt-3 text-xs text-foreground/45">Last updated: {lastUpdated}</p>
         {intro && <p className="mt-5 text-sm leading-relaxed text-foreground/60">{intro}</p>}
@@ -25,7 +25,7 @@ export default function LegalLayout({
           [&_p]:mt-2 [&_p]:text-sm [&_p]:leading-relaxed [&_p]:text-foreground/60
           [&_ul]:mt-2 [&_ul]:ml-5 [&_ul]:flex [&_ul]:list-disc [&_ul]:flex-col [&_ul]:gap-1.5
           [&_li]:text-sm [&_li]:leading-relaxed [&_li]:text-foreground/60
-          [&_a]:text-[#5B4FE9] [&_a]:underline [&_a]:underline-offset-2"
+          [&_a]:text-[#45157b] [&_a]:underline [&_a]:underline-offset-2"
         >
           {children}
         </div>

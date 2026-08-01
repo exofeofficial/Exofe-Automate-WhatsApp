@@ -26,7 +26,7 @@ export default function AdminUsersPage() {
   if (!users) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-950">
-        <Loader2 className="h-6 w-6 animate-spin text-[#7C6FF5]" strokeWidth={2} />
+        <Loader2 className="h-6 w-6 animate-spin text-[#45157b]" strokeWidth={2} />
       </div>
     );
   }
@@ -34,7 +34,7 @@ export default function AdminUsersPage() {
   if (users.length === 0) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-zinc-950 p-8 text-center">
-        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#5B4FE9]/15 text-[#7C6FF5]">
+        <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#45157b]/15 text-[#45157b]">
           <Users className="h-6 w-6" strokeWidth={2} />
         </span>
         <h2 className="mt-4 text-lg font-bold text-white">No users yet</h2>

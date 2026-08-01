@@ -20,7 +20,7 @@ const item: Variants = {
 
 const STATUS_META: Record<OrderStatus, { label: string; badge: string }> = {
   new: { label: "New", badge: "bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400" },
-  confirmed: { label: "Confirmed", badge: "bg-indigo-50 dark:bg-indigo-500/15 text-[#5B4FE9]" },
+  confirmed: { label: "Confirmed", badge: "bg-indigo-50 dark:bg-indigo-500/15 text-[#45157b]" },
   shipped: { label: "Shipped", badge: "bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400" },
   delivered: { label: "Delivered", badge: "bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" },
   canceled: { label: "Canceled", badge: "bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-400" },
@@ -86,7 +86,7 @@ export default function OrdersPage() {
   return (
     <motion.div initial="hidden" animate="show" variants={container} className="flex flex-col gap-6">
       <motion.div variants={item} className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        <div className="rounded-2xl bg-gradient-to-br from-[#5B4FE9] to-[#4338CA] p-4 text-white shadow-sm">
+        <div className="rounded-2xl bg-gradient-to-br from-[#45157b] to-[#4338CA] p-4 text-white shadow-sm">
           <p className="text-xs text-white/70">Total Orders</p>
           <p className="mt-1 text-xl font-extrabold">{totalOrders}</p>
         </div>
@@ -106,7 +106,7 @@ export default function OrdersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by customer or phone"
-            className="w-full rounded-full border border-ink/[.08] bg-surface py-2 pl-9 pr-4 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/25"
+            className="w-full rounded-full border border-ink/[.08] bg-surface py-2 pl-9 pr-4 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/25"
           />
         </div>
 
@@ -118,7 +118,7 @@ export default function OrdersPage() {
               onClick={() => setStatusFilter(f.value)}
               className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
                 statusFilter === f.value
-                  ? "bg-[#5B4FE9] text-white"
+                  ? "bg-[#45157b] text-white"
                   : "bg-surface text-foreground/60 shadow-sm hover:bg-ink/[.03]"
               }`}
             >
@@ -136,7 +136,7 @@ export default function OrdersPage() {
 
       {loading ? (
         <div className="flex h-[calc(100vh-22rem)] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
-          <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
+          <Loader2 className="h-6 w-6 animate-spin text-[#45157b]" strokeWidth={2} />
         </div>
       ) : orders.length === 0 ? (
         <motion.div

@@ -157,7 +157,7 @@ export default function LoginPage() {
                   clearError("email");
                 }}
                 placeholder="Enter your email"
-                className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+                className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
                   errors.email ? "border-red-400" : "border-black/[.12]"
                 }`}
               />
@@ -175,7 +175,7 @@ export default function LoginPage() {
                     clearError("password");
                   }}
                   placeholder="Enter your password"
-                  className={`w-full rounded-lg border px-3.5 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+                  className={`w-full rounded-lg border px-3.5 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
                     errors.password ? "border-red-400" : "border-black/[.12]"
                   }`}
                 />
@@ -197,11 +197,11 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 rounded border-black/[.2] text-[#5B4FE9] focus:ring-[#5B4FE9]/30"
+                  className="h-4 w-4 rounded border-black/[.2] text-[#45157b] focus:ring-[#45157b]/30"
                 />
                 Remember me
               </label>
-              <Link href="/forgot-password" className="text-sm font-medium text-[#5B4FE9] hover:underline">
+              <Link href="/forgot-password" className="text-sm font-medium text-[#45157b] hover:underline">
                 Forgot password?
               </Link>
             </div>
@@ -213,7 +213,7 @@ export default function LoginPage() {
               disabled={status === "loading"}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-[#5B4FE9] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:bg-[#4a3fd6] disabled:opacity-70"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-[#45157b] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:opacity-90 disabled:opacity-70"
             >
               {status === "loading" && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.4} />}
               {status === "loading" ? "Logging in..." : "Login"}
@@ -233,7 +233,7 @@ export default function LoginPage() {
                   clearError("email");
                 }}
                 placeholder="Enter your email"
-                className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+                className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
                   errors.email ? "border-red-400" : "border-black/[.12]"
                 }`}
               />
@@ -247,7 +247,7 @@ export default function LoginPage() {
               disabled={status === "loading"}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-[#5B4FE9] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:bg-[#4a3fd6] disabled:opacity-70"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-[#45157b] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:opacity-90 disabled:opacity-70"
             >
               {status === "loading" && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.4} />}
               {status === "loading" ? "Sending code..." : "Send Code"}
@@ -272,7 +272,7 @@ export default function LoginPage() {
                   clearError("code");
                 }}
                 placeholder="123456"
-                className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-center text-lg tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+                className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-center text-lg tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
                   errors.code ? "border-red-400" : "border-black/[.12]"
                 }`}
               />
@@ -286,7 +286,7 @@ export default function LoginPage() {
               disabled={status === "loading"}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-[#5B4FE9] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:bg-[#4a3fd6] disabled:opacity-70"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-[#45157b] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:opacity-90 disabled:opacity-70"
             >
               {status === "loading" && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.4} />}
               {status === "loading" ? "Verifying..." : "Verify & Login"}
@@ -295,7 +295,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setMode("otp-request")}
-              className="text-center text-sm font-medium text-[#5B4FE9] hover:underline"
+              className="text-center text-sm font-medium text-[#45157b] hover:underline"
             >
               Didn&apos;t get a code? Resend
             </button>
@@ -348,7 +348,7 @@ export default function LoginPage() {
 
         <motion.p variants={item} className="mt-6 text-center text-sm text-foreground/55">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="font-semibold text-[#5B4FE9] hover:underline">
+          <Link href="/signup" className="font-semibold text-[#45157b] hover:underline">
             Sign Up
           </Link>
         </motion.p>

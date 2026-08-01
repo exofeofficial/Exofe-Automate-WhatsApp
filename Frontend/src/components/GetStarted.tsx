@@ -65,7 +65,7 @@ function StepCard({
     >
       <div className="flex items-start justify-between gap-3">
         <span className="flex items-center gap-2 text-base font-bold text-foreground">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-[#5B4FE9]">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-[#45157b]">
             <Icon className="h-4 w-4" strokeWidth={2.2} />
           </span>
           {step.title}
@@ -183,7 +183,7 @@ export default function GetStarted() {
                       whileInView={{ scale: 1, opacity: 1 }}
                       viewport={{ once: true, amount: 0.6 }}
                       transition={{ duration: 0.4, delay: 0.2, ease: EASE }}
-                      className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-[#5B4FE9] bg-white text-base font-bold text-[#5B4FE9] shadow-sm"
+                      className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-[#45157b] bg-white text-base font-bold text-[#45157b] shadow-sm"
                     >
                       {i + 1}
                     </motion.div>

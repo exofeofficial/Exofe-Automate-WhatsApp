@@ -81,7 +81,7 @@ export default function ImportCsvModal({
             type="button"
             disabled={!file || importing}
             onClick={() => file && onImport(file)}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl shine-btn-gold relative overflow-hidden bg-[#45157b] py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
           >
             {importing && <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />}
             {importing ? "Importing..." : "Import"}

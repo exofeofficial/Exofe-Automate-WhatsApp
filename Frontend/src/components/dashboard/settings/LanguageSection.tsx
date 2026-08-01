@@ -56,7 +56,7 @@ export default function LanguageSection({
               setSaved(false);
             }}
             className={`flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 text-sm font-medium transition-colors ${
-              language === l.code ? "border-[#5B4FE9] bg-indigo-50 dark:bg-indigo-500/15 text-[#5B4FE9]" : "border-ink/[.1] text-foreground/65 hover:bg-ink/[.03]"
+              language === l.code ? "border-[#45157b] bg-indigo-50 dark:bg-indigo-500/15 text-[#45157b]" : "border-ink/[.1] text-foreground/65 hover:bg-ink/[.03]"
             }`}
           >
             <span className="text-xl">{l.flag}</span>

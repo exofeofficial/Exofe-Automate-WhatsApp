@@ -67,7 +67,7 @@ export default function Step2Describe({
           onClick={(e) => trackCursor(e.currentTarget)}
           rows={7}
           placeholder="Hello {{customer_name}}, thank you for your order."
-          className="w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+          className="w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
         />
         <InsertVariablePanel onInsert={insertVariable} />
       </div>
@@ -95,7 +95,7 @@ export default function Step2Describe({
           type="button"
           onClick={onNext}
           disabled={!bodyText.trim()}
-          className="flex-1 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
+          className="flex-1 rounded-xl shine-btn-gold relative overflow-hidden bg-[#45157b] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
         >
           Continue
         </button>

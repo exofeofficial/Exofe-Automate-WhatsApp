@@ -109,7 +109,7 @@ export default function Footer() {
                 <Link
                   href={l.href}
                   onClick={(e) => scrollToSection(e, l.href)}
-                  className="text-sm text-foreground/60 transition-colors duration-200 hover:text-[#5B4FE9]"
+                  className="text-sm text-foreground/60 transition-colors duration-200 hover:text-[#45157b]"
                 >
                   {l.label}
                 </Link>
@@ -125,7 +125,7 @@ export default function Footer() {
               <li key={l.label}>
                 <Link
                   href={l.href}
-                  className="text-sm text-foreground/60 transition-colors duration-200 hover:text-[#5B4FE9]"
+                  className="text-sm text-foreground/60 transition-colors duration-200 hover:text-[#45157b]"
                 >
                   {l.label}
                 </Link>
@@ -138,12 +138,12 @@ export default function Footer() {
           <p className="text-sm font-bold text-foreground">Contact</p>
           <ul className="mt-4 flex flex-col gap-3 text-sm text-foreground/60">
             <li>
-              <a href="mailto:support@exofe.com" className="transition-colors duration-200 hover:text-[#5B4FE9]">
+              <a href="mailto:support@exofe.com" className="transition-colors duration-200 hover:text-[#45157b]">
                 support@exofe.com
               </a>
             </li>
             <li>
-              <a href="tel:+923324835793" className="transition-colors duration-200 hover:text-[#5B4FE9]">
+              <a href="tel:+923324835793" className="transition-colors duration-200 hover:text-[#45157b]">
                 +92 332 4835793
               </a>
             </li>
@@ -169,7 +169,7 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={s.label}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-black/[.05] text-foreground/70 transition-colors duration-200 hover:bg-[#5B4FE9] hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-black/[.05] text-foreground/70 transition-colors duration-200 hover:bg-[#45157b] hover:text-white"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d={s.path} />

@@ -19,9 +19,9 @@ export default function AutomationWizardProgress({ current }: { current: number 
               <span
                 className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors ${
                   isDone
-                    ? "bg-[#5B4FE9] text-white"
+                    ? "bg-[#45157b] text-white"
                     : isCurrent
-                      ? "bg-indigo-50 dark:bg-indigo-500/15 text-[#5B4FE9] ring-2 ring-[#5B4FE9]"
+                      ? "bg-indigo-50 dark:bg-indigo-500/15 text-[#45157b] ring-2 ring-[#45157b]"
                       : "bg-ink/[.05] text-foreground/35"
                 }`}
               >
@@ -31,7 +31,7 @@ export default function AutomationWizardProgress({ current }: { current: number 
                 {label}
               </span>
             </div>
-            {!isLast && <span className={`mx-2 h-0.5 flex-1 rounded-full ${isDone ? "bg-[#5B4FE9]" : "bg-ink/[.08]"}`} />}
+            {!isLast && <span className={`mx-2 h-0.5 flex-1 rounded-full ${isDone ? "bg-[#45157b]" : "bg-ink/[.08]"}`} />}
           </div>
         );
       })}

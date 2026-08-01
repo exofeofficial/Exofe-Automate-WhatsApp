@@ -100,7 +100,7 @@ export default function Pricing() {
               type="button"
               onClick={() => setYearly(false)}
               className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors duration-300 ${
-                !yearly ? "bg-[#5B4FE9] text-white shadow-sm" : "text-foreground/60 hover:text-foreground"
+                !yearly ? "bg-[#45157b] text-white shadow-sm" : "text-foreground/60 hover:text-foreground"
               }`}
             >
               Monthly
@@ -109,7 +109,7 @@ export default function Pricing() {
               type="button"
               onClick={() => setYearly(true)}
               className={`flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold transition-colors duration-300 ${
-                yearly ? "bg-[#5B4FE9] text-white shadow-sm" : "text-foreground/60 hover:text-foreground"
+                yearly ? "bg-[#45157b] text-white shadow-sm" : "text-foreground/60 hover:text-foreground"
               }`}
             >
               Yearly
@@ -137,11 +137,11 @@ export default function Pricing() {
                 transition={{ delay: i * 0.1 }}
                 whileHover={{ y: -6 }}
                 className={`relative flex flex-col overflow-hidden rounded-3xl border shadow-sm transition-shadow duration-300 hover:shadow-xl ${
-                  p.popular ? "border-[#5B4FE9]/30 shadow-lg shadow-indigo-900/10" : "border-black/[.06]"
+                  p.popular ? "border-[#45157b]/30 shadow-lg shadow-indigo-900/10" : "border-black/[.06]"
                 }`}
               >
                 {p.popular && (
-                  <span className="absolute right-5 top-5 rounded-full bg-[#5B4FE9] px-3 py-1 text-[11px] font-bold text-white shadow-sm">
+                  <span className="absolute right-5 top-5 rounded-full bg-[#45157b] px-3 py-1 text-[11px] font-bold text-white shadow-sm">
                     Most Popular
                   </span>
                 )}
@@ -171,7 +171,7 @@ export default function Pricing() {
                   <ul className="mt-4 flex flex-1 flex-col gap-3">
                     {p.features.map((f) => (
                       <li key={f} className="flex items-start gap-2 text-sm text-foreground/65">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#5B4FE9]" strokeWidth={2} />
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#45157b]" strokeWidth={2} />
                         {f}
                       </li>
                     ))}
@@ -182,7 +182,7 @@ export default function Pricing() {
                     whileTap={{ scale: 0.98 }}
                     className={`mt-6 w-full rounded-full py-3 text-sm font-semibold shadow-sm transition-colors duration-300 ${
                       p.popular
-                        ? "bg-[#5B4FE9] text-white hover:bg-[#4a3fd6]"
+                        ? "bg-[#45157b] text-white hover:opacity-90"
                         : "bg-black/[.05] text-foreground hover:bg-black/[.08]"
                     }`}
                   >

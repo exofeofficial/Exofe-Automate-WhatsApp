@@ -143,7 +143,7 @@ function IntegrationCard({
             ? "cursor-not-allowed bg-ink/[.04] text-foreground/30"
             : connected
               ? "bg-ink/[.04] text-foreground/60 hover:bg-ink/[.07]"
-              : "shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] text-white shadow-sm hover:opacity-90"
+              : "shine-btn-gold relative overflow-hidden bg-[#45157b] text-white shadow-sm hover:opacity-90"
         }`}
       >
         {isSoon ? "Not available yet" : connected ? "Disconnect" : `Connect ${integration.name.split(" ")[0]}`}

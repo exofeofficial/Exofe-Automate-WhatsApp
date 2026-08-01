@@ -91,7 +91,7 @@ export default function AcceptInvitePage() {
       >
         {loading && (
           <motion.div variants={item} className="flex flex-col items-center py-6 text-center">
-            <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
+            <Loader2 className="h-6 w-6 animate-spin text-[#45157b]" strokeWidth={2} />
           </motion.div>
         )}
 
@@ -104,7 +104,7 @@ export default function AcceptInvitePage() {
             <p className="mt-2 text-sm text-foreground/60">{loadError}</p>
             <Link
               href="/login"
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#5B4FE9] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:bg-[#4a3fd6]"
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#45157b] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:opacity-90"
             >
               Back to Login
             </Link>
@@ -114,7 +114,7 @@ export default function AcceptInvitePage() {
         {!loading && !loadError && details && (
           <>
             <motion.div variants={item} className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-[#5B4FE9]">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-[#45157b]">
                 <UserPlus className="h-4 w-4" strokeWidth={2} />
               </span>
               <div>
@@ -136,7 +136,7 @@ export default function AcceptInvitePage() {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="Sara"
-                    className="mt-1.5 w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                    className="mt-1.5 w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
                   />
                 </div>
                 <div>
@@ -146,7 +146,7 @@ export default function AcceptInvitePage() {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="Khan"
-                    className="mt-1.5 w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                    className="mt-1.5 w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
                   />
                 </div>
               </div>
@@ -159,7 +159,7 @@ export default function AcceptInvitePage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="At least 8 characters"
-                    className="w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                    className="w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
                   />
                   <button
                     type="button"
@@ -179,7 +179,7 @@ export default function AcceptInvitePage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter your password"
-                  className="mt-1.5 w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+                  className="mt-1.5 w-full rounded-lg border border-black/[.12] px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
                 />
               </div>
 
@@ -190,7 +190,7 @@ export default function AcceptInvitePage() {
                 disabled={submitting}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#5B4FE9] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:bg-[#4a3fd6] disabled:opacity-70"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-[#45157b] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:opacity-90 disabled:opacity-70"
               >
                 {submitting && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.4} />}
                 {submitting ? "Setting up..." : "Join the team"}

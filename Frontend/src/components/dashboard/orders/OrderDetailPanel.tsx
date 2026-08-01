@@ -96,7 +96,7 @@ export default function OrderDetailPanel({
                   onClick={() => handleStatusChange(opt.value)}
                   className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 ${
                     order.status === opt.value
-                      ? "bg-[#5B4FE9] text-white"
+                      ? "bg-[#45157b] text-white"
                       : "bg-ink/[.04] text-foreground/60 hover:bg-ink/[.07]"
                   }`}
                 >

@@ -44,7 +44,7 @@ export default function BillingPage() {
   if (!trial) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center rounded-2xl border border-ink/[.06] bg-surface shadow-sm">
-        <Loader2 className="h-6 w-6 animate-spin text-[#5B4FE9]" strokeWidth={2} />
+        <Loader2 className="h-6 w-6 animate-spin text-[#45157b]" strokeWidth={2} />
       </div>
     );
   }
@@ -62,7 +62,7 @@ export default function BillingPage() {
           trial.isExpired
             ? "border border-red-100 dark:border-red-500/25 bg-red-50 dark:bg-red-500/15"
             : trial.isTrialing
-              ? "bg-gradient-to-br from-[#5B4FE9] to-[#4338CA] text-white"
+              ? "bg-gradient-to-br from-[#45157b] to-[#4338CA] text-white"
               : "border border-emerald-100 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/15"
         }`}
       >
@@ -128,11 +128,11 @@ export default function BillingPage() {
               <div
                 key={plan.id}
                 className={`relative flex flex-col rounded-2xl border p-6 shadow-sm transition-shadow ${
-                  plan.popular ? "border-[#5B4FE9]/30 shadow-md shadow-indigo-900/10" : "border-ink/[.06] bg-surface"
-                } ${isCurrent ? "ring-2 ring-[#5B4FE9]/40" : ""}`}
+                  plan.popular ? "border-[#45157b]/30 shadow-md shadow-indigo-900/10" : "border-ink/[.06] bg-surface"
+                } ${isCurrent ? "ring-2 ring-[#45157b]/40" : ""}`}
               >
                 {plan.popular && !isCurrent && (
-                  <span className="absolute right-5 top-5 rounded-full bg-[#5B4FE9] px-2.5 py-1 text-[10px] font-bold text-white">
+                  <span className="absolute right-5 top-5 rounded-full bg-[#45157b] px-2.5 py-1 text-[10px] font-bold text-white">
                     Most Popular
                   </span>
                 )}
@@ -154,7 +154,7 @@ export default function BillingPage() {
                 <ul className="mt-5 flex flex-1 flex-col gap-2.5">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-xs text-foreground/65">
-                      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#5B4FE9]" strokeWidth={2.5} />
+                      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#45157b]" strokeWidth={2.5} />
                       {f}
                     </li>
                   ))}
@@ -167,7 +167,7 @@ export default function BillingPage() {
                   className={`mt-6 flex w-full items-center justify-center gap-2 rounded-full py-2.5 text-sm font-semibold shadow-sm transition-colors disabled:cursor-default ${
                     isCurrent
                       ? "bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-                      : "shine-btn-gold relative overflow-hidden bg-[#5B4FE9] text-white hover:bg-[#4a3fd6]"
+                      : "shine-btn-gold relative overflow-hidden bg-[#45157b] text-white hover:opacity-90"
                   }`}
                 >
                   {isCurrent ? "Current Plan" : "Subscribe"}

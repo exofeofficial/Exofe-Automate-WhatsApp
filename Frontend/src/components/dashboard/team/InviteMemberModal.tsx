@@ -75,7 +75,7 @@ export default function InviteMemberModal({
                 setEmailError("");
               }}
               placeholder="teammate@yourbusiness.com"
-              className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+              className={`mt-1.5 w-full rounded-lg border px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
                 emailError ? "border-red-400 dark:border-red-500/50" : "border-ink/[.12]"
               }`}
             />
@@ -91,10 +91,10 @@ export default function InviteMemberModal({
                   type="button"
                   onClick={() => setRole(r.value)}
                   className={`rounded-xl border px-3.5 py-2.5 text-left transition-colors ${
-                    role === r.value ? "border-[#5B4FE9] bg-indigo-50 dark:bg-indigo-500/15" : "border-ink/[.1] hover:bg-ink/[.03]"
+                    role === r.value ? "border-[#45157b] bg-indigo-50 dark:bg-indigo-500/15" : "border-ink/[.1] hover:bg-ink/[.03]"
                   }`}
                 >
-                  <p className={`text-sm font-semibold ${role === r.value ? "text-[#5B4FE9]" : "text-foreground/80"}`}>{r.label}</p>
+                  <p className={`text-sm font-semibold ${role === r.value ? "text-[#45157b]" : "text-foreground/80"}`}>{r.label}</p>
                   <p className="mt-0.5 text-xs text-foreground/45">{r.description}</p>
                 </button>
               ))}
@@ -106,7 +106,7 @@ export default function InviteMemberModal({
           <button
             type="submit"
             disabled={inviting}
-            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-70"
+            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl shine-btn-gold relative overflow-hidden bg-[#45157b] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-70"
           >
             {inviting ? <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.4} /> : <UserPlus className="h-4 w-4" strokeWidth={2} />}
             {inviting ? "Sending invite..." : "Send Invite"}

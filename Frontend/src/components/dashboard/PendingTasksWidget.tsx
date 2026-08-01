@@ -51,8 +51,8 @@ export default function PendingTasksWidget({ trial, tasks }: { trial: TrialStatu
 
             {trial.isTrialing && (
               <div className="flex shrink-0 items-center gap-2 border-b border-ink/[.06] bg-indigo-50/60 dark:bg-indigo-500/15 px-5 py-3">
-                <Clock className="h-4 w-4 shrink-0 text-[#5B4FE9]" strokeWidth={2} />
-                <p className="text-xs font-medium text-[#5B4FE9]">
+                <Clock className="h-4 w-4 shrink-0 text-[#45157b]" strokeWidth={2} />
+                <p className="text-xs font-medium text-[#45157b]">
                   {trial.daysLeft} of {trial.trialLengthDays} trial days left
                 </p>
               </div>
@@ -85,7 +85,7 @@ export default function PendingTasksWidget({ trial, tasks }: { trial: TrialStatu
             <div className="shrink-0 border-t border-ink/[.06] px-5 py-3.5">
               <Link
                 href="/dashboard/billing"
-                className="text-xs font-semibold text-[#5B4FE9] hover:underline"
+                className="text-xs font-semibold text-[#45157b] hover:underline"
               >
                 View plans and pricing
               </Link>
@@ -99,7 +99,7 @@ export default function PendingTasksWidget({ trial, tasks }: { trial: TrialStatu
         onClick={() => setOpen((v) => !v)}
         whileHover={{ scale: 1.04 }}
         whileTap={{ scale: 0.96 }}
-        className="flex items-center gap-2 rounded-full shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] px-4 py-3 text-white shadow-lg shadow-indigo-500/25"
+        className="flex items-center gap-2 rounded-full shine-btn-gold relative overflow-hidden bg-[#45157b] px-4 py-3 text-white shadow-lg shadow-indigo-500/25"
       >
         <ListChecks className="h-[18px] w-[18px]" strokeWidth={2} />
         <span className="text-xs font-semibold">Setup guide</span>

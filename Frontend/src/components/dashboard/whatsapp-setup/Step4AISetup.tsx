@@ -34,13 +34,13 @@ export default function Step4AISetup({
           onChange={(e) => onChange(e.target.value)}
           rows={4}
           placeholder="We sell premium clothing for women."
-          className="mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30"
+          className="mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30"
         />
       </div>
 
       <div className="flex items-start gap-3 rounded-2xl border border-indigo-100 dark:border-indigo-500/25 bg-indigo-50 dark:bg-indigo-500/15/60 px-4 py-3">
-        <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-[#5B4FE9]" strokeWidth={2} />
-        <p className="text-xs leading-relaxed text-[#5B4FE9]">
+        <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-[#45157b]" strokeWidth={2} />
+        <p className="text-xs leading-relaxed text-[#45157b]">
           Products, business hours, delivery settings, FAQs, and AI personality are coming to this step soon.
           For now you can finish setup and add them from Products and AI Assistant.
         </p>
@@ -57,7 +57,7 @@ export default function Step4AISetup({
         <button
           type="button"
           onClick={onNext}
-          className="flex-1 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+          className="flex-1 rounded-xl shine-btn-gold relative overflow-hidden bg-[#45157b] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90"
         >
           Finish setup
         </button>

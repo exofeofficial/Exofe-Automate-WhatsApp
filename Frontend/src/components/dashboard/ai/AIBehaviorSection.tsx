@@ -6,7 +6,7 @@ import Dropdown from "@/components/ui/Dropdown";
 import SettingsSectionCard from "@/components/dashboard/settings/SettingsSectionCard";
 
 const inputClass =
-  "mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30";
+  "mt-1.5 w-full rounded-lg border border-ink/[.12] px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/30";
 
 const TONE_OPTIONS: { value: AITone; label: string }[] = [
   { value: "friendly", label: "Friendly" },
@@ -93,7 +93,7 @@ export default function AIBehaviorSection({
           type="checkbox"
           checked={form.handoverEnabled}
           onChange={(e) => setField("handoverEnabled", e.target.checked)}
-          className="h-4 w-4 rounded border-ink/[.2] text-[#5B4FE9] focus:ring-[#5B4FE9]/30"
+          className="h-4 w-4 rounded border-ink/[.2] text-[#45157b] focus:ring-[#45157b]/30"
         />
         Let the AI reply automatically (turn off to route every message to your team instead)
       </label>

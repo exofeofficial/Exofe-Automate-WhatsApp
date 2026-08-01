@@ -68,7 +68,7 @@ export default function Topbar({ onMenuClick, title }: { onMenuClick: () => void
           <input
             type="search"
             placeholder="Search"
-            className="w-56 rounded-full border border-ink/[.08] bg-ink/[.03] py-2 pl-9 pr-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/25"
+            className="w-56 rounded-full border border-ink/[.08] bg-ink/[.03] py-2 pl-9 pr-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/25"
           />
         </div>
         <button
@@ -119,7 +119,7 @@ export default function Topbar({ onMenuClick, title }: { onMenuClick: () => void
                   <Link
                     href="/dashboard/billing"
                     onClick={() => setOpen(false)}
-                    className="mx-1 my-1.5 flex items-center justify-between rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90"
+                    className="mx-1 my-1.5 flex items-center justify-between rounded-xl shine-btn-gold relative overflow-hidden bg-[#45157b] px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90"
                   >
                     <span className="flex items-center gap-2">
                       <Crown className="h-4 w-4" strokeWidth={2} />
@@ -165,7 +165,7 @@ export default function Topbar({ onMenuClick, title }: { onMenuClick: () => void
                       aria-label="Toggle dark mode"
                       onClick={toggleTheme}
                       className={`flex h-5 w-9 shrink-0 items-center rounded-full px-0.5 transition-colors ${
-                        theme === "dark" ? "bg-[#5B4FE9]" : "bg-ink/[.15]"
+                        theme === "dark" ? "bg-[#45157b]" : "bg-ink/[.15]"
                       }`}
                     >
                       <motion.span

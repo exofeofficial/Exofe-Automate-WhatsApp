@@ -60,7 +60,7 @@ export function FlowEdgeOverlay({ edges, rects }: { edges: DiagramEdge[]; rects:
     <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
       <defs>
         <marker id="flow-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto-start-reverse">
-          <path d="M0,0 L9,4.5 L0,9 Z" fill="#5B4FE9" />
+          <path d="M0,0 L9,4.5 L0,9 Z" fill="#45157b" />
         </marker>
         <marker id="flow-arrow-warn" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto-start-reverse">
           <path d="M0,0 L9,4.5 L0,9 Z" fill="#ef4444" />
@@ -74,7 +74,7 @@ export function FlowEdgeOverlay({ edges, rects }: { edges: DiagramEdge[]; rects:
           const s = rects.get(edge.source);
           const t = rects.get(edge.target);
           if (!s || !t) return null;
-          const color = EDGE_COLOR[edge.tone ?? ""] ?? "#5B4FE9";
+          const color = EDGE_COLOR[edge.tone ?? ""] ?? "#45157b";
           const { d, labelX, labelY } = elbowPath(s, t);
           return (
             <g key={edge.id}>

@@ -58,10 +58,10 @@ function Bubble({ message }: { message: Message }) {
           ? "rounded-bl-sm bg-surface text-foreground shadow-sm"
           : message.from === "ai"
           ? "rounded-br-sm bg-indigo-50 dark:bg-indigo-500/15 text-foreground"
-          : "rounded-br-sm bg-[#5B4FE9] text-white"
+          : "rounded-br-sm bg-[#45157b] text-white"
       }`}>
         {!isCustomer && (
-          <span className={`mb-1 flex items-center gap-1 text-[10px] font-semibold ${message.from === "ai" ? "text-[#5B4FE9]" : "text-white/70"}`}>
+          <span className={`mb-1 flex items-center gap-1 text-[10px] font-semibold ${message.from === "ai" ? "text-[#45157b]" : "text-white/70"}`}>
             {message.from === "ai" ? <Bot className="h-3 w-3" strokeWidth={2.5} /> : <User className="h-3 w-3" strokeWidth={2.5} />}
             {message.from === "ai" ? "Exofe AI" : "You"}
           </span>
@@ -145,7 +145,7 @@ export default function ConversationsPage() {
   if (conversations.length === 0) {
     return (
       <div className="flex h-[calc(100vh-8rem)] flex-col items-center justify-center gap-3 rounded-2xl border border-ink/[.06] bg-surface p-6 text-center shadow-sm">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 dark:bg-indigo-500/15 text-[#5B4FE9]">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 dark:bg-indigo-500/15 text-[#45157b]">
           {whatsappConnected ? <MessageCircle className="h-6 w-6" strokeWidth={2} /> : <Plug className="h-6 w-6" strokeWidth={2} />}
         </span>
         {whatsappConnected ? (
@@ -163,7 +163,7 @@ export default function ConversationsPage() {
             </p>
             <Link
               href="/dashboard/integrations"
-              className="mt-2 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-90"
+              className="mt-2 rounded-xl shine-btn-gold relative overflow-hidden bg-[#45157b] px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:opacity-90"
             >
               Connect WhatsApp
             </Link>
@@ -185,7 +185,7 @@ export default function ConversationsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search conversations"
-              className="w-full rounded-full border border-ink/[.08] bg-ink/[.03] py-2 pl-9 pr-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/25"
+              className="w-full rounded-full border border-ink/[.08] bg-ink/[.03] py-2 pl-9 pr-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/25"
             />
           </div>
           <div className="mt-3 flex gap-1.5 overflow-x-auto">
@@ -195,7 +195,7 @@ export default function ConversationsPage() {
                 type="button"
                 onClick={() => setFilter(f)}
                 className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                  filter === f ? "bg-[#5B4FE9] text-white" : "bg-ink/[.04] text-foreground/60 hover:bg-ink/[.07]"
+                  filter === f ? "bg-[#45157b] text-white" : "bg-ink/[.04] text-foreground/60 hover:bg-ink/[.07]"
                 }`}
               >
                 {f}
@@ -223,7 +223,7 @@ export default function ConversationsPage() {
                 <div className="mt-0.5 flex items-center justify-between gap-2">
                   <p className="truncate text-xs text-foreground/50">{c.lastMessage}</p>
                   {c.unread > 0 && (
-                    <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#5B4FE9] text-[10px] font-bold text-white">
+                    <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#45157b] text-[10px] font-bold text-white">
                       {c.unread}
                     </span>
                   )}
@@ -260,7 +260,7 @@ export default function ConversationsPage() {
               whileTap={{ scale: 0.97 }}
               className={`flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition-colors ${
                 active.mode === "ai"
-                  ? "shine-btn-gold relative overflow-hidden bg-[#5B4FE9] text-white hover:bg-[#4a3fd6]"
+                  ? "shine-btn-gold relative overflow-hidden bg-[#45157b] text-white hover:opacity-90"
                   : "border border-ink/[.1] text-foreground/70 hover:bg-ink/[.03]"
               }`}
             >
@@ -282,14 +282,14 @@ export default function ConversationsPage() {
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder="Type a message"
-              className="flex-1 rounded-full border border-ink/[.1] bg-ink/[.03] px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/25"
+              className="flex-1 rounded-full border border-ink/[.1] bg-ink/[.03] px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/25"
             />
             <motion.button
               type="button"
               onClick={handleSend}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#5B4FE9] text-white"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#45157b] text-white"
               aria-label="Send message"
             >
               <Send className="h-4 w-4" strokeWidth={2.2} />

@@ -11,7 +11,7 @@ export default function AIUsageCard({ usage }: { usage: AIUsage }) {
   return (
     <div className="rounded-2xl border border-ink/[.06] bg-surface p-5 shadow-sm sm:p-6">
       <div className="flex items-center gap-2">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-500/15 text-[#5B4FE9]">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-500/15 text-[#45157b]">
           <Gauge className="h-4 w-4" strokeWidth={2} />
         </span>
         <div>
@@ -30,7 +30,7 @@ export default function AIUsageCard({ usage }: { usage: AIUsage }) {
         {!unlimited && (
           <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-ink/[.06]">
             <div
-              className={`h-full rounded-full transition-all ${nearLimit ? "bg-amber-500" : "bg-[#5B4FE9]"}`}
+              className={`h-full rounded-full transition-all ${nearLimit ? "bg-amber-500" : "bg-[#45157b]"}`}
               style={{ width: `${pct}%` }}
             />
           </div>

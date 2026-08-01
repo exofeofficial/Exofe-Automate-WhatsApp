@@ -48,7 +48,7 @@ export default function Step3Verification({ onNext, onBack }: { onNext: () => vo
           <div key={label} className="flex items-center justify-between px-4 py-3">
             <span className="text-sm text-foreground/75">{label}</span>
             {states[i] === "pending" && <span className="h-4 w-4 rounded-full border border-black/10" />}
-            {states[i] === "checking" && <Loader2 className="h-4 w-4 animate-spin text-[#5B4FE9]" strokeWidth={2} />}
+            {states[i] === "checking" && <Loader2 className="h-4 w-4 animate-spin text-[#45157b]" strokeWidth={2} />}
             {states[i] === "passed" && <Check className="h-4 w-4 text-emerald-500 dark:text-emerald-400" strokeWidth={2.5} />}
             {states[i] === "failed" && <CircleAlert className="h-4 w-4 text-red-500 dark:text-red-400" strokeWidth={2} />}
           </div>
@@ -81,7 +81,7 @@ export default function Step3Verification({ onNext, onBack }: { onNext: () => vo
           type="button"
           onClick={onNext}
           disabled={!allPassed}
-          className="flex-1 rounded-xl shine-btn-gold relative overflow-hidden bg-gradient-to-br from-[#5B4FE9] to-[#7C6FF5] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
+          className="flex-1 rounded-xl shine-btn-gold relative overflow-hidden bg-[#45157b] py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-40"
         >
           Continue
         </button>

@@ -91,7 +91,7 @@ export default function CTA() {
               disabled={status === "loading" || status === "done"}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-[#5B4FE9] px-6 py-3 text-sm font-semibold text-white shadow-md transition-colors duration-200 hover:bg-[#4a3fd6] disabled:opacity-70 sm:w-auto"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-[#45157b] px-6 py-3 text-sm font-semibold text-white shadow-md transition-colors duration-200 hover:opacity-90 disabled:opacity-70 sm:w-auto"
             >
               {status === "loading" ? (
                 <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.4} />

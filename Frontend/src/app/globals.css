@@ -1,5 +1,26 @@
 @import "tailwindcss";
 
+/* Lenis smooth scroll (see components/SmoothScroll.tsx, mounted once in
+   the root layout so it covers every page). scroll-behavior: auto is
+   required — CSS's own smooth scroll fights Lenis's easing and is what
+   causes scrolling to visibly stutter/pause mid-scroll. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
 /* Dark mode is scoped to the client dashboard only (the .dashboard-dark
    class lives on the dashboard layout's root div, never on <html> or
    <body>) — the marketing site and admin panel stay light-only and are

@@ -170,8 +170,8 @@ export default function DemoPage() {
           <motion.div variants={item} className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {HIGHLIGHTS.map((text) => (
               <div key={text} className="flex items-start gap-2.5">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#5B4FE9]">
-                  <Check className="h-2.5 w-2.5 text-[#5B4FE9]" strokeWidth={3} />
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-[#45157b]">
+                  <Check className="h-2.5 w-2.5 text-[#45157b]" strokeWidth={3} />
                 </span>
                 <span className="text-sm text-foreground/70">{text}</span>
               </div>
@@ -195,7 +195,7 @@ export default function DemoPage() {
               type="text"
               value={form.name}
               onChange={(e) => setField("name", e.target.value)}
-              className={`mt-1.5 w-full rounded-lg border bg-zinc-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+              className={`mt-1.5 w-full rounded-lg border bg-zinc-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
                 errors.name ? "border-red-400" : "border-black/[.1]"
               }`}
             />
@@ -211,7 +211,7 @@ export default function DemoPage() {
               type="email"
               value={form.email}
               onChange={(e) => setField("email", e.target.value)}
-              className={`mt-1.5 w-full rounded-lg border bg-zinc-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+              className={`mt-1.5 w-full rounded-lg border bg-zinc-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
                 errors.email ? "border-red-400" : "border-black/[.1]"
               }`}
             />
@@ -253,7 +253,7 @@ export default function DemoPage() {
                 value={form.phone}
                 onChange={(e) => setField("phone", e.target.value)}
                 placeholder={PHONE_PLACEHOLDER[form.countryCode]}
-                className={`flex-1 rounded-lg border bg-zinc-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#5B4FE9]/30 ${
+                className={`flex-1 rounded-lg border bg-zinc-50 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#45157b]/30 ${
                   errors.phone ? "border-red-400" : "border-black/[.1]"
                 }`}
               />
@@ -286,8 +286,8 @@ export default function DemoPage() {
                       selected ? "pr-9" : "pr-3.5"
                     } ${
                       selected
-                        ? "border-[#5B4FE9] bg-[#5B4FE9] text-white shadow-md shadow-indigo-900/20"
-                        : "border-black/[.1] bg-zinc-50 text-foreground/70 hover:border-[#5B4FE9]/40 hover:bg-white"
+                        ? "border-[#45157b] bg-[#45157b] text-white shadow-md shadow-indigo-900/20"
+                        : "border-black/[.1] bg-zinc-50 text-foreground/70 hover:border-[#45157b]/40 hover:bg-white"
                     }`}
                   >
                     {t}
@@ -313,15 +313,15 @@ export default function DemoPage() {
                   setAgreedToTerms(e.target.checked);
                   if (errors.terms) setErrors((prev) => ({ ...prev, terms: undefined }));
                 }}
-                className="mt-0.5 h-4 w-4 shrink-0 rounded border-black/[.2] text-[#5B4FE9] focus:ring-[#5B4FE9]/30"
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-black/[.2] text-[#45157b] focus:ring-[#45157b]/30"
               />
               <span>
                 By submitting, you agree to Exofe&apos;s{" "}
-                <a href="/terms" className="font-medium text-[#5B4FE9] underline underline-offset-2">
+                <a href="/terms" className="font-medium text-[#45157b] underline underline-offset-2">
                   Terms & Conditions
                 </a>{" "}
                 and{" "}
-                <a href="/privacy" className="font-medium text-[#5B4FE9] underline underline-offset-2">
+                <a href="/privacy" className="font-medium text-[#45157b] underline underline-offset-2">
                   Privacy Policy
                 </a>
                 , and consent to receive communications from Exofe.
@@ -337,7 +337,7 @@ export default function DemoPage() {
             disabled={status === "loading"}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-[#5B4FE9] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:bg-[#4a3fd6] disabled:opacity-70 sm:w-auto sm:px-8"
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-[#45157b] py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-900/20 transition-colors hover:opacity-90 disabled:opacity-70 sm:w-auto sm:px-8"
           >
             {status === "loading" && <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2.4} />}
             {status === "loading" ? "Scheduling..." : "Schedule Demo"}

@@ -2,6 +2,8 @@ from fastapi import APIRouter
 from app.api.v1 import (
     whatsapp,
     integrations,
+    shopify,
+    templates,
     ai,
     admin,
     auth,
@@ -19,6 +21,8 @@ router = APIRouter()
 
 router.include_router(whatsapp.router)
 router.include_router(integrations.router)
+router.include_router(shopify.router)
+router.include_router(templates.router)
 router.include_router(ai.router)
 router.include_router(admin.router)
 router.include_router(auth.router)

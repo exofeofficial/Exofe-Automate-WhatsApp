@@ -102,6 +102,85 @@ def send_button_message(
     )
 
 
+def send_template_message(
+    to: str,
+    *,
+    template_name: str,
+    language: str,
+    parameters: list[str],
+    phone_number_id: str | None = None,
+    access_token: str | None = None,
+) -> None:
+    """Send an approved Business Message Template — the only way to
+    reach a customer who hasn't messaged us in the last 24h (unlike
+    send_text_message/send_list_message/send_button_message above, which
+    only work inside that live-conversation window)."""
+    _send(
+        {
+            "type": "template",
+            "template": {
+                "name": template_name,
+                "language": {"code": language},
+                "components": [
+                    {
+                        "type": "body",
+                        "parameters": [{"type": "text", "text": p} for p in parameters],
+                    }
+                ]
+                if parameters
+                else [],
+            },
+        },
+        to,
+        phone_number_id=phone_number_id,
+        access_token=access_token,
+    )
+
+
+def create_message_template(
+    waba_id: str,
+    access_token: str,
+    *,
+    name: str,
+    category: str,
+    language: str,
+    body_text: str,
+    variable_examples: list[str],
+) -> dict:
+    """Submits a template for Meta's review under this business's own
+    WABA — templates aren't shared across WABAs, so every business that
+    activates a starter template gets its own copy submitted here (see
+    app/services/template_service.py)."""
+    payload = {
+        "name": name,
+        "language": language,
+        "category": category,
+        "components": [
+            {
+                "type": "BODY",
+                "text": body_text,
+                **({"example": {"body_text": [variable_examples]}} if variable_examples else {}),
+            }
+        ],
+    }
+    try:
+        response = httpx.post(
+            f"{GRAPH_API_BASE}/{waba_id}/message_templates",
+            headers={"Authorization": f"Bearer {access_token}"},
+            json=payload,
+            timeout=15,
+        )
+        response.raise_for_status()
+        return response.json()
+    except httpx.HTTPStatusError as e:
+        message = _meta_error_message(e.response)
+        logger.error(f"Failed to create template {name} for WABA {waba_id}: {message}")
+        raise AppError(400, f"Meta rejected this template: {message}")
+    except httpx.HTTPError as e:
+        logger.error(f"Failed to create template {name} for WABA {waba_id}: {e}")
+        raise AppError(400, "Couldn't reach Meta to submit this template — try again.")
+
+
 def verify_signature(payload_body: bytes, signature_header: str | None) -> bool:
     """Confirm a webhook POST actually came from Meta, via the app secret's
     HMAC-SHA256 over the raw body. Skips the check (with a warning) if no

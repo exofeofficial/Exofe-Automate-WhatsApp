@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import IntegrationsPage from "@/views/dashboard/IntegrationsPage";
 
 export default function Page() {
-  return <IntegrationsPage />;
+  return (
+    <Suspense>
+      <IntegrationsPage />
+    </Suspense>
+  );
 }

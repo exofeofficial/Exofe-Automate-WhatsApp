@@ -46,6 +46,7 @@ export const NAV: NavEntry[] = [
       { label: "AI Automations", href: "/dashboard/automation/ai" },
       { label: "Interactive Messages", href: "/dashboard/automation/interactive-messages" },
       { label: "Templates", href: "/dashboard/automation/templates" },
+      { label: "Notifications", href: "/dashboard/automation/notifications" },
       { label: "Flow Builder", href: "/dashboard/automation/flow-builder" },
     ],
   },

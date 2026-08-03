@@ -33,6 +33,16 @@ class Settings(BaseSettings):
     google_client_id: str | None = None
     google_client_secret: str | None = None
 
+    # Shopify App (Partners dashboard > app > Client credentials) — powers
+    # the OAuth "Install" flow and catalog/order sync in shopify_client.py.
+    shopify_api_key: str | None = None
+    shopify_api_secret: str | None = None
+    shopify_scopes: str = "read_products,write_orders"
+    # Base URL of THIS backend — used to build the OAuth redirect_uri
+    # (must exactly match what's registered in the Shopify Partners app)
+    # and the webhook URLs registered after install.
+    backend_url: str = "http://localhost:8000"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8"

@@ -13,6 +13,7 @@ from app.config import settings
 from app.core.logger import get_logger
 from app.database.session import get_db
 from app.repositories import customer_repository, message_repository, user_repository
+from app.services import template_service
 from app.services.conversation_service import handle_inbound_message
 
 logger = get_logger(__name__)
@@ -44,12 +45,25 @@ async def receive_webhook(request: Request, db: Annotated[Session, Depends(get_d
 
     payload = await request.json()
 
+    _TEMPLATE_STATUS_MAP = {"APPROVED": "approved", "REJECTED": "rejected", "PAUSED": "paused"}
+
     for entry in payload.get("entry", []):
+        waba_id = entry.get("id")
         for change in entry.get("changes", []):
             value = change.get("value", {})
+
+            if change.get("field") == "message_template_status_update":
+                mapped_status = _TEMPLATE_STATUS_MAP.get(value.get("event"))
+                template_name = value.get("message_template_name")
+                if mapped_status and template_name and waba_id:
+                    template_service.sync_status_from_webhook(
+                        db, waba_id, template_name, mapped_status, value.get("reason")
+                    )
+                continue
+
             messages = value.get("messages")
             if not messages:
-                continue  # statuses, template updates, etc — nothing to do yet
+                continue  # statuses, delivery receipts, etc — nothing to do yet
 
             display_number = value.get("metadata", {}).get("display_phone_number", "")
             business = user_repository.get_business_by_whatsapp_number(db, display_number)

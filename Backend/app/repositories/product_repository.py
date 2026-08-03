@@ -304,6 +304,94 @@ def update_product(
     return get_product_by_id(db, product_id, business_id)
 
 
+def upsert_shopify_product(
+    db: Session, *, business_id: str, category_id: str | None, shopify_product_id: str, product: dict
+) -> str:
+    """Idempotent product sync from Shopify — same ``product`` dict shape
+    as create_product/update_product, plus each variant carrying its own
+    shopify_variant_id. Matches on shopify_product_id (unique per
+    business, see idx_products_shopify_product_unique) so re-running a
+    sync updates existing rows instead of duplicating them. Doesn't
+    commit — the caller (shopify_service.sync_catalog) commits once after
+    the whole batch."""
+    existing = db.execute(
+        text("SELECT id FROM products WHERE business_id = :business_id AND shopify_product_id = :spid"),
+        {"business_id": business_id, "spid": shopify_product_id},
+    ).fetchone()
+
+    params = {
+        "business_id": business_id,
+        "category_id": category_id,
+        "name": product["name"],
+        "sku": product["sku"],
+        "description": product["description"],
+        "price": product["price"],
+        "compare_at_price": product["compare_at_price"],
+        "stock": product["stock"],
+        "status": product["status"],
+        "has_variants": product["has_variants"],
+        "shopify_product_id": shopify_product_id,
+    }
+
+    if existing:
+        product_id = str(existing.id)
+        db.execute(
+            text(
+                """
+                UPDATE products SET
+                    category_id = :category_id, name = :name, sku = :sku,
+                    description = :description, price = :price,
+                    compare_at_price = :compare_at_price, stock = :stock,
+                    status = :status, has_variants = :has_variants,
+                    updated_at = NOW()
+                WHERE id = :id
+                """
+            ),
+            {**params, "id": product_id},
+        )
+        db.execute(text("DELETE FROM product_images WHERE product_id = :id"), {"id": product_id})
+        db.execute(text("DELETE FROM product_options WHERE product_id = :id"), {"id": product_id})
+        db.execute(text("DELETE FROM product_variants WHERE product_id = :id"), {"id": product_id})
+    else:
+        row = db.execute(
+            text(
+                """
+                INSERT INTO products
+                    (business_id, category_id, name, sku, description, price,
+                     compare_at_price, stock, status, has_variants, shopify_product_id)
+                VALUES
+                    (:business_id, :category_id, :name, :sku, :description, :price,
+                     :compare_at_price, :stock, :status, :has_variants, :shopify_product_id)
+                RETURNING id
+                """
+            ),
+            params,
+        ).fetchone()
+        product_id = str(row.id)
+
+    _insert_images(db, product_id, product["images"])
+    _insert_options(db, product_id, product["options"])
+    for v in product["variants"]:
+        db.execute(
+            text(
+                """
+                INSERT INTO product_variants (product_id, option_values, sku, price, stock, shopify_variant_id)
+                VALUES (:product_id, :option_values, :sku, :price, :stock, :shopify_variant_id)
+                """
+            ),
+            {
+                "product_id": product_id,
+                "option_values": v["option_values"],
+                "sku": v["sku"],
+                "price": v["price"],
+                "stock": v["stock"],
+                "shopify_variant_id": v.get("shopify_variant_id"),
+            },
+        )
+
+    return product_id
+
+
 def delete_product(db: Session, product_id: str, business_id: str) -> bool:
     # product_images/options/variants all cascade via ON DELETE CASCADE.
     result = db.execute(

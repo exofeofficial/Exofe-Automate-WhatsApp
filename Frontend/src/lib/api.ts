@@ -114,6 +114,60 @@ export function disconnectWhatsApp() {
   return request<WhatsAppConnectionStatus>("/integrations/whatsapp/disconnect", { method: "POST" });
 }
 
+// ── Shopify integration ──────────────────────────────────────────────────────
+// The OAuth callback and webhooks are Shopify-facing (no frontend
+// involvement) — these are what the dashboard's "Connect Shopify" card
+// talks to.
+
+export type ShopifyConnectionStatus = {
+  connected: boolean;
+  shopDomain: string | null;
+  connectedAt: string | null;
+};
+
+export function getShopifyStatus() {
+  return request<ShopifyConnectionStatus>("/integrations/shopify/status");
+}
+
+export function installShopify(shop: string) {
+  return request<{ installUrl: string }>("/integrations/shopify/install", {
+    method: "POST",
+    body: JSON.stringify({ shop }),
+  });
+}
+
+export function syncShopifyCatalog() {
+  return request<{ synced: number }>("/integrations/shopify/sync", { method: "POST" });
+}
+
+export function disconnectShopify() {
+  return request<ShopifyConnectionStatus>("/integrations/shopify/disconnect", { method: "POST" });
+}
+
+// ── WhatsApp message templates ("Notifications") ────────────────────────────
+// Real Meta Business Message Templates, distinct from the button/list
+// "Interactive Messages" / automation Templates above — these need Meta's
+// approval and can reach a customer outside the 24h conversation window.
+
+export type StarterTemplate = {
+  key: string;
+  label: string;
+  hint: string;
+  category: "UTILITY" | "MARKETING" | "AUTHENTICATION";
+  body: string;
+  variables: string[];
+  status: "pending" | "approved" | "rejected" | "paused" | null;
+  rejectionReason: string | null;
+};
+
+export function getStarterTemplates() {
+  return request<{ templates: StarterTemplate[] }>("/templates/starters");
+}
+
+export function activateTemplate(key: string) {
+  return request<{ key: string; status: string }>(`/templates/${key}/activate`, { method: "POST" });
+}
+
 // Waitlist / early-access signup (CTA section email form)
 // Expected backend contract: POST /waitlist { email } -> 200 { message }
 export function joinWaitlist(email: string) {

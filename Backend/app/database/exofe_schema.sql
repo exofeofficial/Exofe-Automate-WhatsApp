@@ -70,6 +70,9 @@ CREATE TABLE businesses (
     whatsapp_phone_number_id TEXT,                 -- Meta's phone number id, needed to send messages
     whatsapp_waba_id       TEXT,                   -- WhatsApp Business Account id, needed to subscribe the webhook
     whatsapp_access_token  TEXT,                   -- per-tenant permanent token from Embedded Signup/manual setup
+    shopify_shop_domain    TEXT,                   -- e.g. "my-store.myshopify.com", NULL until connected
+    shopify_access_token   TEXT,                   -- permanent Admin API token from the OAuth install flow
+    shopify_connected_at   TIMESTAMPTZ,            -- NULL until first successful connection
     delivery_charge         NUMERIC(10,2) NOT NULL DEFAULT 0,   -- flat fee per order
     delivery_areas          TEXT,
     delivery_estimated_time TEXT,
@@ -102,6 +105,13 @@ ALTER TABLE users
 CREATE UNIQUE INDEX idx_businesses_whatsapp_number_unique
     ON businesses (regexp_replace(whatsapp_number, '[^0-9]', '', 'g'))
     WHERE whatsapp_number IS NOT NULL;
+
+-- Same reasoning as the WhatsApp number index above — prevents one
+-- Shopify store from ever being connected to two Exofe businesses at
+-- once (would misroute webhooks unpredictably).
+CREATE UNIQUE INDEX idx_businesses_shopify_shop_unique
+    ON businesses (shopify_shop_domain)
+    WHERE shopify_shop_domain IS NOT NULL;
 
 -- ============================================================
 -- SUBSCRIPTIONS
@@ -173,10 +183,16 @@ CREATE TABLE products (
     stock             INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
     status            TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('active', 'draft')),
     has_variants      BOOLEAN NOT NULL DEFAULT FALSE,
+    shopify_product_id TEXT,               -- Shopify's product id, NULL for products created directly in Exofe
     created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
- 
+
+-- Lets catalog sync re-run safely (ON CONFLICT upsert) instead of
+-- creating duplicate products every time.
+CREATE UNIQUE INDEX idx_products_shopify_product_unique
+    ON products (business_id, shopify_product_id)
+    WHERE shopify_product_id IS NOT NULL;
 
 -- ============================================================
 -- PRODUCT IMAGES
@@ -222,8 +238,13 @@ CREATE TABLE product_variants (
     sku            TEXT NOT NULL DEFAULT '',
     price          NUMERIC(10,2) NOT NULL CHECK (price >= 0),
     stock          INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
+    shopify_variant_id TEXT,               -- Shopify's variant id, NULL for variants created directly in Exofe
     created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE UNIQUE INDEX idx_variants_shopify_variant_unique
+    ON product_variants (product_id, shopify_variant_id)
+    WHERE shopify_variant_id IS NOT NULL;
 
 -- ============================================================
 -- CUSTOMERS
@@ -445,6 +466,34 @@ CREATE TABLE interactive_messages (
     status              TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('active', 'draft')),
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
+-- WHATSAPP MESSAGE TEMPLATES
+-- Real Meta Business Message Templates (not the interactive_messages
+-- above — those are live-conversation button/list messages that never
+-- touch Meta's review queue). Every row here is one business's own
+-- activated copy of one of the platform's starter templates, submitted
+-- for approval under that business's own WABA (templates aren't shared
+-- across WABAs, so the same starter gets its own row/approval per
+-- business — see app/services/template_service.py STARTER_TEMPLATES).
+-- ============================================================
+
+CREATE TABLE whatsapp_templates (
+    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_id       UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+    key               TEXT NOT NULL,          -- matches a STARTER_TEMPLATES key, e.g. 'order_confirmed'
+    template_name     TEXT NOT NULL,          -- exact name submitted to Meta (== key)
+    category          TEXT NOT NULL CHECK (category IN ('UTILITY', 'MARKETING', 'AUTHENTICATION')),
+    language          TEXT NOT NULL DEFAULT 'en',
+    body_text         TEXT NOT NULL,
+    variables         TEXT[] NOT NULL DEFAULT '{}',   -- e.g. ['customer_name','order_id','total'], positional order
+    status            TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'paused')),
+    meta_template_id  TEXT,                   -- Meta's own id for this template, once created
+    rejection_reason  TEXT,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (business_id, key)
 );
 
 -- ============================================================

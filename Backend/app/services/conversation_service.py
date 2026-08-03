@@ -11,7 +11,7 @@ from app.repositories import (
     product_repository,
     user_repository,
 )
-from app.services import ai_service, ai_usage_service
+from app.services import ai_service, ai_usage_service, shopify_service
 
 # Sentinel: "this wasn't a browsing action, fall through to normal intent
 # handling" — distinct from a real `None` return, which means a reply
@@ -395,6 +395,10 @@ def _finalize_cart_order(db, business_id, business, customer_id, to, cart, deliv
         to, f"Your order is confirmed! ✅ Total: PKR {order['total']:,.0f}. Thanks for shopping with us!",
         phone_number_id=business["whatsapp_phone_number_id"], access_token=business["whatsapp_access_token"],
     )
+    # Best-effort only (catches its own exceptions) — a connected store
+    # gets this order mirrored in, but a Shopify hiccup must never touch
+    # the WhatsApp confirmation already sent above.
+    shopify_service.push_order_to_shopify(db, business_id, order["id"])
     return None
 
 

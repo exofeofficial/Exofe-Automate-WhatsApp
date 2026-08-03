@@ -220,6 +220,64 @@ def clear_whatsapp_connection(db: Session, business_id: str) -> dict:
     return dict(row._mapping)
 
 
+def get_business_by_waba_id(db: Session, waba_id: str) -> dict | None:
+    """Resolves a business from Meta's WABA id — used by the
+    message_template_status_update webhook, which identifies the account
+    by WABA rather than by phone number."""
+    row = db.execute(
+        text("SELECT * FROM businesses WHERE whatsapp_waba_id = :waba_id"),
+        {"waba_id": waba_id},
+    ).fetchone()
+    return dict(row._mapping) if row else None
+
+
+def get_business_by_shopify_shop(db: Session, shop_domain: str) -> dict | None:
+    """Resolves a business from the shop domain Shopify sends in every
+    webhook (X-Shopify-Shop-Domain header) — the Shopify equivalent of
+    get_business_by_whatsapp_number above."""
+    row = db.execute(
+        text("SELECT * FROM businesses WHERE shopify_shop_domain = :shop"),
+        {"shop": shop_domain},
+    ).fetchone()
+    return dict(row._mapping) if row else None
+
+
+def update_shopify_connection(db: Session, business_id: str, *, shop_domain: str, access_token: str) -> dict:
+    """Saves this business's Shopify connection once the OAuth install
+    flow hands back a working access token."""
+    row = db.execute(
+        text("""
+            UPDATE businesses
+            SET shopify_shop_domain = :shop_domain,
+                shopify_access_token = :access_token,
+                shopify_connected_at = NOW()
+            WHERE id = :business_id
+            RETURNING *
+        """),
+        {"business_id": business_id, "shop_domain": shop_domain, "access_token": access_token},
+    ).fetchone()
+    db.commit()
+    return dict(row._mapping)
+
+
+def clear_shopify_connection(db: Session, business_id: str) -> dict:
+    """Disconnects — clears stored credentials but keeps the business row
+    (and any products already synced in) intact."""
+    row = db.execute(
+        text("""
+            UPDATE businesses
+            SET shopify_shop_domain = NULL,
+                shopify_access_token = NULL,
+                shopify_connected_at = NULL
+            WHERE id = :business_id
+            RETURNING *
+        """),
+        {"business_id": business_id},
+    ).fetchone()
+    db.commit()
+    return dict(row._mapping)
+
+
 _BUSINESS_ALLOWED_FIELDS = frozenset({
     "name", "industry", "description", "support_email", "support_phone",
     "logo_url", "whatsapp_number", "whatsapp_connected_at",

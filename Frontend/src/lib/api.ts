@@ -755,6 +755,22 @@ export function getAdminUsers() {
   return adminRequest<{ users: AdminUser[] }>("/admin/users");
 }
 
+export type DemoLead = {
+  id: string;
+  name: string;
+  email: string;
+  billingCountry: string;
+  countryCode: string;
+  phone: string;
+  team: string | null;
+  createdAt: string;
+};
+
+// Expected backend contract: GET /admin/demo-leads -> 200 { leads: DemoLead[] }
+export function getDemoLeads() {
+  return adminRequest<{ leads: DemoLead[] }>("/admin/demo-leads");
+}
+
 export type AdminSubscription = {
   id: string;
   businessId: string;

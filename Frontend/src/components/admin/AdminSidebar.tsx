@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   BarChart3,
   Building2,
+  CalendarClock,
   CreditCard,
   Flag,
   LayoutDashboard,
@@ -19,6 +20,7 @@ export const ADMIN_NAV = [
   { label: "Overview", href: "/admin", icon: LayoutDashboard },
   { label: "Users", href: "/admin/users", icon: Users },
   { label: "Clients", href: "/admin/clients", icon: Building2 },
+  { label: "Demo Requests", href: "/admin/demo-leads", icon: CalendarClock },
   { label: "Subscriptions", href: "/admin/subscriptions", icon: CreditCard },
   { label: "Revenue", href: "/admin/revenue", icon: BarChart3 },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },

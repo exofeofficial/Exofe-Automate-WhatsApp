@@ -23,6 +23,13 @@ def add_to_waitlist(db: Session, email: str) -> None:
         db.rollback()
 
 
+def list_demo_leads(db: Session) -> list[dict]:
+    rows = db.execute(
+        text("SELECT * FROM demo_leads ORDER BY created_at DESC")
+    ).fetchall()
+    return [dict(row._mapping) for row in rows]
+
+
 def create_demo_lead(
     db: Session,
     *,

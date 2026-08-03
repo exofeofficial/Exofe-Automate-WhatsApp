@@ -166,3 +166,20 @@ class SetFeatureFlagRequest(BaseModel):
 
 class FeatureFlagResponse(BaseModel):
     flag: FeatureFlagRow
+
+# Admin demo bookings (from the public "Book a Demo" marketing page)
+class DemoLeadRow(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    id: str
+    name: str
+    email: str
+    billing_country: str
+    country_code: str
+    phone: str
+    team: str | None
+    created_at: str
+
+
+class DemoLeadsResponse(BaseModel):
+    leads: list[DemoLeadRow]

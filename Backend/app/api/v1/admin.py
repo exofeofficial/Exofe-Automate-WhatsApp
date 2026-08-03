@@ -14,6 +14,7 @@ from app.database.session import get_db
 from app.models.auth import AdminLoginRequest, TokenResponse
 from app.repositories import user_repository
 from app.repositories import business_repository
+from app.repositories import marketing_repository
 from app.services import admin_service
 
 from app.models.admin import (
@@ -36,7 +37,9 @@ from app.models.admin import (
     FeatureFlagRow,
     FeatureFlagsResponse,
     SetFeatureFlagRequest,
-    FeatureFlagResponse
+    FeatureFlagResponse,
+    DemoLeadRow,
+    DemoLeadsResponse,
 )
 router = APIRouter(tags=["Admin"], prefix="/admin")
 
@@ -301,4 +304,27 @@ def set_feature_flag(
             business_id=str(row["business_id"]) if row["business_id"] else None,
             business_name=row["business_name"],
         )
+    )
+
+# ── GET /admin/demo-leads ─────────────────────────────────────────────────────
+@router.get("/demo-leads", response_model=DemoLeadsResponse)
+def list_demo_leads(
+    db: Annotated[Session, Depends(get_db)],
+    _admin: Annotated[CurrentUser, Depends(require_admin)],
+) -> DemoLeadsResponse:
+    rows = marketing_repository.list_demo_leads(db)
+    return DemoLeadsResponse(
+        leads=[
+            DemoLeadRow(
+                id=str(row["id"]),
+                name=row["name"],
+                email=row["email"],
+                billing_country=row["billing_country"],
+                country_code=row["country_code"],
+                phone=row["phone"],
+                team=row["team"],
+                created_at=row["created_at"].isoformat(),
+            )
+            for row in rows
+        ]
     )

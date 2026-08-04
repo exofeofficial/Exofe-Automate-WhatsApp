@@ -21,6 +21,19 @@ import {
 import { clearToken } from "@/lib/auth";
 import { getUserProfile } from "@/lib/user";
 import { useTheme } from "@/components/dashboard/ThemeProvider";
+import { getNotifications, markNotificationsRead, type Notification } from "@/lib/api";
+
+const POLL_INTERVAL_MS = 30_000;
+
+function timeAgo(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const minutes = Math.floor(diffMs / 60_000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -38,12 +51,43 @@ export default function Topbar({ onMenuClick, title }: { onMenuClick: () => void
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<{ firstName: string; lastName?: string; email: string } | null>(null);
 
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
   // Reads localStorage, has to happen after mount so the server render
   // and first client render match (same pattern used across the
   // dashboard for client only data).
   useEffect(() => {
     setProfile(getUserProfile());
   }, []);
+
+  useEffect(() => {
+    const refresh = () => {
+      getNotifications()
+        .then((res) => {
+          setNotifications(res.notifications);
+          setUnreadCount(res.unreadCount);
+        })
+        .catch(() => {});
+    };
+    refresh();
+    const id = setInterval(refresh, POLL_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, []);
+
+  const handleOpenNotifications = () => {
+    const next = !notifOpen;
+    setNotifOpen(next);
+    if (next && unreadCount > 0) {
+      markNotificationsRead()
+        .then((res) => {
+          setNotifications(res.notifications);
+          setUnreadCount(res.unreadCount);
+        })
+        .catch(() => {});
+    }
+  };
 
   const handleLogout = () => {
     clearToken();
@@ -71,14 +115,59 @@ export default function Topbar({ onMenuClick, title }: { onMenuClick: () => void
             className="w-56 rounded-full border border-ink/[.08] bg-ink/[.03] py-2 pl-9 pr-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/25"
           />
         </div>
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="relative flex h-9 w-9 items-center justify-center rounded-full text-foreground/60 hover:bg-ink/[.03]"
-        >
-          <Bell className="h-[18px] w-[18px]" strokeWidth={2} />
-          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500" />
-        </button>
+        <div className="relative">
+          <button
+            type="button"
+            aria-label="Notifications"
+            onClick={handleOpenNotifications}
+            className="relative flex h-9 w-9 items-center justify-center rounded-full text-foreground/60 hover:bg-ink/[.03]"
+          >
+            <Bell className="h-[18px] w-[18px]" strokeWidth={2} />
+            {unreadCount > 0 && <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-red-500" />}
+          </button>
+
+          <AnimatePresence>
+            {notifOpen && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Close notifications"
+                  onClick={() => setNotifOpen(false)}
+                  className="fixed inset-0 z-30 cursor-default"
+                />
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                  transition={{ duration: 0.15, ease: EASE }}
+                  className="absolute right-0 z-40 mt-2 w-80 overflow-hidden rounded-2xl border border-ink/[.06] bg-surface shadow-xl"
+                >
+                  <div className="border-b border-ink/[.06] px-4 py-3">
+                    <p className="text-sm font-bold text-foreground">Notifications</p>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <p className="px-4 py-6 text-center text-xs text-foreground/45">No notifications yet.</p>
+                    ) : (
+                      notifications.map((n) => (
+                        <div
+                          key={n.id}
+                          className={`border-b border-ink/[.04] px-4 py-3 last:border-b-0 ${
+                            n.isRead ? "" : "bg-[#45157b]/[.04]"
+                          }`}
+                        >
+                          <p className="text-sm font-semibold text-foreground">{n.title}</p>
+                          <p className="mt-0.5 text-xs leading-relaxed text-foreground/60">{n.body}</p>
+                          <p className="mt-1 text-[11px] text-foreground/35">{timeAgo(n.createdAt)}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
 
         <div className="relative">
           <button

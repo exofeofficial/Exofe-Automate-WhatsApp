@@ -497,6 +497,23 @@ CREATE TABLE whatsapp_templates (
 );
 
 -- ============================================================
+-- NOTIFICATIONS
+-- In-app notifications shown from the dashboard's Topbar bell (e.g.
+-- "your Order Confirmed template was approved").
+-- ============================================================
+
+CREATE TABLE notifications (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_id UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+    title       TEXT NOT NULL,
+    body        TEXT NOT NULL,
+    is_read     BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_notifications_business ON notifications(business_id, created_at DESC);
+
+-- ============================================================
 -- DRAFT ORDERS
 -- ============================================================
 

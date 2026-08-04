@@ -7,14 +7,14 @@
 
 from app.ai import whatsapp_client
 from app.core.exceptions import AppError
-from app.repositories import template_repository, user_repository
+from app.repositories import notification_repository, template_repository, user_repository
 
 STARTER_TEMPLATES: dict[str, dict] = {
     "order_confirmed": {
         "label": "Order Confirmed",
         "hint": "Sent the moment an order is placed — confirms items and total.",
         "category": "UTILITY",
-        "body": "Shukriya {{1}}! Aapka order #{{2}} confirm ho gaya hai. Total: PKR {{3}}. Jald hi dispatch hote hi bata denge.",
+        "body": "Thanks {{1}}! Your order #{{2}} is confirmed. Total: PKR {{3}}. We'll let you know as soon as it ships.",
         "variables": ["customer_name", "order_id", "total"],
         "examples": ["Ali", "1023", "2,500"],
     },
@@ -22,15 +22,15 @@ STARTER_TEMPLATES: dict[str, dict] = {
         "label": "Order Shipped",
         "hint": "Lets the customer know their order is on its way.",
         "category": "UTILITY",
-        "body": "Good news {{1}}! Aapka order #{{2}} bhej diya gaya hai. Expected delivery: {{3}}.",
+        "body": "Good news {{1}}! Your order #{{2}} has shipped. Expected delivery: {{3}}.",
         "variables": ["customer_name", "order_id", "eta"],
-        "examples": ["Ali", "1023", "2-3 din"],
+        "examples": ["Ali", "1023", "2-3 days"],
     },
     "out_for_delivery": {
         "label": "Out for Delivery",
         "hint": "Same-day heads-up so someone's home to receive it.",
         "category": "UTILITY",
-        "body": "Aapka order #{{1}} aaj deliver hone wala hai! Ghar par mojood rahen.",
+        "body": "Your order #{{1}} is out for delivery today! Please make sure someone's home to receive it.",
         "variables": ["order_id"],
         "examples": ["1023"],
     },
@@ -38,7 +38,7 @@ STARTER_TEMPLATES: dict[str, dict] = {
         "label": "Order Delivered",
         "hint": "Confirms a successful delivery.",
         "category": "UTILITY",
-        "body": "Aapka order #{{1}} deliver ho chuka hai. Humare sath shopping karne ka shukriya!",
+        "body": "Your order #{{1}} has been delivered. Thanks for shopping with us!",
         "variables": ["order_id"],
         "examples": ["1023"],
     },
@@ -46,15 +46,15 @@ STARTER_TEMPLATES: dict[str, dict] = {
         "label": "Order Cancelled",
         "hint": "Explains why an order didn't go through.",
         "category": "UTILITY",
-        "body": "Aapka order #{{1}} cancel kar diya gaya hai. Wajah: {{2}}. Sawal ke liye reply karein.",
+        "body": "Your order #{{1}} has been cancelled. Reason: {{2}}. Reply here if you have any questions.",
         "variables": ["order_id", "reason"],
-        "examples": ["1023", "Stock khatam"],
+        "examples": ["1023", "Item out of stock"],
     },
     "cod_confirmation": {
         "label": "COD Confirmation",
         "hint": "Cuts down Cash-on-Delivery no-shows by confirming before dispatch.",
         "category": "UTILITY",
-        "body": "Hi {{1}}, apna Cash on Delivery order #{{2}} (PKR {{3}}) confirm karne ke liye YES reply karein.",
+        "body": "Hi {{1}}, please reply YES to confirm your Cash on Delivery order #{{2}} (PKR {{3}}).",
         "variables": ["customer_name", "order_id", "total"],
         "examples": ["Ali", "1023", "2,500"],
     },
@@ -62,7 +62,7 @@ STARTER_TEMPLATES: dict[str, dict] = {
         "label": "Payment Reminder",
         "hint": "Nudges a customer who hasn't finished paying online yet.",
         "category": "UTILITY",
-        "body": "Hi {{1}}, order #{{2}} (PKR {{3}}) ki payment abhi baaki hai. Complete karne ke liye is link par jayen: {{4}}",
+        "body": "Hi {{1}}, payment for order #{{2}} (PKR {{3}}) is still pending. Complete it here: {{4}}",
         "variables": ["customer_name", "order_id", "total", "link"],
         "examples": ["Ali", "1023", "2,500", "pay.exofe.com/xyz"],
     },
@@ -70,7 +70,7 @@ STARTER_TEMPLATES: dict[str, dict] = {
         "label": "Welcome Message",
         "hint": "First contact with a new customer (e.g. from a click-to-WhatsApp ad).",
         "category": "MARKETING",
-        "body": "{{1}} mein khush amdeed! 👋 Hamara catalog dekhne ke liye 'catalog' likh kar bhejein.",
+        "body": "Welcome to {{1}}! 👋 Reply 'catalog' anytime to browse our products.",
         "variables": ["business_name"],
         "examples": ["Ali's Store"],
     },
@@ -78,7 +78,7 @@ STARTER_TEMPLATES: dict[str, dict] = {
         "label": "Abandoned Cart Reminder",
         "hint": "Recovers a cart a customer never checked out.",
         "category": "MARKETING",
-        "body": "Hi {{1}}, aapka cart mein {{2}} item reh gaye hain! Order complete karein: {{3}}",
+        "body": "Hi {{1}}, you left {{2}} item(s) in your cart! Complete your order here: {{3}}",
         "variables": ["customer_name", "item_count", "link"],
         "examples": ["Ali", "2", "exofe.com/cart/xyz"],
     },
@@ -86,7 +86,7 @@ STARTER_TEMPLATES: dict[str, dict] = {
         "label": "Review Request",
         "hint": "Asks for feedback after a delivered order.",
         "category": "MARKETING",
-        "body": "Hi {{1}}, umeed hai aapko order #{{2}} pasand aaya hoga! Chand second nikaal kar hamein rate kar dein: {{3}}",
+        "body": "Hi {{1}}, hope you loved order #{{2}}! Got a second to leave us a rating? {{3}}",
         "variables": ["customer_name", "order_id", "link"],
         "examples": ["Ali", "1023", "exofe.com/review/xyz"],
     },
@@ -158,4 +158,22 @@ def sync_status_from_webhook(db, waba_id: str, template_name: str, status: str, 
     business = user_repository.get_business_by_waba_id(db, waba_id)
     if not business:
         return
-    template_repository.update_status_by_name(db, business["id"], template_name, status, rejection_reason)
+    updated = template_repository.update_status_by_name(db, business["id"], template_name, status, rejection_reason)
+    if not updated:
+        return
+
+    label = STARTER_TEMPLATES.get(template_name, {}).get("label", template_name)
+    if status == "approved":
+        notification_repository.create_notification(
+            db,
+            business_id=business["id"],
+            title="Template approved",
+            body=f"Your \"{label}\" template was approved by Meta and is ready to use.",
+        )
+    elif status == "rejected":
+        notification_repository.create_notification(
+            db,
+            business_id=business["id"],
+            title="Template rejected",
+            body=f"Your \"{label}\" template was rejected by Meta" + (f": {rejection_reason}" if rejection_reason else "."),
+        )

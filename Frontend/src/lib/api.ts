@@ -168,6 +168,26 @@ export function activateTemplate(key: string) {
   return request<{ key: string; status: string }>(`/templates/${key}/activate`, { method: "POST" });
 }
 
+// ── Notifications (Topbar bell) ──────────────────────────────────────────────
+
+export type Notification = {
+  id: string;
+  title: string;
+  body: string;
+  isRead: boolean;
+  createdAt: string;
+};
+
+export function getNotifications() {
+  return request<{ notifications: Notification[]; unreadCount: number }>("/notifications");
+}
+
+export function markNotificationsRead() {
+  return request<{ notifications: Notification[]; unreadCount: number }>("/notifications/mark-read", {
+    method: "POST",
+  });
+}
+
 // Waitlist / early-access signup (CTA section email form)
 // Expected backend contract: POST /waitlist { email } -> 200 { message }
 export function joinWaitlist(email: string) {

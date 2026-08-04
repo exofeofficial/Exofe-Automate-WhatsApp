@@ -4,6 +4,7 @@ from app.api.v1 import (
     integrations,
     shopify,
     templates,
+    notifications,
     ai,
     admin,
     auth,
@@ -23,6 +24,7 @@ router.include_router(whatsapp.router)
 router.include_router(integrations.router)
 router.include_router(shopify.router)
 router.include_router(templates.router)
+router.include_router(notifications.router)
 router.include_router(ai.router)
 router.include_router(admin.router)
 router.include_router(auth.router)

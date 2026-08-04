@@ -68,6 +68,25 @@ export default function IntegrationsPage() {
       .catch(() => setShopify({ connected: false, shopDomain: null, connectedAt: null }));
   };
 
+  // The install flow now opens in a new tab, so this tab has no idea
+  // when (or if) it finishes — poll for a bit after the modal closes so
+  // "Connected" appears here on its own instead of needing a manual
+  // refresh once the user switches back.
+  const pollForShopifyConnection = () => {
+    let attempts = 0;
+    const id = setInterval(() => {
+      attempts += 1;
+      getShopifyStatus()
+        .then((res) => {
+          setShopify(res);
+          if (res.connected || attempts >= 40) clearInterval(id);
+        })
+        .catch(() => {
+          if (attempts >= 40) clearInterval(id);
+        });
+    }, 3000);
+  };
+
   useEffect(() => {
     refreshShopifyStatus();
 
@@ -193,7 +212,10 @@ export default function IntegrationsPage() {
         {showConnectShopify && (
           <ConnectShopifyModal
             onClose={() => setShowConnectShopify(false)}
-            onConnected={() => setShowConnectShopify(false)}
+            onConnected={() => {
+              setShowConnectShopify(false);
+              pollForShopifyConnection();
+            }}
           />
         )}
       </AnimatePresence>
@@ -350,8 +372,8 @@ function ConnectShopifyModal({ onClose, onConnected }: { onClose: () => void; on
     setError(null);
     try {
       const { installUrl } = await installShopify(normalized);
+      window.open(installUrl, "_blank", "noopener,noreferrer");
       onConnected();
-      window.location.href = installUrl;
     } catch (err) {
       setLoading(false);
       setError(err instanceof ApiError ? err.message : "Couldn't start the connection — try again.");
@@ -385,7 +407,7 @@ function ConnectShopifyModal({ onClose, onConnected }: { onClose: () => void; on
         </div>
         <p className="mt-4 text-sm font-bold text-foreground">Connect Shopify</p>
         <p className="mt-2 text-xs leading-relaxed text-foreground/55">
-          Enter your store&apos;s domain — you&apos;ll be sent to Shopify to approve the connection.
+          Enter your store&apos;s domain — Shopify&apos;s approval screen will open in a new tab.
         </p>
 
         <input

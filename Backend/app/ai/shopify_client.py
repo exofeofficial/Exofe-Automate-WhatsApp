@@ -37,7 +37,10 @@ def verify_oauth_hmac(params: dict) -> bool:
     every OAuth redirect carries an hmac computed over the other query
     params, signed with our app's client secret."""
     if not settings.shopify_api_secret:
-        logger.warning("SHOPIFY_API_SECRET not configured — skipping OAuth HMAC verification")
+        if settings.is_production:
+            logger.error("SHOPIFY_API_SECRET not configured in production — rejecting OAuth callback")
+            return False
+        logger.warning("SHOPIFY_API_SECRET not configured — skipping OAuth HMAC verification (dev only)")
         return True
     received = params.get("hmac")
     if not received:
@@ -51,7 +54,10 @@ def verify_webhook_hmac(body: bytes, hmac_header: str | None) -> bool:
     """Same idea as verify_oauth_hmac but for webhook POSTs, which sign
     the raw request body (base64, not hex) instead of a query string."""
     if not settings.shopify_api_secret:
-        logger.warning("SHOPIFY_API_SECRET not configured — skipping webhook HMAC verification")
+        if settings.is_production:
+            logger.error("SHOPIFY_API_SECRET not configured in production — rejecting webhook")
+            return False
+        logger.warning("SHOPIFY_API_SECRET not configured — skipping webhook HMAC verification (dev only)")
         return True
     if not hmac_header:
         return False

@@ -43,10 +43,20 @@ class Settings(BaseSettings):
     # and the webhook URLs registered after install.
     backend_url: str = "http://localhost:8000"
 
+    # "development" | "production". Controls fail-open behaviours that are
+    # convenient locally but dangerous in prod — e.g. skipping webhook
+    # signature checks when a secret isn't configured, and exposing the
+    # interactive API docs. Set ENVIRONMENT=production on Render.
+    environment: str = "development"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8"
     )
+
+    @property
+    def is_production(self) -> bool:
+        return self.environment.strip().lower() == "production"
 
     @property
     def cors_origins_list(self) -> list[str]:

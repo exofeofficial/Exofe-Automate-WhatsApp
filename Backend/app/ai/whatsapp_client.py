@@ -187,7 +187,13 @@ def verify_signature(payload_body: bytes, signature_header: str | None) -> bool:
     app secret is configured yet, so the webhook still works before that's
     set up in the Meta dashboard."""
     if not settings.whatsapp_app_secret:
-        logger.warning("WHATSAPP_APP_SECRET not configured — skipping webhook signature verification")
+        # Fail closed in production — an unset secret must never mean
+        # "accept every webhook", or anyone could forge inbound messages
+        # and orders. Only skip the check in local dev.
+        if settings.is_production:
+            logger.error("WHATSAPP_APP_SECRET not configured in production — rejecting webhook")
+            return False
+        logger.warning("WHATSAPP_APP_SECRET not configured — skipping webhook signature verification (dev only)")
         return True
     if not signature_header or not signature_header.startswith("sha256="):
         return False

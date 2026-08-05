@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import DataError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.logger import get_logger
@@ -49,6 +50,14 @@ def register_exception_handlers(app: FastAPI) -> None:
         # of stringifying it into a Python dict repr.
         content = exc.detail if isinstance(exc.detail, dict) else {"message": str(exc.detail)}
         return JSONResponse(status_code=exc.status_code, content=content)
+
+    @app.exception_handler(DataError)
+    async def data_error_handler(request: Request, exc: DataError) -> JSONResponse:
+        # A malformed value that Postgres can't accept for a column type —
+        # most often a bad UUID in a path param (e.g. /products/notauuid).
+        # That's a client mistake, so return 400, not a 500 that would
+        # otherwise fall through to the generic handler below.
+        return JSONResponse(status_code=400, content={"message": "Invalid request."})
 
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:

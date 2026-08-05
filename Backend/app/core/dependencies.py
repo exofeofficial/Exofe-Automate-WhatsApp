@@ -65,7 +65,28 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    business_id = payload.get("business_id")
+    # Re-validate against the DB on every request instead of trusting the
+    # token's claims. Tokens live 7 days, so a member who's been removed
+    # or demoted must not keep access (or their old role) until expiry —
+    # and role/business_id are read from the row, never from the token, so
+    # a tampered claim can't grant privileges even if the secret leaked.
+    user = user_repository.get_user_by_id(db, payload["sub"])
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account no longer exists",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if user["status"] == "invited":
+        # Invited-but-not-accepted rows have no password and shouldn't be
+        # usable as an identity even if a token somehow references them.
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    business_id = str(user["business_id"]) if user["business_id"] else None
     if business_id:
         business = user_repository.get_business_by_id(db, business_id)
         if business and business["status"] == "suspended":
@@ -75,7 +96,7 @@ def get_current_user(
             )
 
     return CurrentUser(
-        user_id=payload["sub"],
+        user_id=str(user["id"]),
         business_id=business_id,
-        role=payload.get("role", "owner"),
+        role=user["role"],
     )

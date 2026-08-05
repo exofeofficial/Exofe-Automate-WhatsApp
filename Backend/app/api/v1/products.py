@@ -144,6 +144,9 @@ def bulk_delete_products(body: BulkDeleteRequest, db: DbSession, user: CurrentUs
 # multipart/form-data, field name "file" — matches importProductsCsv() in
 # api.ts, which can't go through the shared JSON request() helper.
 
+MAX_CSV_BYTES = 2 * 1024 * 1024  # 2 MB — plenty for a product catalog CSV
+
+
 @router.post("/import", response_model=ImportResultResponse)
 async def import_products(db: DbSession, user: CurrentUserDep, file: UploadFile):
     business_id = _require_business(user)
@@ -153,8 +156,22 @@ async def import_products(db: DbSession, user: CurrentUserDep, file: UploadFile)
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail={"message": "Please upload a .csv file"},
         )
+    if file.filename and not file.filename.lower().endswith(".csv"):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"message": "Please upload a .csv file"},
+        )
 
-    content = await file.read()
+    # Read with a hard cap instead of an unbounded file.read(), so a huge
+    # upload can't balloon memory on the small instance even if it slipped
+    # past the global body-size middleware.
+    content = await file.read(MAX_CSV_BYTES + 1)
+    if len(content) > MAX_CSV_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail={"message": "That file is too large (max 2 MB)."},
+        )
+
     imported = catalog_service.import_products_csv(db, business_id, content)
     return ImportResultResponse(imported=imported)
 

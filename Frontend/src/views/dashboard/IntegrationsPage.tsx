@@ -407,7 +407,7 @@ function ConnectShopifyModal({ onClose, onConnected }: { onClose: () => void; on
         </div>
         <p className="mt-4 text-sm font-bold text-foreground">Connect Shopify</p>
         <p className="mt-2 text-xs leading-relaxed text-foreground/55">
-          Enter your store&apos;s domain — Shopify&apos;s approval screen will open in a new tab.
+          Enter your domain to connect your Shopify store with Exofe.
         </p>
 
         <input

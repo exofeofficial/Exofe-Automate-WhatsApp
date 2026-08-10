@@ -6,6 +6,17 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 
+def _row_to_dict(row) -> dict:
+    """id/business_id come back from psycopg2 as uuid.UUID objects, not
+    str — the Pydantic response models declare them as str and reject a
+    raw UUID outright rather than coercing it, so every read has to
+    stringify here."""
+    d = dict(row._mapping)
+    d["id"] = str(d["id"])
+    d["business_id"] = str(d["business_id"])
+    return d
+
+
 def create(db: Session, *, business_id: str, name: str, key_prefix: str, key_hash: str) -> dict:
     row = db.execute(
         text(
@@ -16,7 +27,7 @@ def create(db: Session, *, business_id: str, name: str, key_prefix: str, key_has
         {"business_id": business_id, "name": name, "key_prefix": key_prefix, "key_hash": key_hash},
     ).fetchone()
     db.commit()
-    return dict(row._mapping)
+    return _row_to_dict(row)
 
 
 def list_by_business(db: Session, business_id: str) -> list[dict]:
@@ -27,7 +38,7 @@ def list_by_business(db: Session, business_id: str) -> list[dict]:
         ),
         {"business_id": business_id},
     ).fetchall()
-    return [dict(r._mapping) for r in rows]
+    return [_row_to_dict(r) for r in rows]
 
 
 def get_active_by_hash(db: Session, key_hash: str) -> dict | None:
@@ -38,7 +49,7 @@ def get_active_by_hash(db: Session, key_hash: str) -> dict | None:
         ),
         {"key_hash": key_hash},
     ).fetchone()
-    return dict(row._mapping) if row else None
+    return _row_to_dict(row) if row else None
 
 
 def touch_last_used(db: Session, key_id: str) -> None:

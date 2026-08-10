@@ -13,7 +13,7 @@ GRAPH_API_VERSION = "v21.0"
 GRAPH_API_BASE = f"https://graph.facebook.com/{GRAPH_API_VERSION}"
 
 
-def _send(payload: dict, to: str, *, phone_number_id: str | None, access_token: str | None) -> None:
+def _send(payload: dict, to: str, *, phone_number_id: str | None, access_token: str | None) -> bool:
     """Shared POST to /{phone_number_id}/messages — every message type
     (text, list, buttons) is just a different `payload` shape.
 
@@ -22,13 +22,17 @@ def _send(payload: dict, to: str, *, phone_number_id: str | None, access_token: 
     back to the platform-level settings values so Exofe's own
     already-working connection (set up before per-business columns
     existed) keeps working unchanged.
+
+    Returns whether the send succeeded — most callers are fire-and-forget
+    and ignore it, but send_button_message uses it to retry without an
+    image header if a bad image URL took the whole message down with it.
     """
     phone_number_id = phone_number_id or settings.whatsapp_phone_number_id
     access_token = access_token or settings.whatsapp_cloud_api_token
 
     if not access_token or not phone_number_id:
         logger.error("WhatsApp send skipped: no access token / phone number id available")
-        return
+        return False
 
     url = f"{GRAPH_API_BASE}/{phone_number_id}/messages"
     headers = {"Authorization": f"Bearer {access_token}"}
@@ -37,9 +41,11 @@ def _send(payload: dict, to: str, *, phone_number_id: str | None, access_token: 
     try:
         response = httpx.post(url, json=payload, headers=headers, timeout=10)
         response.raise_for_status()
+        return True
     except httpx.HTTPError as e:
         detail = _meta_error_message(e.response) if isinstance(e, httpx.HTTPStatusError) else str(e)
         logger.error(f"Failed to send WhatsApp message to {to}: {detail}")
+        return False
 
 
 def send_text_message(to: str, text: str, *, phone_number_id: str | None = None, access_token: str | None = None) -> None:
@@ -79,27 +85,68 @@ def send_button_message(
     *,
     body: str,
     buttons: list[dict],
+    header_image: dict | None = None,
     phone_number_id: str | None = None,
     access_token: str | None = None,
 ) -> None:
     """Send up to 3 Reply Buttons — each {id, title} (title max 20 chars,
     a WhatsApp API limit). Used for 'Next product' / 'Select this one'
-    style choices while browsing."""
-    _send(
-        {
-            "type": "interactive",
-            "interactive": {
-                "type": "button",
-                "body": {"text": body},
-                "action": {
-                    "buttons": [{"type": "reply", "reply": {"id": b["id"], "title": b["title"][:20]}} for b in buttons]
-                },
-            },
+    style choices while browsing. header_image puts a product photo above
+    the body text (Cloud API supports an image header on button
+    messages) — either {"link": <public https url>} or
+    {"id": <media id from upload_media>} for images that only exist as
+    raw bytes (see conversation_service._get_whatsapp_image_ref)."""
+    interactive: dict = {
+        "type": "button",
+        "body": {"text": body},
+        "action": {
+            "buttons": [{"type": "reply", "reply": {"id": b["id"], "title": b["title"][:20]}} for b in buttons]
         },
+    }
+    if header_image:
+        interactive["header"] = {"type": "image", "image": header_image}
+
+    ok = _send(
+        {"type": "interactive", "interactive": interactive},
         to,
         phone_number_id=phone_number_id,
         access_token=access_token,
     )
+    if not ok and header_image:
+        # An unreachable link or a media id Meta no longer has takes the
+        # whole message down with it — better the customer still gets
+        # the product with no photo than nothing at all.
+        interactive.pop("header", None)
+        _send(
+            {"type": "interactive", "interactive": interactive},
+            to,
+            phone_number_id=phone_number_id,
+            access_token=access_token,
+        )
+
+
+def upload_media(phone_number_id: str, access_token: str, data: bytes, mime_type: str) -> str | None:
+    """Uploads raw image bytes to this business's own WABA and returns
+    the resulting media id — the only way to send an image WhatsApp
+    doesn't already have a public URL for (e.g. a product photo stored
+    as base64 in our own DB rather than a hosted file). The id is
+    reusable in later messages, so callers should cache it instead of
+    re-uploading the same bytes every time (see
+    product_repository.set_image_media_id)."""
+    try:
+        response = httpx.post(
+            f"{GRAPH_API_BASE}/{phone_number_id}/media",
+            headers={"Authorization": f"Bearer {access_token}"},
+            data={"messaging_product": "whatsapp", "type": mime_type},
+            files={"file": ("image", data, mime_type)},
+            timeout=20,
+        )
+        response.raise_for_status()
+        return response.json().get("id")
+    except httpx.HTTPError as e:
+        detail = _meta_error_message(e.response) if isinstance(e, httpx.HTTPStatusError) else str(e)
+        logger.error(f"Failed to upload media for phone_number_id {phone_number_id}: {detail}")
+        return None
 
 
 def send_template_message(

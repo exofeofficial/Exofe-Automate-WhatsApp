@@ -203,8 +203,15 @@ CREATE UNIQUE INDEX idx_products_shopify_product_unique
 CREATE TABLE product_images (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     product_id  UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    url         TEXT NOT NULL,      -- Cloudflare R2 URL
-    sort_order  INTEGER NOT NULL DEFAULT 0
+    url         TEXT NOT NULL,      -- Cloudflare R2 URL (or, currently, a raw
+                                    -- base64 data: URI — see whatsapp_media_id)
+    sort_order  INTEGER NOT NULL DEFAULT 0,
+    -- Cache of the Meta media id after this image is uploaded to a
+    -- business's WABA (base64 images can't be used as a WhatsApp "link"
+    -- header — they have to be uploaded once via /media and referenced
+    -- by id from then on). NULL until the image is first shown in a
+    -- WhatsApp message.
+    whatsapp_media_id TEXT
 );
 
 

@@ -176,6 +176,29 @@ def get_product_by_id(db: Session, product_id: str, business_id: str) -> dict | 
     return _assemble([dict(row._mapping)], db)[0]
 
 
+def get_first_image(db: Session, product_id: str) -> dict | None:
+    """The product's cover photo, with its Meta media id if one's already
+    been uploaded — used when sending a product on WhatsApp (see
+    conversation_service._get_whatsapp_image_ref), not by the dashboard's
+    own product views."""
+    row = db.execute(
+        text(
+            "SELECT id, url, whatsapp_media_id FROM product_images "
+            "WHERE product_id = :product_id ORDER BY sort_order LIMIT 1"
+        ),
+        {"product_id": product_id},
+    ).fetchone()
+    return dict(row._mapping) if row else None
+
+
+def set_image_media_id(db: Session, image_id: str, media_id: str) -> None:
+    db.execute(
+        text("UPDATE product_images SET whatsapp_media_id = :media_id WHERE id = :id"),
+        {"id": image_id, "media_id": media_id},
+    )
+    db.commit()
+
+
 # ── Product writes ───────────────────────────────────────────────────────────
 
 def _insert_images(db: Session, product_id: str, images: list[str]) -> None:

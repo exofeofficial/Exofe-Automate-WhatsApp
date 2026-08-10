@@ -1,8 +1,11 @@
 # app/services/conversation_service.py
+import base64
+
 from sqlalchemy.orm import Session
 
 from app.ai import classify_intent, extract_order_update
 from app.ai import whatsapp_client
+from app.core.logger import get_logger
 from app.repositories import (
     ai_repository,
     customer_repository,
@@ -12,6 +15,8 @@ from app.repositories import (
     user_repository,
 )
 from app.services import ai_service, ai_usage_service, shopify_service
+
+logger = get_logger(__name__)
 
 # Sentinel: "this wasn't a browsing action, fall through to normal intent
 # handling" — distinct from a real `None` return, which means a reply
@@ -234,6 +239,41 @@ def _start_browsing(db: Session, business: dict, customer_id: str, to: str, cart
     return None
 
 
+def _get_whatsapp_image_ref(db: Session, business: dict, product_id: str) -> dict | None:
+    """Resolves a product's cover photo into whatever shape
+    whatsapp_client.send_button_message's header_image expects. Real
+    hosted URLs go straight through as a link; images we only have as
+    base64 (see product_images.url) get uploaded to Meta once and the
+    resulting media id is cached on that image row for next time."""
+    image = product_repository.get_first_image(db, product_id)
+    if not image:
+        return None
+
+    url = image["url"]
+    if not url.startswith("data:"):
+        return {"link": url}
+
+    if image["whatsapp_media_id"]:
+        return {"id": image["whatsapp_media_id"]}
+
+    try:
+        header, b64_data = url.split(",", 1)
+        mime_type = header.split(";")[0].removeprefix("data:") or "image/jpeg"
+        raw = base64.b64decode(b64_data)
+    except (ValueError, base64.binascii.Error):
+        logger.error(f"Malformed data URI for product image {image['id']}")
+        return None
+
+    media_id = whatsapp_client.upload_media(
+        business["whatsapp_phone_number_id"], business["whatsapp_access_token"], raw, mime_type
+    )
+    if not media_id:
+        return None
+
+    product_repository.set_image_media_id(db, image["id"], media_id)
+    return {"id": media_id}
+
+
 def _show_product_at_index(
     db: Session, business: dict, customer_id: str, to: str, category_id: str, index: int, cart: list[dict]
 ) -> None:
@@ -277,6 +317,7 @@ def _show_product_at_index(
         to,
         body=_format_product_message(product),
         buttons=buttons,
+        header_image=_get_whatsapp_image_ref(db, business, product["id"]),
         phone_number_id=business["whatsapp_phone_number_id"],
         access_token=business["whatsapp_access_token"],
     )

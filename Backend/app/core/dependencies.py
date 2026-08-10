@@ -10,13 +10,13 @@ from dataclasses import dataclass
 from typing import Annotated
 
 from jose import JWTError, ExpiredSignatureError
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
-from app.core.security import decode_access_token
+from app.core.security import decode_access_token, hash_api_key
 from app.database.session import get_db
-from app.repositories import user_repository
+from app.repositories import api_key_repository, user_repository
 
 _bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -100,3 +100,22 @@ def get_current_user(
         business_id=business_id,
         role=user["role"],
     )
+
+
+def get_business_from_api_key(
+    db: Annotated[Session, Depends(get_db)],
+    x_api_key: Annotated[str | None, Header(alias="X-API-Key")] = None,
+) -> str:
+    """Resolves the X-API-Key header to a business_id for /v1/public —
+    the auth path a developer's own website uses instead of a login
+    token. Updates last_used_at so the Developers page can show which
+    keys are actually in use."""
+    if not x_api_key:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing X-API-Key header")
+
+    key = api_key_repository.get_active_by_hash(db, hash_api_key(x_api_key))
+    if not key:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or revoked API key")
+
+    api_key_repository.touch_last_used(db, key["id"])
+    return str(key["business_id"])

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Building2, Clock, CreditCard, Globe, Loader2, Percent, Truck } from "lucide-react";
+import { Building2, Clock, CreditCard, Globe, Loader2, Percent, Truck, Code2 } from "lucide-react";
 import { getSettings, type BusinessHourRow, type Settings } from "@/lib/api";
 import BusinessProfileSection from "@/components/dashboard/settings/BusinessProfileSection";
 import BusinessHoursSection from "@/components/dashboard/settings/BusinessHoursSection";
@@ -9,6 +9,7 @@ import DeliverySection from "@/components/dashboard/settings/DeliverySection";
 import TaxSection from "@/components/dashboard/settings/TaxSection";
 import PaymentSection from "@/components/dashboard/settings/PaymentSection";
 import LanguageSection from "@/components/dashboard/settings/LanguageSection";
+import DevelopersSection from "@/components/dashboard/settings/DevelopersSection";
 
 const DAYS: BusinessHourRow["day"][] = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
@@ -28,6 +29,7 @@ const TABS = [
   { id: "tax", label: "Taxes", icon: Percent },
   { id: "payment", label: "Payment", icon: CreditCard },
   { id: "language", label: "Language", icon: Globe },
+  { id: "developers", label: "Developers", icon: Code2 },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -97,6 +99,7 @@ export default function SettingsPage() {
         {tab === "language" && (
           <LanguageSection initial={settings.language} onSaved={(language) => setSettings((s) => ({ ...s, language }))} />
         )}
+        {tab === "developers" && <DevelopersSection />}
       </div>
     </div>
   );

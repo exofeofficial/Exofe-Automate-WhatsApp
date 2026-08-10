@@ -537,6 +537,28 @@ CREATE TABLE draft_orders (
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- ============================================================
+-- API KEYS
+-- Lets a business's own developer connect a custom website/app to
+-- Exofe (products, shipping sync) without a dashboard login. Only the
+-- SHA-256 hash is stored — the raw key is shown once at creation time,
+-- same pattern as Stripe/GitHub tokens.
+-- ============================================================
+
+CREATE TABLE api_keys (
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    business_id  UUID NOT NULL REFERENCES businesses(id) ON DELETE CASCADE,
+    name         TEXT NOT NULL,             -- owner's own label, e.g. "Storefront sync"
+    key_prefix   TEXT NOT NULL,             -- first 12 chars, shown in the list for identification
+    key_hash     TEXT NOT NULL UNIQUE,      -- sha256(raw key), never the raw key itself
+    last_used_at TIMESTAMPTZ,
+    revoked_at   TIMESTAMPTZ,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_api_keys_business ON api_keys(business_id);
+CREATE INDEX idx_api_keys_hash ON api_keys(key_hash) WHERE revoked_at IS NULL;
+
 
 -- ============================================================
 -- INDEXES

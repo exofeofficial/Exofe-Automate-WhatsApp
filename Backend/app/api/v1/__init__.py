@@ -11,9 +11,11 @@ from app.api.v1 import (
     billing,
     customers,
     dashboard,
+    developers,
     marketing,
     orders,
     products,
+    public,
     settings,
     team,
     automation
@@ -32,9 +34,11 @@ router.include_router(automation.router)
 router.include_router(billing.router)
 router.include_router(customers.router)
 router.include_router(dashboard.router)
+router.include_router(developers.router)
 router.include_router(marketing.router)
 router.include_router(orders.router)
 router.include_router(products.router)
 router.include_router(products.categories_router)
+router.include_router(public.router)
 router.include_router(settings.router)
 router.include_router(team.router)

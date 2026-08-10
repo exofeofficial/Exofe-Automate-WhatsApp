@@ -619,6 +619,41 @@ export function getSettings() {
   return request<{ settings: Settings }>("/settings");
 }
 
+// ── Developers / API keys ───────────────────────────────────────────────────
+// Lets a business's own developer connect a custom website/app to Exofe
+// (products, shipping sync) via /public/*, authenticated with an API key
+// instead of a login token — see Frontend/docs/API.md.
+
+export type ApiKey = {
+  id: string;
+  name: string;
+  keyPrefix: string;
+  lastUsedAt: string | null;
+  revokedAt: string | null;
+  createdAt: string;
+};
+
+// Expected backend contract: GET /developers/api-keys -> 200 { keys: ApiKey[] }
+export function listApiKeys() {
+  return request<{ keys: ApiKey[] }>("/developers/api-keys");
+}
+
+// Expected: POST /developers/api-keys { name } -> 201 { key: ApiKey, rawKey: string }
+// rawKey is only ever returned here, once — the backend stores just its hash.
+export function createApiKey(name: string) {
+  return request<{ key: ApiKey; rawKey: string }>("/developers/api-keys", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+}
+
+// Expected: DELETE /developers/api-keys/{id} -> 200 { message }
+export function revokeApiKey(id: string) {
+  return request<{ message: string }>(`/developers/api-keys/${id}`, {
+    method: "DELETE",
+  });
+}
+
 // ── Billing ──────────────────────────────────────────────────────────────────
 
 // Expected backend contract: GET /billing/trial-status -> 200 TrialStatus

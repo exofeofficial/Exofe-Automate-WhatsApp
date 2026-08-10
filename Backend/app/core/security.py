@@ -2,6 +2,8 @@
 # Password hashing and JWT helpers. This is shared by every login flow,
 # admin login now, business owner signup/login later.
 
+import hashlib
+import secrets
 from datetime import datetime, timedelta, timezone
 
 from jose import JWTError, jwt
@@ -13,6 +15,25 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_DAYS = 7
+
+API_KEY_PREFIX = "exf_live_"
+
+
+def generate_api_key() -> tuple[str, str, str]:
+    """Returns (raw_key, key_prefix, key_hash). The raw key is shown to
+    the business owner exactly once, at creation — only the hash is ever
+    stored, so a leaked database can't be used to impersonate a
+    developer's integration. Plain SHA-256 (not bcrypt) on purpose: the
+    key itself is already 256 bits of randomness, so it doesn't need a
+    slow, salted hash the way a human-chosen password does — a lookup
+    needs to be fast since it runs on every public API request."""
+    raw_key = API_KEY_PREFIX + secrets.token_urlsafe(32)
+    key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
+    return raw_key, raw_key[:12], key_hash
+
+
+def hash_api_key(raw_key: str) -> str:
+    return hashlib.sha256(raw_key.encode()).hexdigest()
 
 
 def hash_password(password: str) -> str:

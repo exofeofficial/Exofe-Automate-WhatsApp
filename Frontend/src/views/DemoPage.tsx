@@ -6,6 +6,7 @@ import { Check, CheckCircle2, Loader2 } from "lucide-react";
 import { ApiError, bookDemo, type DemoBookingPayload } from "@/lib/api";
 import { COUNTRIES, PHONE_PLACEHOLDER } from "@/lib/countries";
 import Dropdown from "@/components/ui/Dropdown";
+import { fbEvent } from "@/lib/fbpixel";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -118,6 +119,7 @@ export default function DemoPage() {
 
     try {
       await bookDemo(payload);
+      fbEvent("Lead", { content_name: "Demo Booking" });
       setStatus("done");
     } catch (err) {
       setStatus("idle");

@@ -10,6 +10,7 @@ import { COUNTRIES, PHONE_PLACEHOLDER } from "@/lib/countries";
 import { setToken } from "@/lib/auth";
 import { setUserProfile } from "@/lib/user";
 import { decodeGoogleIdToken } from "@/lib/google";
+import { fbEvent } from "@/lib/fbpixel";
 import Dropdown from "@/components/ui/Dropdown";
 import BrandLogo from "@/components/BrandLogo";
 import CodeInput from "@/components/ui/CodeInput";
@@ -112,6 +113,7 @@ export default function SignupPage() {
       // Only now does the account actually become usable — the token from
       // signup is withheld from storage until the email is confirmed.
       if (pendingToken) setToken(pendingToken);
+      fbEvent("CompleteRegistration", { content_name: "Email Signup", status: true });
       router.push("/dashboard");
     } catch (err) {
       setVerifyStatus("idle");
@@ -174,6 +176,7 @@ export default function SignupPage() {
       setToken(token);
       const info = decodeGoogleIdToken(idToken);
       if (info) setUserProfile(info);
+      fbEvent("CompleteRegistration", { content_name: "Google Signup", status: true });
       router.push("/dashboard");
     } catch (err) {
       setSocialNotice(err instanceof ApiError ? err.message : "Something went wrong.");

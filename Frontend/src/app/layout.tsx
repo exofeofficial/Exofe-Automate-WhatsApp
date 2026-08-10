@@ -4,6 +4,7 @@ import "./globals.css";
 import ConditionalNavbar from "@/components/ConditionalNavbar";
 import ConditionalFooter from "@/components/ConditionalFooter";
 import SmoothScroll from "@/components/SmoothScroll";
+import MetaPixel from "@/components/MetaPixel";
 
 const exo2 = Exo_2({
   variable: "--font-exo2",
@@ -35,6 +36,7 @@ export default function RootLayout({
         <meta name="color-scheme" content="light" />
       </head>
       <body className="min-h-full flex flex-col bg-white" suppressHydrationWarning>
+        <MetaPixel />
         <SmoothScroll>
           <ConditionalNavbar />
           {children}

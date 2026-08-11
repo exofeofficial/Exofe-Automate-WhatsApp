@@ -166,6 +166,29 @@ def get_all_products(
     return _assemble([dict(row._mapping) for row in rows], db)
 
 
+def get_sync_stats(db: Session, business_id: str) -> dict:
+    """Powers the Developers tab's sync status panel — cheap COUNT
+    queries instead of pulling full product rows just to count them."""
+    row = db.execute(
+        text(
+            "SELECT "
+            "COUNT(*) AS total_products, "
+            "COUNT(*) FILTER (WHERE status = 'active') AS active_products "
+            "FROM products WHERE business_id = :business_id"
+        ),
+        {"business_id": business_id},
+    ).fetchone()
+    category_count = db.execute(
+        text("SELECT COUNT(*) FROM categories WHERE business_id = :business_id"),
+        {"business_id": business_id},
+    ).scalar()
+    return {
+        "total_products": row.total_products,
+        "active_products": row.active_products,
+        "categories": category_count,
+    }
+
+
 def get_product_by_id(db: Session, product_id: str, business_id: str) -> dict | None:
     row = db.execute(
         text(f"{_PRODUCT_SELECT} WHERE p.id = :product_id AND p.business_id = :business_id"),

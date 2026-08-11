@@ -110,6 +110,14 @@ class ImportResultResponse(_CamelModel):
     imported: int
 
 
+# ── Sync stats (Developers tab) ─────────────────────────────────────────────
+
+class SyncStatsResponse(_CamelModel):
+    total_products: int
+    active_products: int
+    categories: int
+
+
 # ── Categories (Frontend/docs/API.md: GET/POST/PATCH/DELETE /categories) ─────
 # Not called by the product form today (it resolves categories by name on
 # the fly), but a first-class resource for whenever a category management

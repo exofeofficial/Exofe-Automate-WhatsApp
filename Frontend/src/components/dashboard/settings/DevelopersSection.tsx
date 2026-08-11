@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Copy, Key, Loader2, Plus, Trash2 } from "lucide-react";
-import { ApiError, createApiKey, listApiKeys, revokeApiKey, type ApiKey } from "@/lib/api";
+import { Boxes, Check, CheckCircle2, Copy, Key, Layers, Loader2, Plus, Trash2 } from "lucide-react";
+import { ApiError, createApiKey, getSyncStats, listApiKeys, revokeApiKey, type ApiKey, type SyncStats } from "@/lib/api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -20,12 +20,16 @@ export default function DevelopersSection() {
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [revokingId, setRevokingId] = useState<string | null>(null);
+  const [stats, setStats] = useState<SyncStats | null>(null);
 
   useEffect(() => {
     listApiKeys()
       .then((res) => setKeys(res.keys))
       .catch(() => {})
       .finally(() => setLoading(false));
+    getSyncStats()
+      .then(setStats)
+      .catch(() => {});
   }, []);
 
   const handleCreate = async () => {
@@ -68,6 +72,45 @@ export default function DevelopersSection() {
 
   return (
     <div className="flex flex-col gap-5">
+      {stats && (
+        <div className="rounded-2xl border border-ink/[.06] bg-surface p-5 shadow-sm sm:p-6">
+          <p className="text-sm font-bold text-foreground">Sync Status</p>
+          <p className="mt-1 text-xs text-foreground/50">
+            What&apos;s actually landed in Exofe from your website so far — proves the
+            integration is really pushing data in, not just that a key exists.
+          </p>
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="flex items-center gap-3 rounded-xl border border-ink/[.08] bg-ink/[.015] px-4 py-3.5">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-500/15">
+                <Boxes className="h-4.5 w-4.5 text-[#45157b]" strokeWidth={2} />
+              </span>
+              <div>
+                <p className="text-lg font-bold leading-tight text-foreground">{stats.totalProducts}</p>
+                <p className="text-xs text-foreground/50">Total products</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 rounded-xl border border-ink/[.08] bg-ink/[.015] px-4 py-3.5">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-500/15">
+                <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" strokeWidth={2} />
+              </span>
+              <div>
+                <p className="text-lg font-bold leading-tight text-foreground">{stats.activeProducts}</p>
+                <p className="text-xs text-foreground/50">Live on WhatsApp</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 rounded-xl border border-ink/[.08] bg-ink/[.015] px-4 py-3.5">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-500/15">
+                <Layers className="h-4.5 w-4.5 text-amber-600 dark:text-amber-400" strokeWidth={2} />
+              </span>
+              <div>
+                <p className="text-lg font-bold leading-tight text-foreground">{stats.categories}</p>
+                <p className="text-xs text-foreground/50">Categories</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-2xl border border-ink/[.06] bg-surface p-5 shadow-sm sm:p-6">
         <p className="text-sm font-bold text-foreground">API Keys</p>
         <p className="mt-1 text-xs text-foreground/50">

@@ -19,9 +19,14 @@ from app.models.api_key import (
     ApiKeyResponse,
     MessageResponse,
 )
-from app.services import api_key_service
+from app.models.product import SyncStatsResponse
+from app.services import api_key_service, catalog_service
 
 router = APIRouter(prefix="/developers/api-keys", tags=["developers"])
+# separate from the api-keys router above since it's not about keys — it's
+# what the Developers tab shows to prove a developer's integration is
+# actually pushing data in, not just that a key exists
+stats_router = APIRouter(prefix="/developers", tags=["developers"])
 
 DbSession = Annotated[Session, Depends(get_db)]
 CurrentOwner = Annotated[CurrentUser, Depends(get_current_user)]
@@ -53,3 +58,10 @@ def revoke_key(key_id: str, db: DbSession, current: CurrentOwner) -> MessageResp
     business_id = _require_business(current)
     api_key_service.revoke_key(db, business_id, key_id)
     return MessageResponse(message="API key revoked")
+
+
+@stats_router.get("/sync-stats", response_model=SyncStatsResponse)
+def get_sync_stats(db: DbSession, current: CurrentOwner) -> SyncStatsResponse:
+    business_id = _require_business(current)
+    stats = catalog_service.get_sync_stats(db, business_id)
+    return SyncStatsResponse(**stats)

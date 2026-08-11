@@ -654,6 +654,19 @@ export function revokeApiKey(id: string) {
   });
 }
 
+export type SyncStats = {
+  totalProducts: number;
+  activeProducts: number;
+  categories: number;
+};
+
+// Expected backend contract: GET /developers/sync-stats -> 200 SyncStats
+// What's actually landed in Exofe via /public/* so far — proves an
+// integration is really pushing data in, not just that a key exists.
+export function getSyncStats() {
+  return request<SyncStats>("/developers/sync-stats");
+}
+
 // ── Billing ──────────────────────────────────────────────────────────────────
 
 // Expected backend contract: GET /billing/trial-status -> 200 TrialStatus

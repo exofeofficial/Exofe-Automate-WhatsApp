@@ -71,6 +71,10 @@ def get_products(
     )
 
 
+def get_sync_stats(db: Session, business_id: str) -> dict:
+    return product_repository.get_sync_stats(db, business_id)
+
+
 def get_product_by_id(db: Session, product_id: str, business_id: str) -> dict:
     product = product_repository.get_product_by_id(db, product_id, business_id)
     if not product:

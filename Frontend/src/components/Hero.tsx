@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, useScroll, useTransform, type Variants } from "framer-motion";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, Check, Play, Star } from "lucide-react";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -66,109 +66,122 @@ function RevealWords({
   );
 }
 
-function HandArrow() {
-  return (
-    <svg width="90" height="110" viewBox="0 0 90 110" fill="none" className="text-foreground/70">
-      <motion.path
-        d="M62 6 C 30 18, 18 34, 30 46 C 38 54, 52 50, 50 40 C 48 31, 34 32, 26 42 C 16 55, 22 74, 44 88"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        initial={{ pathLength: 0, opacity: 0 }}
-        animate={{ pathLength: 1, opacity: 1 }}
-        transition={{ duration: 1.2, delay: 0.9, ease: "easeInOut" }}
-      />
-      <motion.path
-        d="M 38 76 L 44 88 L 31 87"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-        initial={{ pathLength: 0, opacity: 0 }}
-        animate={{ pathLength: 1, opacity: 1 }}
-        transition={{ duration: 0.4, delay: 2.0, ease: "easeOut" }}
-      />
-    </svg>
-  );
-}
+const TRUST_STATS = [
+  ["10,000+", "Orders automated"],
+  ["<2 min", "Avg. response time"],
+  ["3", "Countries live"],
+] as const;
 
-function OrdersReportCard() {
+function TrustBar() {
   return (
-    <div className="w-full rounded-t-2xl border border-b-0 border-black/[.06] bg-white p-6 shadow-2xl shadow-indigo-900/15 sm:p-7">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/[.06] pb-4">
-        <p className="text-base font-bold text-foreground">Orders Engagement Report</p>
-        <div className="flex items-center gap-2 text-[11px] text-foreground/50">
-          <span className="rounded-md border border-black/[.08] px-2.5 py-1">Total Orders ▾</span>
-          <span className="rounded-md border border-black/[.08] px-2.5 py-1">Last 7 Days ▾</span>
+    <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-8">
+      <div className="flex items-center gap-2">
+        <div className="flex -space-x-2">
+          {["#F59E0B", "#EC4899", "#6D5EFC", "#10B981"].map((c) => (
+            <span
+              key={c}
+              className="h-7 w-7 rounded-full border-2 border-white shadow-sm"
+              style={{ backgroundColor: c }}
+            />
+          ))}
+        </div>
+        <div className="flex flex-col items-start">
+          <div className="flex items-center gap-0.5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" strokeWidth={0} />
+            ))}
+          </div>
+          <span className="text-[11px] text-foreground/50">Trusted by growing businesses</span>
         </div>
       </div>
-      <div className="relative mt-4">
-        <svg viewBox="0 0 420 120" fill="none" className="w-full">
-          {[0, 30, 60, 90, 120].map((y) => (
-            <line key={y} x1="0" y1={y} x2="420" y2={y} stroke="#00000008" strokeWidth="1" />
-          ))}
-          <motion.path
-            d="M0 78 C 40 38, 70 30, 105 52 C 140 74, 160 96, 195 88 L 195 88 C 214 84, 224 60, 240 48 C 268 28, 300 30, 330 52 C 358 72, 388 80, 418 60"
-            stroke="#6d5efc"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 1.6, delay: 0.8, ease: "easeInOut" }}
-          />
-          <circle cx="195" cy="88" r="5" fill="#fff" stroke="#6d5efc" strokeWidth="2.5" />
-          <circle cx="330" cy="52" r="5" fill="#fff" stroke="#f43f5e" strokeWidth="2.5" />
-        </svg>
-        <div className="absolute right-24 top-0 hidden rounded-lg border border-black/[.06] bg-white p-2.5 shadow-lg sm:block">
-          {[
-            ["New", "46"],
-            ["Confirmed", "34"],
-            ["Shipped", "21"],
-            ["Delivered", "18"],
-          ].map(([k, v]) => (
-            <div key={k} className="flex items-center justify-between gap-6 text-[10px] leading-4">
-              <span className="text-foreground/50">{k}</span>
-              <span className="font-semibold text-foreground">{v}</span>
-            </div>
-          ))}
-        </div>
+      <div className="hidden h-8 w-px bg-black/[.08] sm:block" />
+      <div className="flex items-center gap-5">
+        {TRUST_STATS.map(([num, label]) => (
+          <div key={label} className="text-center sm:text-left">
+            <p className="text-sm font-bold leading-none text-foreground">{num}</p>
+            <p className="mt-1 text-[11px] leading-none text-foreground/45">{label}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
-function EngagementScoresCard() {
+const CHAT_MESSAGES = [
+  { from: "customer", text: "Hi! Do you have this in blue?", delay: 1.1 },
+  { from: "bot", text: "Yes! Here's what we have in stock 👇", delay: 1.6 },
+  { from: "bot", product: true, delay: 1.9 },
+  { from: "customer", text: "Perfect, I'll take 2", delay: 2.6 },
+  { from: "bot", text: "Order confirmed ✅ Total: Rs 2,400. We'll notify you once it ships!", delay: 3.1 },
+] as const;
+
+function WhatsAppMockup() {
   return (
-    <div className="w-full rounded-t-2xl border border-b-0 border-black/[.06] bg-white p-6 shadow-2xl shadow-indigo-900/15 sm:p-7">
-      <p className="border-b border-black/[.06] pb-4 text-base font-bold text-foreground">
-        Customer Engagement Scores
-      </p>
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        {[
-          ["Total Customers", "89", "+12% Last Week"],
-          ["Total Orders", "142", "+8% Last Week"],
-        ].map(([label, num, delta]) => (
-          <div key={label} className="rounded-lg border border-black/[.06] p-4 text-center">
-            <p className="text-xs text-foreground/50">{label}</p>
-            <p className="mt-1.5 text-3xl font-extrabold text-foreground">{num}</p>
-            <p className="mt-1.5 text-[11px] text-emerald-600">{delta}</p>
-          </div>
-        ))}
+    <div className="mx-auto w-full max-w-[340px] overflow-hidden rounded-[2rem] border-[6px] border-[#171326] bg-white shadow-2xl shadow-indigo-900/25">
+      {/* status bar */}
+      <div className="flex items-center justify-between bg-[#075E54] px-4 pb-2 pt-2.5 text-white">
+        <span className="text-[10px] font-medium opacity-80">9:41</span>
+        <div className="flex items-center gap-1">
+          <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
+          <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
+          <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
+        </div>
       </div>
-      <div className="mt-4 grid grid-cols-3 gap-3">
-        {[
-          ["New", "text-rose-500", "bg-rose-500"],
-          ["Shipped", "text-orange-500", "bg-orange-500"],
-          ["Delivered", "text-emerald-500", "bg-emerald-500"],
-        ].map(([label, txt, bar]) => (
-          <div key={label} className="border-l-2 border-black/[.06] pl-2">
-            <p className={`text-[11px] font-semibold ${txt}`}>{label}</p>
-            <div className="mt-1.5 h-1 w-full rounded-full bg-black/[.06]">
-              <div className={`h-1 w-2/3 rounded-full ${bar}`} />
-            </div>
-          </div>
-        ))}
+      {/* chat header */}
+      <div className="flex items-center gap-2.5 bg-[#075E54] px-4 pb-3">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-xs font-bold text-white">
+          E
+        </span>
+        <div>
+          <p className="text-xs font-semibold text-white">Exofe Store</p>
+          <p className="text-[10px] text-emerald-200">Online · Replies via AI</p>
+        </div>
+      </div>
+
+      {/* chat body */}
+      <div
+        className="flex min-h-[380px] flex-col gap-2.5 p-3.5"
+        style={{
+          backgroundColor: "#E5DDD5",
+          backgroundImage:
+            "radial-gradient(circle at 20% 20%, rgba(0,0,0,0.02) 1px, transparent 1px), radial-gradient(circle at 60% 70%, rgba(0,0,0,0.02) 1px, transparent 1px)",
+          backgroundSize: "24px 24px",
+        }}
+      >
+        {CHAT_MESSAGES.map((msg, i) => {
+          const isCustomer = msg.from === "customer";
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 8 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: msg.delay, ease: EASE }}
+              className={`flex ${isCustomer ? "justify-end" : "justify-start"}`}
+            >
+              {"product" in msg && msg.product ? (
+                <div className="w-[72%] rounded-xl rounded-tl-sm bg-white p-2.5 shadow-sm">
+                  <div className="h-20 w-full rounded-lg bg-gradient-to-br from-indigo-100 to-fuchsia-100" />
+                  <p className="mt-2 text-[11px] font-semibold text-foreground">Classic Tee — Blue</p>
+                  <div className="mt-0.5 flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-[#075E54]">Rs 1,200</span>
+                    <span className="rounded-full bg-[#075E54] px-2 py-0.5 text-[9px] font-semibold text-white">
+                      Add to cart
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className={`max-w-[78%] rounded-xl px-3 py-2 text-[11px] leading-relaxed shadow-sm ${
+                    isCustomer ? "rounded-tr-sm bg-[#DCF8C6] text-foreground/85" : "rounded-tl-sm bg-white text-foreground/85"
+                  }`}
+                >
+                  {"text" in msg ? msg.text : null}
+                </div>
+              )}
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );
@@ -184,7 +197,6 @@ export default function Hero() {
     offset: ["start end", "end start"],
   });
   const yLeft = useTransform(scrollYProgress, [0, 1], [0, -90]);
-  const yRight = useTransform(scrollYProgress, [0, 1], [0, -90]);
 
   useLayoutEffect(() => {
     gsap.registerPlugin(SplitText);
@@ -283,11 +295,8 @@ export default function Hero() {
         {/* CTAs */}
         <motion.div
           variants={item}
-          className="relative mt-9 flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row"
+          className="flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row"
         >
-          <div className="absolute top-[-48px] hidden md:-left-44 md:block lg:-left-52">
-            <HandArrow />
-          </div>
           <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
             <Link
               href="/signup"
@@ -308,30 +317,53 @@ export default function Hero() {
             </Link>
           </motion.div>
         </motion.div>
+
+        {/* trust bar */}
+        <motion.div variants={item} className="mt-10">
+          <TrustBar />
+        </motion.div>
       </motion.div>
 
-      {/* dashboard cards peeking from bottom */}
-      <div
-        ref={cardsRef}
-        className="relative z-10 mx-auto mt-16 grid w-full max-w-7xl grid-cols-1 gap-6 px-4 pb-0 sm:px-6 md:grid-cols-[1.6fr_1fr] md:items-end"
-      >
-        <motion.div style={{ y: yLeft }} className="will-change-transform md:translate-y-6">
-          <motion.div
-            initial={{ y: 90, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.9, delay: 0.5, ease: EASE }}
-          >
-            <OrdersReportCard />
-          </motion.div>
-        </motion.div>
-        <motion.div style={{ y: yRight }} className="will-change-transform md:translate-y-6">
-          <motion.div
-            initial={{ y: 80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.9, delay: 0.65, ease: EASE }}
-          >
-            <EngagementScoresCard />
-          </motion.div>
+      {/* product preview: real WhatsApp conversation, not abstract charts —
+          shows what the business is actually buying */}
+      <div ref={cardsRef} className="relative z-10 mx-auto mt-14 w-full max-w-7xl px-4 pb-0 sm:px-6">
+        <motion.div
+          style={{ y: yLeft }}
+          initial={{ y: 60, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.9, delay: 0.5, ease: EASE }}
+          className="relative mx-auto flex max-w-3xl items-end justify-center gap-6 will-change-transform"
+        >
+          {/* feature call-outs flanking the phone on larger screens */}
+          <div className="hidden w-48 flex-col gap-4 pb-16 lg:flex">
+            {[
+              "AI replies in seconds, 24/7",
+              "Full product catalog on WhatsApp",
+            ].map((text) => (
+              <div key={text} className="flex items-start gap-2 rounded-xl border border-black/[.06] bg-white/80 p-3 shadow-sm backdrop-blur">
+                <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                  <Check className="h-2.5 w-2.5 text-emerald-600" strokeWidth={3} />
+                </span>
+                <span className="text-xs leading-snug text-foreground/70">{text}</span>
+              </div>
+            ))}
+          </div>
+
+          <WhatsAppMockup />
+
+          <div className="hidden w-48 flex-col gap-4 pb-16 lg:flex">
+            {[
+              "Orders confirmed automatically",
+              "Works with your existing number",
+            ].map((text) => (
+              <div key={text} className="flex items-start gap-2 rounded-xl border border-black/[.06] bg-white/80 p-3 shadow-sm backdrop-blur">
+                <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                  <Check className="h-2.5 w-2.5 text-emerald-600" strokeWidth={3} />
+                </span>
+                <span className="text-xs leading-snug text-foreground/70">{text}</span>
+              </div>
+            ))}
+          </div>
         </motion.div>
       </div>
     </section>

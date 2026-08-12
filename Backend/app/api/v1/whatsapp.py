@@ -13,7 +13,7 @@ from app.config import settings
 from app.core.logger import get_logger
 from app.database.session import get_db
 from app.repositories import customer_repository, message_repository, user_repository
-from app.services import template_service
+from app.services import ai_service, template_service
 from app.services.conversation_service import handle_inbound_message
 
 logger = get_logger(__name__)
@@ -111,6 +111,29 @@ async def receive_webhook(request: Request, db: Annotated[Session, Depends(get_d
                     content=log_text,
                     whatsapp_message_id=wamid,
                 )
+
+                # Opt-in per business (see businesses.send_welcome_first) —
+                # greets a brand-new customer before the AI even looks at
+                # what they said, instead of only greeting when the
+                # message itself reads as a greeting. Exofe's own account
+                # only, for now — not exposed in Settings UI.
+                if customer["is_new"] and business["send_welcome_first"]:
+                    welcome = ai_service.get_settings(db, business["id"])["greeting_message"]
+                    if welcome:
+                        send_text_message(
+                            sender,
+                            welcome,
+                            phone_number_id=business["whatsapp_phone_number_id"],
+                            access_token=business["whatsapp_access_token"],
+                        )
+                        message_repository.log_message(
+                            db,
+                            business_id=business["id"],
+                            customer_id=customer["id"],
+                            direction="outbound",
+                            content=welcome,
+                            ai_generated=True,
+                        )
 
                 reply = handle_inbound_message(db, business["id"], customer["id"], incoming_text)
                 if reply:

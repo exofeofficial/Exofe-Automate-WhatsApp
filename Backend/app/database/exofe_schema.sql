@@ -88,6 +88,13 @@ CREATE TABLE businesses (
                                 CHECK (language IN ('en', 'ur', 'ko', 'ar')),
     status                   TEXT NOT NULL DEFAULT 'active'
                                 CHECK (status IN ('active', 'suspended')),
+    send_welcome_first       BOOLEAN NOT NULL DEFAULT FALSE,  -- opt-in per business: greet a
+                                                    -- brand-new customer's first-ever message with
+                                                    -- ai_settings.greeting_message before the AI's
+                                                    -- contextual reply, instead of only greeting
+                                                    -- when the message itself reads as a greeting.
+                                                    -- Not exposed in Settings UI yet — internal use
+                                                    -- (Exofe's own account) only for now.
     created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

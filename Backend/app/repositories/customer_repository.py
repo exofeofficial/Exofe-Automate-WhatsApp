@@ -35,14 +35,19 @@ def get_or_create_by_whatsapp(db: Session, business_id: str, whatsapp_number: st
     """Called from the inbound WhatsApp pipeline — every message needs a
     customer row to hang a draft order / order history off of. name is
     only set on first contact (pulled from the WhatsApp profile); an
-    existing customer's name is never overwritten here."""
+    existing customer's name is never overwritten here.
+
+    Returned dict carries `is_new`: True only when this INSERT actually
+    created the row (Postgres's xmax = 0 trick), False when it hit the
+    ON CONFLICT path — the webhook uses this to decide whether to greet
+    a business's brand-new customer before the AI's contextual reply."""
     row = db.execute(
         text(
             """
             INSERT INTO customers (business_id, whatsapp_number, name)
             VALUES (:business_id, :whatsapp_number, :name)
             ON CONFLICT (business_id, whatsapp_number) DO UPDATE SET business_id = EXCLUDED.business_id
-            RETURNING *
+            RETURNING *, (xmax = 0) AS is_new
             """
         ),
         {"business_id": business_id, "whatsapp_number": whatsapp_number, "name": name},

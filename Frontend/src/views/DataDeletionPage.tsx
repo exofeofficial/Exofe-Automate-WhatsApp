@@ -35,7 +35,7 @@ export default function DataDeletionPage() {
 
       <section>
         <h2>4. How to submit a request</h2>
-        <p>Email <a href="mailto:privacy@exofe.com">privacy@exofe.com</a> with the subject line &quot;Data Deletion Request&quot;, along with your business name and the email address on your Exofe account. We will confirm your identity before processing the request, to make sure we are not deleting someone else&apos;s data by mistake.</p>
+        <p>Email <a href="mailto:support@exofe.com">support@exofe.com</a> with the subject line &quot;Data Deletion Request&quot;, along with your business name and the email address on your Exofe account. We will confirm your identity before processing the request, to make sure we are not deleting someone else&apos;s data by mistake.</p>
       </section>
     </LegalLayout>
   );

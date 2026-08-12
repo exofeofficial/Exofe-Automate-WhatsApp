@@ -34,7 +34,8 @@ export default function PrivacyPolicyPage() {
       <section>
         <h2>3. WhatsApp and Meta</h2>
         <p>Exofe connects to your WhatsApp Business number through Meta&apos;s WhatsApp Business Platform. When a customer messages your number, that message passes through Meta&apos;s systems before reaching Exofe. Meta has its own privacy policy governing that part of the process, separate from this one.</p>
-        <p>Exofe only sends and receives messages on your behalf. We do not use your customer conversations for anything outside of running your Exofe account, and we do not sell conversation data to third parties.</p>
+        <p>Through this connection, Exofe accesses data Meta calls &quot;Platform Data&quot;: your WhatsApp Business Account details, phone number, message content, and delivery status. We use this data solely to operate the features you signed up for &mdash; letting the AI assistant read and reply to your customers, tracking orders, and showing your conversation history on your dashboard. We do not use Platform Data for advertising, do not sell it, and do not share it with anyone except the service providers listed in Section 4, who process it only on our behalf to run Exofe.</p>
+        <p>If you disconnect your WhatsApp number from Exofe or delete your account, we stop accessing Platform Data going forward and delete what we&apos;ve stored, as described in Section 6 and our <a href="/data-deletion">Data Deletion</a> page.</p>
       </section>
 
       <section>
@@ -80,7 +81,7 @@ export default function PrivacyPolicyPage() {
 
       <section>
         <h2>11. Contact us</h2>
-        <p>If you have questions about this policy or how your data is handled, email us at <a href="mailto:privacy@exofe.com">privacy@exofe.com</a>.</p>
+        <p>If you have questions about this policy or how your data is handled, email us at <a href="mailto:support@exofe.com">support@exofe.com</a>.</p>
       </section>
     </LegalLayout>
   );

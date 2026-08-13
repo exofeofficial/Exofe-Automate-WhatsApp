@@ -7,11 +7,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import {
   Bell,
+  Bot,
   Crown,
   HelpCircle,
   LayoutGrid,
   LogOut,
-  Menu,
   Moon,
   Plug,
   Search,
@@ -28,8 +28,17 @@ import { NAV, getActiveNavHref } from "@/components/dashboard/Sidebar";
 
 // Only the top-level links show up in the pill nav — a full flatten of NAV
 // (including the Automation group's children) wouldn't fit in one bar. The
-// account dropdown below still covers Team/Integrations/Settings.
+// account dropdown below still covers Team/Settings.
 const PILL_NAV = NAV.filter((entry) => entry.type === "link").slice(0, 6);
+
+// AI Assistant and Integrations sit past the first 6 links so they don't
+// make PILL_NAV's cut, but they're too central to leave in the account
+// dropdown only — icon-only slots at the end of the bar, same treatment
+// as the Dashboard icon on the left.
+const ICON_NAV = [
+  { label: "AI Assistant", href: "/dashboard/ai-assistant", icon: Bot },
+  { label: "Integrations", href: "/dashboard/integrations", icon: Plug },
+];
 
 const POLL_INTERVAL_MS = 30_000;
 
@@ -53,7 +62,7 @@ const MENU_ITEMS = [
   { label: "Help Center", href: "/docs", icon: HelpCircle },
 ];
 
-export default function Topbar({ onMenuClick }: { onMenuClick: () => void; title: string }) {
+export default function Topbar({ title }: { title: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
@@ -110,9 +119,6 @@ export default function Topbar({ onMenuClick }: { onMenuClick: () => void; title
   return (
     <header className="relative z-20 flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
       <div className="flex shrink-0 items-center gap-3">
-        <button type="button" onClick={onMenuClick} aria-label="Open menu" className="lg:hidden">
-          <Menu className="h-5 w-5 text-foreground/60" />
-        </button>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo-icon.png" alt="" className="h-6 w-auto" />
         <span className="hidden text-base font-bold tracking-tight text-foreground sm:inline">Exofe</span>
@@ -138,6 +144,23 @@ export default function Topbar({ onMenuClick }: { onMenuClick: () => void; title
               }`}
             >
               {entry.label}
+            </Link>
+          );
+        })}
+        <div className="mx-0.5 h-4 w-px shrink-0 bg-white/10" />
+        {ICON_NAV.map((entry) => {
+          const isActive = entry.href === activeHref;
+          const Icon = entry.icon;
+          return (
+            <Link
+              key={entry.href}
+              href={entry.href}
+              aria-label={entry.label}
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${
+                isActive ? "bg-[#c4b5fd] text-[#171326]" : "text-white/45 hover:text-white"
+              }`}
+            >
+              <Icon className="h-4 w-4" strokeWidth={2} />
             </Link>
           );
         })}

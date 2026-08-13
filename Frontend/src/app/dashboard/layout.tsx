@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
 import Sidebar, { getPageTitle } from "@/components/dashboard/Sidebar";
 import Topbar from "@/components/dashboard/Topbar";
+import BottomNav from "@/components/dashboard/BottomNav";
+import MoreSheet from "@/components/dashboard/MoreSheet";
 import PendingTasksWidget from "@/components/dashboard/PendingTasksWidget";
 import TrialLockOverlay from "@/components/dashboard/TrialLockOverlay";
 import ThemeProvider from "@/components/dashboard/ThemeProvider";
@@ -70,33 +71,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Sidebar trial={trial} />
         </div>
 
-        <AnimatePresence>
-          {mobileOpen && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setMobileOpen(false)}
-                className="fixed inset-0 z-40 bg-black/30 lg:hidden"
-              />
-              <motion.div
-                initial={{ x: -280 }}
-                animate={{ x: 0 }}
-                exit={{ x: -280 }}
-                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                className="fixed inset-y-0 left-0 z-50 lg:hidden"
-              >
-                <Sidebar trial={trial} onClose={() => setMobileOpen(false)} />
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
-
         <div className="flex min-w-0 flex-1 flex-col">
-          <Topbar onMenuClick={() => setMobileOpen(true)} title={title} />
-          <main className="flex-1 p-4 sm:p-6">{children}</main>
+          <Topbar title={title} />
+          <main className="flex-1 p-4 pb-24 sm:p-6 md:pb-6">{children}</main>
         </div>
+
+        <BottomNav onMoreClick={() => setMobileOpen(true)} />
+        <MoreSheet open={mobileOpen} onClose={() => setMobileOpen(false)} />
 
         {!showLock && <PendingTasksWidget trial={trial} tasks={buildOnboardingTasks(onboarding)} />}
         {showLock && <TrialLockOverlay trial={trial} />}

@@ -22,7 +22,7 @@ export default function PendingTasksWidget({ trial, tasks }: { trial: TrialStatu
   if (remaining === 0 && !trial.isTrialing) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-5 sm:right-5">
+    <div className="fixed bottom-20 right-4 z-30 flex flex-col items-end gap-3 md:bottom-5 md:right-5 md:z-50">
       <AnimatePresence>
         {open && (
           <motion.div

@@ -59,6 +59,16 @@ function flatLinks(): { label: string; href: string }[] {
   return NAV.flatMap((entry) => (entry.type === "link" ? [{ label: entry.label, href: entry.href }] : entry.children));
 }
 
+// Same flatten, but keeps the icon (group children inherit their group's
+// icon) — for the "all pages" grids (mobile MoreSheet, desktop dropdown).
+export function flatNavItemsWithIcons(): { label: string; href: string; icon: IconType }[] {
+  return NAV.flatMap((entry) =>
+    entry.type === "link"
+      ? [{ label: entry.label, href: entry.href, icon: entry.icon }]
+      : entry.children.map((c) => ({ label: c.label, href: c.href, icon: entry.icon }))
+  );
+}
+
 // Nested routes (like /dashboard/integrations/whatsapp) should still
 // highlight their parent nav item and use its label as the page title.
 // Picks the longest NAV href that prefixes the current path.

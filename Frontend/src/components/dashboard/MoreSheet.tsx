@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import { NAV, getActiveNavHref } from "@/components/dashboard/Sidebar";
+import { flatNavItemsWithIcons, getActiveNavHref } from "@/components/dashboard/Sidebar";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -12,11 +12,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 // bottom sheet grid instead of a left-slide drawer, so it matches the
 // bottom tab bar it opens from rather than feeling like a leftover
 // desktop pattern.
-const ITEMS = NAV.flatMap((entry) =>
-  entry.type === "link"
-    ? [{ label: entry.label, href: entry.href, icon: entry.icon }]
-    : entry.children.map((c) => ({ label: c.label, href: c.href, icon: entry.icon }))
-);
+const ITEMS = flatNavItemsWithIcons();
 
 export default function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const pathname = usePathname();

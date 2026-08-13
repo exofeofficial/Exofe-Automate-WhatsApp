@@ -1,30 +1,13 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, type Variants } from "framer-motion";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
-import {
-  ArrowRight,
-  Bell,
-  Play,
-  Search,
-  Sparkles,
-  LayoutGrid,
-  MessageSquare,
-  Users,
-  Package,
-  ShoppingCart,
-  Zap,
-  BarChart3,
-  Settings,
-  HelpCircle,
-  Send,
-  Code2,
-  ShoppingBag,
-  Share2,
-} from "lucide-react";
+import { ArrowRight, Play, Sparkles, Code2, Webhook } from "lucide-react";
+import { ShopifyIcon, WhatsAppIcon } from "@/components/dashboard/IntegrationIcons";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -35,19 +18,11 @@ const container: Variants = {
 
 // Content stays fully opaque even before hydration/animation kicks in — only
 // a subtle slide-up plays once JS is ready. Fading from opacity: 0 here left
-// the hero blank (just the background sparkles) for however long hydration
-// took on a cold load.
+// the hero blank for however long hydration took on a cold load.
 const item: Variants = {
   hidden: { y: 14, opacity: 1 },
   show: { y: 0, opacity: 1, transition: { duration: 0.5, ease: EASE } },
 };
-
-/* fixed star positions */
-const STARS = [
-  [6, 12], [14, 34], [22, 8], [30, 22], [38, 15], [46, 6], [54, 18],
-  [62, 10], [70, 26], [78, 7], [86, 16], [93, 30], [10, 55], [90, 55],
-  [4, 78], [96, 72], [18, 68], [82, 80], [26, 88], [74, 90],
-] as const;
 
 /* GSAP text reveal: heading = SplitText chars (skewX + opacity), paragraph = word color fade */
 
@@ -85,160 +60,20 @@ function RevealWords({
   );
 }
 
-const SIDEBAR_ITEMS = [
-  { label: "Overview", icon: LayoutGrid, active: true },
-  { label: "Conversations", icon: MessageSquare, active: false },
-  { label: "Customers", icon: Users, active: false },
-  { label: "Products", icon: Package, active: false },
-  { label: "Orders", icon: ShoppingCart, active: false },
-  { label: "Automations", icon: Zap, active: false },
-  { label: "Analytics", icon: BarChart3, active: false },
-  { label: "Settings", icon: Settings, active: false },
-] as const;
-
-function MockCard({ title, children, badge }: { title: string; children: React.ReactNode; badge?: React.ReactNode }) {
-  return (
-    <div className="flex flex-col rounded-xl border border-black/[.06] bg-white p-3 shadow-sm">
-      <div className="flex items-center justify-between">
-        <p className="text-[10px] font-bold text-foreground">{title}</p>
-        {badge}
-      </div>
-      <div className="mt-2 flex-1">{children}</div>
-    </div>
-  );
-}
-
 function DashboardMockup() {
   return (
-    <div className="mx-auto w-full max-w-[640px] -rotate-1 overflow-hidden rounded-2xl border border-black/[.06] bg-white shadow-2xl shadow-indigo-900/20">
-      {/* top bar */}
-      <div className="flex items-center justify-between border-b border-black/[.06] px-4 py-3">
-        <div className="flex items-center gap-1.5">
-          <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#45157b] text-[9px] font-bold text-white">
-            E
-          </span>
-          <span className="text-[11px] font-extrabold tracking-tight text-foreground">EXOFE</span>
-        </div>
-        <div className="flex items-center gap-3 text-foreground/40">
-          <Search className="h-3 w-3" strokeWidth={2} />
-          <Bell className="h-3 w-3" strokeWidth={2} />
-          <div className="flex items-center gap-1.5">
-            <span className="h-5 w-5 rounded-full bg-gradient-to-br from-indigo-200 to-fuchsia-200" />
-            <span className="hidden text-[9px] font-semibold text-foreground/60 sm:inline">Alex Smith</span>
-          </div>
-        </div>
-      </div>
+    <div className="relative mx-auto w-full max-w-[640px]" style={{ perspective: "1800px" }}>
+      {/* soft ambient shadow beneath the tilted card — separate blurred
+          blob reads better than a plain box-shadow once the card is
+          actually rotated in 3D */}
+      <div className="absolute inset-x-10 -bottom-6 h-20 rounded-full bg-[#45157b]/25 blur-3xl" />
 
-      <div className="flex">
-        {/* sidebar */}
-        <div className="hidden w-24 shrink-0 flex-col gap-0.5 border-r border-black/[.06] p-2 sm:flex">
-          {SIDEBAR_ITEMS.map(({ label, icon: Icon, active }) => (
-            <div
-              key={label}
-              className={`flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[8px] font-medium ${
-                active ? "bg-indigo-50 text-[#45157b]" : "text-foreground/45"
-              }`}
-            >
-              <Icon className="h-2.5 w-2.5 shrink-0" strokeWidth={2} />
-              <span className="truncate">{label}</span>
-            </div>
-          ))}
-          <div className="mt-auto flex items-center gap-1.5 px-2 py-1.5 text-[8px] font-medium text-foreground/35">
-            <HelpCircle className="h-2.5 w-2.5 shrink-0" strokeWidth={2} />
-            <span>Help</span>
-          </div>
-        </div>
-
-        {/* main content */}
-        <div className="min-w-0 flex-1 p-3 sm:p-4">
-          <p className="text-[11px] font-bold text-foreground">Good morning, Alex 👋</p>
-          <p className="text-[9px] text-foreground/45">Here&apos;s what&apos;s happening with your store today.</p>
-
-          <div className="mt-3 grid grid-cols-3 gap-2.5">
-            {/* WhatsApp conversation */}
-            <MockCard
-              title="WhatsApp Conversation"
-              badge={<span className="flex items-center gap-1 text-[8px] text-emerald-600"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />Online</span>}
-            >
-              <div className="flex flex-col gap-1.5">
-                <div className="max-w-[85%] rounded-lg rounded-tl-sm bg-black/[.04] px-2 py-1 text-[8px] leading-snug text-foreground/70">
-                  Hi, I&apos;m looking for a moisturizer for dry skin
-                </div>
-                <div className="ml-auto max-w-[85%] rounded-lg rounded-tr-sm bg-indigo-50 px-2 py-1 text-[8px] leading-snug text-[#45157b]">
-                  Sure! Here are some options for dry skin.
-                </div>
-                <div className="flex items-center gap-1.5 rounded-lg border border-black/[.06] p-1.5">
-                  <span className="h-6 w-6 shrink-0 rounded bg-gradient-to-br from-indigo-100 to-fuchsia-100" />
-                  <div className="min-w-0">
-                    <p className="truncate text-[8px] font-semibold text-foreground">HydraGlow Moisturizer</p>
-                    <p className="text-[8px] font-bold text-[#45157b]">$28.00</p>
-                  </div>
-                </div>
-                <div className="ml-auto max-w-[85%] rounded-lg rounded-tr-sm bg-indigo-50 px-2 py-1 text-[8px] leading-snug text-[#45157b]">
-                  Added to your cart ✅
-                </div>
-              </div>
-              <div className="mt-1.5 flex items-center gap-1 rounded-full border border-black/[.08] px-2 py-1">
-                <span className="flex-1 text-[7px] text-foreground/30">Type a message…</span>
-                <Send className="h-2 w-2 text-[#45157b]" strokeWidth={2.5} />
-              </div>
-            </MockCard>
-
-            {/* AI Automation */}
-            <MockCard title="AI Automation" badge={<span className="rounded-full bg-emerald-50 px-1.5 py-0.5 text-[7px] font-semibold text-emerald-600">● Live</span>}>
-              <div className="flex flex-col gap-2 border-l border-black/[.08] pl-2">
-                {[
-                  ["Intent detected", "Product search: moisturizer"],
-                  ["Product recommendations", "3 products matched"],
-                  ["Cart created", "1 item added"],
-                  ["Order placed", "Order #10234 confirmed"],
-                ].map(([title, sub]) => (
-                  <div key={title} className="relative">
-                    <span className="absolute -left-[9px] top-0.5 h-1.5 w-1.5 rounded-full bg-[#45157b]" />
-                    <p className="text-[8px] font-semibold text-foreground">{title}</p>
-                    <p className="text-[7px] text-foreground/40">{sub}</p>
-                  </div>
-                ))}
-              </div>
-            </MockCard>
-
-            {/* Cart */}
-            <MockCard title="Cart" badge={<span className="text-[7px] text-foreground/40">1 item</span>}>
-              <div className="flex items-center gap-1.5 rounded-lg border border-black/[.06] p-1.5">
-                <span className="h-6 w-6 shrink-0 rounded bg-gradient-to-br from-indigo-100 to-fuchsia-100" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[8px] font-semibold text-foreground">HydraGlow Moisturizer</p>
-                  <p className="text-[8px] font-bold text-[#45157b]">$28.00</p>
-                </div>
-              </div>
-              <div className="mt-2 flex items-center justify-between rounded-md bg-black/[.03] px-1.5 py-1 text-[7px] font-semibold text-foreground/60">
-                <span>Order Status</span>
-                <span className="rounded-full bg-emerald-50 px-1.5 py-0.5 text-emerald-600">Confirmed</span>
-              </div>
-            </MockCard>
-          </div>
-
-          <div className="mt-2.5 grid grid-cols-2 gap-2.5">
-            <MockCard title="Customers">
-              <div className="flex items-center gap-1.5">
-                <span className="h-5 w-5 shrink-0 rounded-full bg-gradient-to-br from-amber-200 to-rose-200" />
-                <div className="min-w-0">
-                  <p className="truncate text-[8px] font-semibold text-foreground">Sarah Johnson</p>
-                  <p className="truncate text-[7px] text-foreground/40">sarah@example.com</p>
-                </div>
-                <span className="ml-auto shrink-0 rounded-full bg-amber-50 px-1.5 py-0.5 text-[7px] font-semibold text-amber-600">VIP</span>
-              </div>
-            </MockCard>
-            <MockCard title="Real-time Activity">
-              <div className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                <div className="min-w-0">
-                  <p className="truncate text-[8px] font-semibold text-foreground">New order received</p>
-                  <p className="truncate text-[7px] text-foreground/40">Order #10234 from Sarah</p>
-                </div>
-              </div>
-            </MockCard>
-          </div>
+      <div
+        className="relative overflow-hidden rounded-2xl border border-black/[.06] bg-white shadow-[0_50px_100px_-25px_rgba(69,21,123,0.4)]"
+        style={{ transform: "rotateY(-10deg) rotateX(4deg) rotateZ(-1deg)", transformStyle: "preserve-3d" }}
+      >
+        <div className="relative aspect-[16/10] w-full">
+          <Image src="/dashboard-preview.png" alt="Exofe dashboard" fill className="object-cover object-top" priority />
         </div>
       </div>
     </div>
@@ -246,21 +81,21 @@ function DashboardMockup() {
 }
 
 const INTEGRATIONS = [
-  { label: "WhatsApp", icon: MessageSquare, color: "text-emerald-500" },
-  { label: "Shopify", icon: ShoppingBag, color: "text-emerald-600" },
-  { label: "Custom APIs", icon: Code2, color: "text-[#45157b]" },
-  { label: "Webhooks", icon: Share2, color: "text-[#45157b]" },
+  { label: "WhatsApp", render: () => <span className="flex h-7 w-7 items-center justify-center [&>svg]:h-full [&>svg]:w-full sm:h-9 sm:w-9 lg:h-11 lg:w-11"><WhatsAppIcon /></span> },
+  { label: "Shopify", render: () => <span className="flex h-7 w-7 items-center justify-center [&>svg]:h-full [&>svg]:w-full sm:h-9 sm:w-9 lg:h-11 lg:w-11"><ShopifyIcon /></span> },
+  { label: "Custom APIs", render: () => <Code2 className="h-7 w-7 text-[#45157b] sm:h-9 sm:w-9 lg:h-12 lg:w-11" strokeWidth={2} /> },
+  { label: "Webhooks", render: () => <Webhook className="h-7 w-7 text-[#45157b] sm:h-9 sm:w-9 lg:h-12 lg:w-11" strokeWidth={2} /> },
 ] as const;
 
 function IntegrationsRow() {
   return (
-    <div className="flex flex-col items-center gap-5">
-      <p className="text-xs font-medium text-foreground/45">Works with the tools your business already uses</p>
-      <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-        {INTEGRATIONS.map(({ label, icon: Icon, color }) => (
-          <div key={label} className="flex items-center gap-2">
-            <Icon className={`h-4 w-4 ${color}`} strokeWidth={2} />
-            <span className="text-sm font-semibold text-foreground/70">{label}</span>
+    <div className="flex flex-col items-center gap-6 sm:gap-8">
+      <p className="text-center text-xs text-foreground/45 sm:text-sm">Works with the tools your business already uses</p>
+      <div className="grid w-full grid-cols-2 gap-x-3 gap-y-5 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-3 sm:gap-y-3 lg:justify-between lg:gap-x-1 lg:divide-x lg:divide-black/[.08]">
+        {INTEGRATIONS.map(({ label, render }) => (
+          <div key={label} className="flex flex-1 items-center justify-center gap-1.5 sm:gap-2 lg:px-2 first:pl-0 last:pr-0">
+            {render()}
+            <span className="text-sm font-bold text-foreground/75 sm:text-base lg:text-xl">{label}</span>
           </div>
         ))}
       </div>
@@ -309,8 +144,8 @@ export default function Hero() {
   }, []);
 
   return (
-    <section id="home" ref={sectionRef} className="relative overflow-hidden bg-white scroll-mt-20">
-      {/* backdrop: soft glow + sparkles */}
+    <section id="home" ref={sectionRef} className="relative flex min-h-[90vh] flex-col overflow-hidden bg-white scroll-mt-20">
+      {/* backdrop: soft glow, no dot particles */}
       <div className="pointer-events-none absolute inset-0">
         <motion.div
           animate={{ opacity: [0.5, 0.8, 0.5] }}
@@ -318,15 +153,6 @@ export default function Hero() {
           className="absolute right-[-10%] top-[10%] h-[42rem] w-[42rem] rounded-full bg-[radial-gradient(circle,_rgba(109,94,252,0.25)_0%,_rgba(217,70,239,0.12)_45%,_transparent_70%)] blur-2xl"
         />
         <div className="absolute left-[-15%] bottom-[-20%] h-96 w-96 rounded-full bg-sky-300/25 blur-3xl" />
-        {STARS.map(([x, y], i) => (
-          <motion.span
-            key={i}
-            animate={{ opacity: [0.15, 0.6, 0.15] }}
-            transition={{ duration: 2.5 + (i % 5) * 0.7, repeat: Infinity, delay: (i % 7) * 0.4 }}
-            className="absolute h-[3px] w-[3px] rounded-full bg-[#6d5efc]"
-            style={{ left: `${x}%`, top: `${y}%` }}
-          />
-        ))}
       </div>
 
       <motion.div
@@ -334,7 +160,7 @@ export default function Hero() {
         variants={container}
         initial="hidden"
         animate="show"
-        className="relative mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-12 px-4 pt-16 sm:px-6 sm:pt-20 lg:grid-cols-2 lg:gap-8"
+        className="relative mx-auto grid w-full max-w-[1600px] flex-1 content-center grid-cols-1 items-center gap-12 px-4 pt-16 sm:px-8 sm:pt-20 lg:grid-cols-2 lg:gap-8 lg:px-16 xl:px-24"
       >
         {/* left: copy */}
         <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
@@ -410,7 +236,7 @@ export default function Hero() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, ease: EASE }}
-        className="relative z-10 mx-auto mt-16 w-full max-w-7xl px-4 pb-20 sm:px-6"
+        className="relative z-10 mx-auto w-full max-w-[1600px] px-4 pb-20 pt-24 sm:px-8 sm:pt-28 lg:px-16 xl:px-24"
       >
         <IntegrationsRow />
       </motion.div>

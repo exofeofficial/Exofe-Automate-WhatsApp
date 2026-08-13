@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 import {
   Bell,
   Crown,
   HelpCircle,
+  LayoutGrid,
   LogOut,
   Menu,
   Moon,
@@ -22,6 +24,12 @@ import { clearToken } from "@/lib/auth";
 import { getUserProfile } from "@/lib/user";
 import { useTheme } from "@/components/dashboard/ThemeProvider";
 import { getNotifications, markNotificationsRead, type Notification } from "@/lib/api";
+import { NAV, getActiveNavHref } from "@/components/dashboard/Sidebar";
+
+// Only the top-level links show up in the pill nav — a full flatten of NAV
+// (including the Automation group's children) wouldn't fit in one bar. The
+// account dropdown below still covers Team/Integrations/Settings.
+const PILL_NAV = NAV.filter((entry) => entry.type === "link").slice(0, 6);
 
 const POLL_INTERVAL_MS = 30_000;
 
@@ -45,8 +53,9 @@ const MENU_ITEMS = [
   { label: "Help Center", href: "/docs", icon: HelpCircle },
 ];
 
-export default function Topbar({ onMenuClick, title }: { onMenuClick: () => void; title: string }) {
+export default function Topbar({ onMenuClick }: { onMenuClick: () => void; title: string }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<{ firstName: string; lastName?: string; email: string } | null>(null);
@@ -96,25 +105,59 @@ export default function Topbar({ onMenuClick, title }: { onMenuClick: () => void
 
   const displayName = profile ? `${profile.firstName}${profile.lastName ? ` ${profile.lastName}` : ""}` : "Account";
   const initial = profile?.firstName?.[0]?.toUpperCase() ?? "?";
+  const activeHref = getActiveNavHref(pathname);
 
   return (
-    <header className="relative z-20 flex h-16 items-center justify-between gap-4 px-4 sm:px-6">
-      <div className="flex items-center gap-3">
+    <header className="relative z-20 flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
+      <div className="flex shrink-0 items-center gap-3">
         <button type="button" onClick={onMenuClick} aria-label="Open menu" className="lg:hidden">
           <Menu className="h-5 w-5 text-foreground/60" />
         </button>
-        <h1 className="text-base font-bold text-foreground sm:text-lg">{title}</h1>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo-icon.png" alt="" className="h-6 w-auto" />
+        <span className="hidden text-base font-bold tracking-tight text-foreground sm:inline">Exofe</span>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="relative hidden sm:block">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/35" strokeWidth={2} />
-          <input
-            type="search"
-            placeholder="Search"
-            className="w-56 rounded-full border border-ink/[.08] bg-ink/[.03] py-2 pl-9 pr-4 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#45157b]/25"
-          />
-        </div>
+      {/* dark pill nav — the primary navigation now that the sidebar is hidden */}
+      <nav className="hidden min-w-0 items-center gap-0.5 overflow-x-auto rounded-full bg-[#171326] p-1.5 shadow-sm md:flex">
+        <Link
+          href="/dashboard"
+          aria-label="Dashboard"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/45 transition-colors hover:text-white"
+        >
+          <LayoutGrid className="h-4 w-4" strokeWidth={2} />
+        </Link>
+        {PILL_NAV.map((entry) => {
+          const isActive = entry.href === activeHref;
+          return (
+            <Link
+              key={entry.href}
+              href={entry.href}
+              className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                isActive ? "bg-[#c4b5fd] text-[#171326]" : "text-white/55 hover:text-white"
+              }`}
+            >
+              {entry.label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="flex shrink-0 items-center gap-1.5">
+        <button
+          type="button"
+          aria-label="Search"
+          className="hidden h-9 w-9 items-center justify-center rounded-full text-foreground/60 hover:bg-ink/[.03] sm:flex"
+        >
+          <Search className="h-[18px] w-[18px]" strokeWidth={2} />
+        </button>
+        <Link
+          href="/dashboard/settings"
+          aria-label="Settings"
+          className="hidden h-9 w-9 items-center justify-center rounded-full text-foreground/60 hover:bg-ink/[.03] sm:flex"
+        >
+          <Settings className="h-[18px] w-[18px]" strokeWidth={2} />
+        </Link>
         <div className="relative">
           <button
             type="button"

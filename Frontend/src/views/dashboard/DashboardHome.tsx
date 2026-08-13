@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { motion, type Variants } from "framer-motion";
-import { Bot, CheckCircle2, Clock, Inbox, MessageCircle, Package, Wallet } from "lucide-react";
+import { ArrowUpRight, Bot, CheckCircle2, Clock, Inbox, MessageCircle, Package, Wallet } from "lucide-react";
 import { getUserProfile } from "@/lib/user";
 import {
   ApiError,
@@ -69,6 +70,7 @@ export default function DashboardHome() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [activity, setActivity] = useState<ActivityItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState(0);
 
   useEffect(() => {
     const profile = getUserProfile();
@@ -104,7 +106,7 @@ export default function DashboardHome() {
           {dateLabel && <p className="text-xs font-medium text-foreground/40 dark:text-white/35">{dateLabel}</p>}
           <p className="mt-1 text-sm font-semibold text-foreground/60 dark:text-white/55">{greeting},</p>
           <div className="mt-0.5 flex flex-wrap items-center gap-3">
-            <h1 className="text-3xl font-extrabold tracking-tight text-foreground dark:text-white sm:text-4xl">
+            <h1 className="text-4xl font-black tracking-tight text-foreground dark:text-white sm:text-5xl">
               {firstName}
               {lastName ? ` ${lastName}` : ""}
             </h1>
@@ -173,10 +175,9 @@ export default function DashboardHome() {
         </motion.div>
       )}
 
-      <motion.div variants={item} className="rounded-2xl border border-ink/[.06] bg-surface p-5 shadow-sm sm:p-6">
-        <p className="text-sm font-bold text-foreground">Recent Activity</p>
-
-        {!activity || activity.length === 0 ? (
+      {!activity || activity.length === 0 ? (
+        <motion.div variants={item} className="rounded-2xl border border-ink/[.06] bg-surface p-5 shadow-sm sm:p-6">
+          <p className="text-sm font-bold text-foreground">Recent Activity</p>
           <div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
             <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-ink/[.03] text-foreground/30">
               <Inbox className="h-5 w-5" strokeWidth={2} />
@@ -185,22 +186,81 @@ export default function DashboardHome() {
               Nothing here yet. Once orders and messages start coming in, you will see them in this feed.
             </p>
           </div>
-        ) : (
-          <div className="mt-4 flex flex-col divide-y divide-ink/[.05]">
-            {activity.map((a, i) => (
-              <div key={i} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
-                <div className="min-w-0">
-                  <p className="truncate text-sm text-foreground/80">{a.text}</p>
-                  <p className="mt-0.5 text-xs text-foreground/40">{new Date(a.time).toLocaleString()}</p>
-                </div>
-                <span className="shrink-0 rounded-full bg-ink/[.04] px-2.5 py-1 text-[11px] font-medium text-foreground/55">
-                  {a.tag}
-                </span>
-              </div>
-            ))}
+        </motion.div>
+      ) : (
+        <motion.div variants={item} className="grid grid-cols-1 gap-4 overflow-hidden rounded-3xl lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+          {/* left: activity list, dark panel */}
+          <div className="rounded-3xl bg-[#171326] p-4">
+            <p className="px-2 py-1 text-sm font-bold text-white">Recent Conversations</p>
+            <div className="mt-2 flex flex-col gap-1">
+              {activity.map((a, i) => {
+                const isSelected = i === selectedActivity;
+                const initial = a.text.replace(/^[^:]*:\s*/, "").trim().charAt(0).toUpperCase() || "?";
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setSelectedActivity(i)}
+                    className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-colors ${
+                      isSelected ? "bg-white/10" : "hover:bg-white/[.04]"
+                    }`}
+                  >
+                    <span
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-[#171326]"
+                      style={{ backgroundColor: "#FCBA03" }}
+                    >
+                      {initial}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-white/90">{a.text}</p>
+                      <p className="mt-0.5 text-xs text-white/40">{new Date(a.time).toLocaleString()}</p>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-semibold text-white/60">
+                      {a.tag}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        )}
-      </motion.div>
+
+          {/* right: selected item detail */}
+          <div className="rounded-3xl border border-ink/[.06] bg-surface p-5 shadow-sm sm:p-6">
+            {activity[selectedActivity] && (
+              <>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-base font-bold text-[#171326]"
+                      style={{ backgroundColor: "#FCBA03" }}
+                    >
+                      {(activity[selectedActivity].text.replace(/^[^:]*:\s*/, "").trim().charAt(0) || "?").toUpperCase()}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-bold text-foreground">{activity[selectedActivity].text}</p>
+                      <p className="mt-0.5 text-xs text-foreground/45">
+                        {new Date(activity[selectedActivity].time).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-[#45157b] dark:bg-[#a78bfa]/15 dark:text-[#c4b5fd]">
+                    {activity[selectedActivity].tag}
+                  </span>
+                </div>
+
+                <Link
+                  href="/dashboard/conversations"
+                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-bold text-[#171326] transition-transform hover:scale-[1.02]"
+                  style={{ backgroundColor: "#FCBA03" }}
+                >
+                  View conversation
+                  <ArrowUpRight className="h-4 w-4" strokeWidth={2.5} />
+                </Link>
+              </>
+            )}
+          </div>
+        </motion.div>
+      )}
     </motion.div>
   );
 }

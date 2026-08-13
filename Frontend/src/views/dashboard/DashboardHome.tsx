@@ -8,10 +8,18 @@ import {
   ApiError,
   getDashboardActivity,
   getDashboardSummary,
+  getTrialStatus,
   type ActivityItem,
   type DashboardSummary,
   type MetricValue,
 } from "@/lib/api";
+
+const PLAN_LABELS = {
+  trial: "Free Trial",
+  starter: "Starter",
+  growth: "Growth",
+  business: "Business",
+} as const;
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -47,30 +55,6 @@ function buildStats(summary: DashboardSummary) {
   ];
 }
 
-function ChangeBadge({ change, onDark }: { change: string | null; onDark?: boolean }) {
-  if (!change) {
-    return (
-      <span
-        className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-          onDark ? "bg-white/15 text-white/60" : "bg-ink/[.04] text-foreground/35"
-        }`}
-      >
-        —
-      </span>
-    );
-  }
-  const isUp = change.startsWith("+");
-  return (
-    <span
-      className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-        isUp ? "bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-400"
-      }`}
-    >
-      {change}
-    </span>
-  );
-}
-
 function getGreeting(hour: number) {
   if (hour < 12) return "Good morning";
   if (hour < 17) return "Good afternoon";
@@ -79,13 +63,17 @@ function getGreeting(hour: number) {
 
 export default function DashboardHome() {
   const [firstName, setFirstName] = useState("there");
+  const [lastName, setLastName] = useState("");
+  const [plan, setPlan] = useState<keyof typeof PLAN_LABELS | null>(null);
   const [now, setNow] = useState<Date | null>(null);
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [activity, setActivity] = useState<ActivityItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setFirstName(getUserProfile()?.firstName ?? "there");
+    const profile = getUserProfile();
+    setFirstName(profile?.firstName ?? "there");
+    setLastName(profile?.lastName ?? "");
     setNow(new Date());
 
     getDashboardSummary()
@@ -95,19 +83,84 @@ export default function DashboardHome() {
     getDashboardActivity()
       .then((res) => setActivity(res.activity))
       .catch(() => setActivity([]));
+
+    getTrialStatus()
+      .then((res) => setPlan(res.currentPlan))
+      .catch(() => {});
   }, []);
 
   const greeting = getGreeting(now?.getHours() ?? 9);
   const dateLabel = now?.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }) ?? "";
   const stats = summary ? buildStats(summary) : null;
+  const featuredStats = stats ? stats.slice(0, 3) : null;
 
   return (
     <motion.div initial="hidden" animate="show" variants={container} className="flex flex-col gap-6">
-      <motion.div variants={item}>
-        {dateLabel && <p className="text-xs font-medium text-foreground/40">{dateLabel}</p>}
-        <h1 className="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-          {greeting}, {firstName}
-        </h1>
+      <motion.div
+        variants={item}
+        className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-8"
+      >
+        <div className="shrink-0">
+          {dateLabel && <p className="text-xs font-medium text-foreground/40 dark:text-white/35">{dateLabel}</p>}
+          <p className="mt-1 text-xs font-medium text-foreground/50 dark:text-white/45">{greeting},</p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground dark:text-white sm:text-3xl">
+              {firstName}
+              {lastName ? ` ${lastName}` : ""}
+            </h1>
+            {plan && (
+              <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-[#45157b] dark:bg-[#a78bfa]/15 dark:text-[#c4b5fd]">
+                {PLAN_LABELS[plan]}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:w-auto lg:flex-1 lg:max-w-2xl">
+          {(featuredStats ?? Array.from({ length: 3 })).map((s, i) => {
+            const highlighted = i === 2;
+            const Icon = s ? s.icon : Package;
+            return (
+              <div
+                key={s ? s.label : i}
+                className={`min-w-[11rem] rounded-2xl p-5 ${
+                  highlighted ? "bg-[#c4b5fd]" : "bg-ink/[.04] dark:bg-white/[.06]"
+                } ${!s ? "animate-pulse" : ""}`}
+              >
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                      highlighted ? "bg-[#171326]/10 text-[#171326]" : "bg-ink/[.06] text-foreground/60 dark:bg-white/10 dark:text-white/70"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" strokeWidth={2} />
+                  </span>
+                  {s && (
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                        highlighted
+                          ? "bg-[#171326]/10 text-[#171326]/70"
+                          : "bg-ink/[.05] text-foreground/50 dark:bg-white/10 dark:text-white/60"
+                      }`}
+                    >
+                      {s.change ?? "—"}
+                    </span>
+                  )}
+                </div>
+                <p className={`mt-3 text-xs ${highlighted ? "text-[#171326]/70" : "text-foreground/45 dark:text-white/45"}`}>
+                  {s ? s.label : ""}
+                </p>
+                <p
+                  className={`mt-0.5 text-2xl font-extrabold tracking-tight ${
+                    highlighted ? "text-[#171326]" : "text-foreground dark:text-white"
+                  }`}
+                >
+                  {s ? s.value : ""}
+                </p>
+              </div>
+            );
+          })}
+        </div>
       </motion.div>
 
       {error && (
@@ -115,44 +168,6 @@ export default function DashboardHome() {
           {error}
         </motion.div>
       )}
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {(stats ?? Array.from({ length: 6 })).map((s, i) => {
-          const featured = i === 0;
-          const Icon = s ? s.icon : Package;
-          return (
-            <motion.div
-              key={s ? s.label : i}
-              variants={item}
-              whileHover={{ y: -3 }}
-              transition={{ duration: 0.2, ease: EASE }}
-              className={`rounded-2xl p-5 shadow-sm transition-shadow hover:shadow-md ${
-                featured
-                  ? "bg-gradient-to-br from-[#45157b] to-[#4338CA] shadow-indigo-900/20"
-                  : "border border-ink/[.06] bg-surface"
-              } ${!s ? "animate-pulse" : ""}`}
-            >
-              <div className="flex items-center justify-between">
-                <span
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl ${
-                    featured ? "bg-white/15 text-white" : "bg-ink/[.04] text-foreground/60"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" strokeWidth={2} />
-                </span>
-                {s && <ChangeBadge change={s.change} onDark={featured} />}
-              </div>
-              <p className={`mt-4 text-xs ${featured ? "text-white/70" : "text-foreground/45"}`}>{s ? s.label : ""}</p>
-              <div className="mt-1 flex items-baseline gap-2">
-                <p className={`text-2xl font-extrabold tracking-tight ${featured ? "text-white" : "text-foreground"}`}>
-                  {s ? s.value : ""}
-                </p>
-                <p className={`text-[11px] ${featured ? "text-white/60" : "text-foreground/40"}`}>{s ? s.subtitle : ""}</p>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
 
       <motion.div variants={item} className="rounded-2xl border border-ink/[.06] bg-surface p-5 shadow-sm sm:p-6">
         <p className="text-sm font-bold text-foreground">Recent Activity</p>

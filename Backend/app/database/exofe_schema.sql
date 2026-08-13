@@ -277,6 +277,9 @@ CREATE TABLE customers (
     ai_window_started_at  TIMESTAMPTZ,    -- start of this customer's current 24h AI-billing
                                            -- conversation window (see ai_usage_service) — null
                                            -- until their first AI-handled message
+    conversation_mode     TEXT NOT NULL DEFAULT 'ai' CHECK (conversation_mode IN ('ai', 'human')),
+                                           -- 'human' when a staff member has taken over this
+                                           -- conversation from the AI (see conversations router)
     created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (business_id, whatsapp_number)   -- same number per business = same customer
 );

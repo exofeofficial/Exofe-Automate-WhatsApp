@@ -561,7 +561,15 @@ def handle_inbound_message(db: Session, business_id: str, customer_id: str, mess
 
     Returns None when this business has hit its plan's monthly AI
     conversation limit (see ai_usage_service) — no automated reply
-    should be sent, a human needs to pick this conversation up."""
+    should be sent, a human needs to pick this conversation up.
+
+    Also returns None when a staff member has taken this specific
+    conversation over (see app/api/v1/conversations.py) — the AI stays
+    silent on it until they hand it back."""
+    customer = customer_repository.get_customer(db, business_id, customer_id)
+    if customer and customer["conversation_mode"] == "human":
+        return None
+
     if not ai_usage_service.check_and_increment(db, business_id, customer_id):
         return None
 

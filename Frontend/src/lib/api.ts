@@ -168,6 +168,57 @@ export function activateTemplate(key: string) {
   return request<{ key: string; status: string }>(`/templates/${key}/activate`, { method: "POST" });
 }
 
+// ── Conversations ────────────────────────────────────────────────────────────
+
+export type ConversationMessage = {
+  id: string;
+  from: "customer" | "ai" | "staff";
+  text: string;
+  time: string;
+};
+
+export type ConversationSummary = {
+  id: string;
+  name: string | null;
+  whatsappNumber: string;
+  lastMessage: string | null;
+  lastMessageAt: string | null;
+  lastDirection: "inbound" | "outbound" | null;
+  unreadCount: number;
+  mode: "ai" | "human";
+};
+
+export function getConversations() {
+  return request<{ conversations: ConversationSummary[] }>("/conversations");
+}
+
+export type ConversationDetail = {
+  id: string;
+  name: string | null;
+  whatsappNumber: string;
+  mode: "ai" | "human";
+  messages: ConversationMessage[];
+};
+
+export function getConversation(id: string) {
+  return request<ConversationDetail>(`/conversations/${id}`);
+}
+
+export function takeoverConversation(id: string) {
+  return request<{ id: string; mode: "ai" | "human" }>(`/conversations/${id}/takeover`, { method: "POST" });
+}
+
+export function handbackConversation(id: string) {
+  return request<{ id: string; mode: "ai" | "human" }>(`/conversations/${id}/handback`, { method: "POST" });
+}
+
+export function sendConversationMessage(id: string, text: string) {
+  return request<{ message: ConversationMessage }>(`/conversations/${id}/messages`, {
+    method: "POST",
+    body: JSON.stringify({ text }),
+  });
+}
+
 // ── Notifications (Topbar bell) ──────────────────────────────────────────────
 
 export type Notification = {

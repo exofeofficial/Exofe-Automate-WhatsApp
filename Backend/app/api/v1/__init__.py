@@ -9,6 +9,7 @@ from app.api.v1 import (
     admin,
     auth,
     billing,
+    conversations,
     customers,
     dashboard,
     developers,
@@ -32,6 +33,7 @@ router.include_router(admin.router)
 router.include_router(auth.router)
 router.include_router(automation.router)
 router.include_router(billing.router)
+router.include_router(conversations.router)
 router.include_router(customers.router)
 router.include_router(dashboard.router)
 router.include_router(developers.router)

@@ -93,6 +93,22 @@ def set_name_if_missing(db: Session, customer_id: str, name: str) -> None:
     db.commit()
 
 
+def set_conversation_mode(db: Session, business_id: str, customer_id: str, mode: str) -> dict | None:
+    """Flips a conversation between 'ai' (default) and 'human' — see
+    conversations router's takeover/handback endpoints. handle_inbound_message
+    checks this before generating an AI reply."""
+    row = db.execute(
+        text("""
+            UPDATE customers SET conversation_mode = :mode
+            WHERE id = :customer_id AND business_id = :business_id
+            RETURNING id, conversation_mode AS mode
+        """),
+        {"mode": mode, "customer_id": customer_id, "business_id": business_id},
+    ).fetchone()
+    db.commit()
+    return dict(row._mapping) if row else None
+
+
 def is_new_conversation_window(db: Session, customer_id: str, now: datetime) -> bool:
     """True if this message opens a fresh 24h AI-billing conversation
     window for this customer, and advances their stored window start to

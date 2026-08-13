@@ -102,9 +102,9 @@ export default function DashboardHome() {
       >
         <div className="shrink-0">
           {dateLabel && <p className="text-xs font-medium text-foreground/40 dark:text-white/35">{dateLabel}</p>}
-          <p className="mt-1 text-xs font-medium text-foreground/50 dark:text-white/45">{greeting},</p>
+          <p className="mt-1 text-sm font-semibold text-foreground/60 dark:text-white/55">{greeting},</p>
           <div className="mt-0.5 flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground dark:text-white sm:text-3xl">
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground dark:text-white sm:text-4xl">
               {firstName}
               {lastName ? ` ${lastName}` : ""}
             </h1>
@@ -121,9 +121,13 @@ export default function DashboardHome() {
             const highlighted = i === 2;
             const Icon = s ? s.icon : Package;
             return (
-              <div
+              <motion.div
                 key={s ? s.label : i}
-                className={`min-w-[11rem] rounded-2xl p-5 ${
+                initial={{ opacity: 0, y: 16, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.45, delay: 0.15 + i * 0.1, ease: EASE }}
+                whileHover={{ y: -5, scale: 1.03 }}
+                className={`min-w-[11rem] rounded-2xl p-5 shadow-sm transition-shadow hover:shadow-lg ${
                   highlighted ? "bg-[#c4b5fd]" : "bg-ink/[.04] dark:bg-white/[.06]"
                 } ${!s ? "animate-pulse" : ""}`}
               >
@@ -157,7 +161,7 @@ export default function DashboardHome() {
                 >
                   {s ? s.value : ""}
                 </p>
-              </div>
+              </motion.div>
             );
           })}
         </div>

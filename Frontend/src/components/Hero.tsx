@@ -72,7 +72,7 @@ function DashboardMockup() {
         className="relative overflow-hidden rounded-2xl border border-black/[.06] bg-white shadow-[0_50px_100px_-25px_rgba(69,21,123,0.4)]"
         style={{ transform: "rotateY(-10deg) rotateX(4deg) rotateZ(-1deg)", transformStyle: "preserve-3d" }}
       >
-        <div className="relative aspect-[1740/904] w-full">
+        <div className="relative aspect-[1740/980] w-full">
           <Image src="/dashboard-preview.png" alt="Exofe dashboard" fill className="object-cover object-top" priority />
         </div>
       </div>

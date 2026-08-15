@@ -103,6 +103,23 @@ def _finalize_order(db, business_id, customer_id, draft_id, result, merged_data)
         draft_order_repository.mark_status(db, business_id, draft_id, "confirmed", order_id=order["id"])
         return result.next_question or f"Your order is confirmed! Total: PKR {order['total']:,.0f}."
 
+def _find_in_catalog(catalog: list[dict], product_id: str | None) -> dict | None:
+    return next((p for p in catalog if p["id"] == product_id), None)
+
+
+def _missing_required_variant(catalog: list[dict], result) -> dict | None:
+    """The prompt already tells the model to ask for size/color before
+    calling a variant product's order complete, but an LLM can slip —
+    this is the deterministic backstop so an order for a product with
+    variants can never finalize without one, no matter what the model
+    decided. Returns the matched product if a variant is still missing,
+    None otherwise."""
+    product = _find_in_catalog(catalog, result.matched_product_id)
+    if product and product.get("has_variants") and not result.matched_variant_id:
+        return product
+    return None
+
+
 def _order_items_from_draft(result, merged_data: dict) -> list[dict]:
     item = {"product_id": result.matched_product_id, "quantity": int(merged_data.get("quantity", 1))}
     if result.matched_variant_id:
@@ -127,8 +144,15 @@ def _start_new_draft(db: Session, business_id: str, business: dict, customer_id:
         # stock and let them try again.
         return result.next_question or "That item is out of stock right now — would you like something else?"
 
+    missing_variant = _missing_required_variant(catalog, result)
+    if missing_variant:
+        result = result.model_copy(update={"is_complete": False, "confirmed": False})
+
     missing = [] if result.is_complete else ["see next_question"]
     draft = draft_order_repository.create_draft(db, business_id, customer_id, result.updated_fields, missing)
+
+    if missing_variant:
+        return f"Which size/option would you like for *{missing_variant['name']}*?"
 
     if result.is_complete and result.confirmed:
         return _finalize_order(db, business_id, customer_id, draft["id"], result, result.updated_fields)
@@ -159,8 +183,15 @@ def _continue_draft(
         draft_order_repository.update_draft(db, business_id, draft["id"], merged_data, ["see next_question"])
         return result.next_question or "That option is out of stock — want to try a different one?"
 
+    missing_variant = _missing_required_variant(catalog, result)
+    if missing_variant:
+        result = result.model_copy(update={"is_complete": False, "confirmed": False})
+
     missing = [] if result.is_complete else ["see next_question"]
     draft_order_repository.update_draft(db, business_id, draft["id"], merged_data, missing)
+
+    if missing_variant:
+        return f"Which size/option would you like for *{missing_variant['name']}*?"
 
     # The model is sometimes too conservative about setting confirmed=true
     # on a bare "yes" once every field is already filled — leaving a

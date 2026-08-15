@@ -133,7 +133,7 @@ export default function Topbar({ title }: { title: string }) {
           purpose: a dropdown positioned inside a horizontally-scrolling
           container gets its own overflow-y forced to auto by the browser
           and clips vertically instead of floating over the page. */}
-      <div className="hidden min-w-0 items-center gap-1.5 md:flex">
+      <div className="hidden min-w-0 items-center gap-1.5 lg:flex">
         <nav className="flex min-w-0 items-center gap-0.5 overflow-x-auto rounded-full bg-[#171326] p-1.5 shadow-sm">
           <Link
             href="/dashboard"

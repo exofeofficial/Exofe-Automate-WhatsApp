@@ -27,14 +27,14 @@ export default function MoreSheet({ open, onClose }: { open: boolean; onClose: (
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-40 bg-black/30 md:hidden"
+            className="fixed inset-0 z-40 bg-black/30 lg:hidden"
           />
           <motion.div
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ duration: 0.25, ease: EASE }}
-            className="fixed inset-x-0 bottom-0 z-50 max-h-[75vh] overflow-y-auto rounded-t-3xl bg-surface pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl md:hidden"
+            className="fixed inset-x-0 bottom-0 z-50 max-h-[75vh] overflow-y-auto rounded-t-3xl bg-surface pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-2xl lg:hidden"
           >
             <div className="sticky top-0 flex items-center justify-between border-b border-ink/[.06] bg-surface px-5 py-4">
               <p className="text-sm font-bold text-foreground">All pages</p>
@@ -48,7 +48,7 @@ export default function MoreSheet({ open, onClose }: { open: boolean; onClose: (
               </button>
             </div>
 
-            <div className="grid grid-cols-4 gap-1 p-4">
+            <div className="grid grid-cols-4 gap-1 p-4 sm:grid-cols-6">
               {ITEMS.map((item) => {
                 const isActive = item.href === activeHref;
                 const Icon = item.icon;

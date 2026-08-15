@@ -21,7 +21,7 @@ export default function BottomNav({ onMoreClick }: { onMoreClick: () => void }) 
   const activeHref = getActiveNavHref(pathname);
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around border-t border-ink/[.06] bg-surface pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px_rgba(0,0,0,0.05)] md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 flex items-stretch justify-around border-t border-ink/[.06] bg-surface pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px_rgba(0,0,0,0.05)] lg:hidden">
       {ITEMS.map((item) => {
         const isActive = item.href === activeHref;
         const Icon = item.icon;

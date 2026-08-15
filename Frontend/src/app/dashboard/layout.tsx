@@ -73,7 +73,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         <div className="flex min-w-0 flex-1 flex-col">
           <Topbar title={title} />
-          <main className="flex-1 p-4 pb-24 sm:p-6 md:pb-6">{children}</main>
+          <main className="flex-1 p-4 pb-24 sm:p-6 lg:pb-6">{children}</main>
         </div>
 
         <BottomNav onMoreClick={() => setMobileOpen(true)} />

@@ -41,7 +41,7 @@ export default function PendingTasksWidget({ trial, tasks }: { trial: TrialStatu
         initial={{ x: 12, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         whileHover={{ x: -3 }}
-        className="fixed bottom-24 right-0 z-30 flex items-center gap-1 rounded-l-2xl bg-[#45157b] py-3 pl-3 pr-2 text-white shadow-lg shadow-indigo-500/25 md:bottom-6 md:z-50"
+        className="fixed bottom-24 right-0 z-30 flex items-center gap-1 rounded-l-2xl bg-[#45157b] py-3 pl-3 pr-2 text-white shadow-lg shadow-indigo-500/25 lg:bottom-6 lg:z-50"
       >
         <ListChecks className="h-[18px] w-[18px]" strokeWidth={2} />
         {remaining > 0 && (
@@ -55,7 +55,7 @@ export default function PendingTasksWidget({ trial, tasks }: { trial: TrialStatu
   }
 
   return (
-    <div className="fixed bottom-20 right-4 z-30 flex flex-col items-end gap-3 md:bottom-5 md:right-5 md:z-50">
+    <div className="fixed bottom-20 right-4 z-30 flex flex-col items-end gap-3 lg:bottom-5 lg:right-5 lg:z-50">
       <AnimatePresence>
         <motion.div
           initial={{ opacity: 0, y: 12, scale: 0.96 }}

@@ -128,50 +128,54 @@ export default function Topbar({ title }: { title: string }) {
         <span className="hidden text-base font-bold tracking-tight text-foreground sm:inline">Exofe</span>
       </div>
 
-      {/* dark pill nav — the primary navigation now that the sidebar is hidden */}
-      <nav className="hidden min-w-0 items-center gap-0.5 overflow-x-auto rounded-full bg-[#171326] p-1.5 shadow-sm md:flex">
-        <Link
-          href="/dashboard"
-          aria-label="Dashboard"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/45 transition-colors hover:text-white"
-        >
-          <LayoutGrid className="h-4 w-4" strokeWidth={2} />
-        </Link>
-        {PILL_NAV.map((entry) => {
-          const isActive = entry.href === activeHref;
-          return (
-            <Link
-              key={entry.href}
-              href={entry.href}
-              className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-                isActive ? "bg-[#c4b5fd] text-[#171326]" : "text-white/55 hover:text-white"
-              }`}
-            >
-              {entry.label}
-            </Link>
-          );
-        })}
-        <div className="mx-0.5 h-4 w-px shrink-0 bg-white/10" />
-        {ICON_NAV.map((entry) => {
-          const isActive = entry.href === activeHref;
-          const Icon = entry.icon;
-          return (
-            <Link
-              key={entry.href}
-              href={entry.href}
-              aria-label={entry.label}
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${
-                isActive ? "bg-[#c4b5fd] text-[#171326]" : "text-white/45 hover:text-white"
-              }`}
-            >
-              <Icon className="h-4 w-4" strokeWidth={2} />
-            </Link>
-          );
-        })}
+      {/* dark pill nav — the primary navigation now that the sidebar is hidden.
+          The "All pages" trigger lives outside the overflow-x-auto nav on
+          purpose: a dropdown positioned inside a horizontally-scrolling
+          container gets its own overflow-y forced to auto by the browser
+          and clips vertically instead of floating over the page. */}
+      <div className="hidden min-w-0 items-center gap-1.5 md:flex">
+        <nav className="flex min-w-0 items-center gap-0.5 overflow-x-auto rounded-full bg-[#171326] p-1.5 shadow-sm">
+          <Link
+            href="/dashboard"
+            aria-label="Dashboard"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/45 transition-colors hover:text-white"
+          >
+            <LayoutGrid className="h-4 w-4" strokeWidth={2} />
+          </Link>
+          {PILL_NAV.map((entry) => {
+            const isActive = entry.href === activeHref;
+            return (
+              <Link
+                key={entry.href}
+                href={entry.href}
+                className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
+                  isActive ? "bg-[#c4b5fd] text-[#171326]" : "text-white/55 hover:text-white"
+                }`}
+              >
+                {entry.label}
+              </Link>
+            );
+          })}
+          <div className="mx-0.5 h-4 w-px shrink-0 bg-white/10" />
+          {ICON_NAV.map((entry) => {
+            const isActive = entry.href === activeHref;
+            const Icon = entry.icon;
+            return (
+              <Link
+                key={entry.href}
+                href={entry.href}
+                aria-label={entry.label}
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${
+                  isActive ? "bg-[#c4b5fd] text-[#171326]" : "text-white/45 hover:text-white"
+                }`}
+              >
+                <Icon className="h-4 w-4" strokeWidth={2} />
+              </Link>
+            );
+          })}
+        </nav>
 
-        <div className="mx-0.5 h-4 w-px shrink-0 bg-white/10" />
-
-        <div className="relative">
+        <div className="relative shrink-0 rounded-full bg-[#171326] p-1.5 shadow-sm">
           <button
             type="button"
             onClick={() => setAllPagesOpen((v) => !v)}
@@ -244,7 +248,7 @@ export default function Topbar({ title }: { title: string }) {
             )}
           </AnimatePresence>
         </div>
-      </nav>
+      </div>
 
       <div className="flex shrink-0 items-center gap-1.5">
         <button

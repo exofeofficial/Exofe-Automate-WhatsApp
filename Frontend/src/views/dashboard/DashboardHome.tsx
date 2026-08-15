@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, type Variants } from "framer-motion";
-import { ArrowUpRight, Bot, CheckCircle2, Clock, Inbox, MessageCircle, Package, Wallet } from "lucide-react";
+import { ArrowUpRight, Bot, CheckCircle2, Clock, Inbox, MessageCircle, Package, Play, Wallet } from "lucide-react";
 import { getUserProfile } from "@/lib/user";
 import {
   ApiError,
@@ -166,6 +166,28 @@ export default function DashboardHome() {
               </motion.div>
             );
           })}
+        </div>
+      </motion.div>
+
+      <motion.div variants={item} className="overflow-hidden rounded-3xl bg-[#171326] p-5 sm:p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
+          <div className="flex-1">
+            <p className="text-xs font-bold uppercase tracking-wide text-[#FCBA03]">Getting Started</p>
+            <h2 className="mt-1.5 text-lg font-bold text-white sm:text-xl">How to use Exofe</h2>
+            <p className="mt-1.5 max-w-md text-sm text-white/55">
+              A quick walkthrough of connecting WhatsApp, adding your products, and letting the AI handle your first orders.
+            </p>
+          </div>
+
+          <div className="relative flex aspect-video w-full shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white/[.04] lg:w-80">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#45157b]/50 via-transparent to-transparent" />
+            <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-[#FCBA03] text-[#171326] shadow-lg">
+              <Play className="ml-0.5 h-6 w-6" strokeWidth={2.5} fill="currentColor" />
+            </span>
+            <span className="absolute bottom-3 right-3 rounded-full bg-black/40 px-2.5 py-1 text-[10px] font-semibold text-white/70">
+              Coming soon
+            </span>
+          </div>
         </div>
       </motion.div>
 

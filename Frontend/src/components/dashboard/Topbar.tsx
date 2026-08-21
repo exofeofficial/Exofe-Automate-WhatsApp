@@ -21,7 +21,7 @@ import {
   User,
   UsersRound,
 } from "lucide-react";
-import { clearToken } from "@/lib/auth";
+import { clearToken, goToMarketing } from "@/lib/auth";
 import { getUserProfile, setUserProfile } from "@/lib/user";
 import { useTheme } from "@/components/dashboard/ThemeProvider";
 import { getMe, getNotifications, markNotificationsRead, type Notification } from "@/lib/api";
@@ -121,7 +121,7 @@ export default function Topbar({ title }: { title: string }) {
 
   const handleLogout = () => {
     clearToken();
-    router.push("/login");
+    goToMarketing(router);
   };
 
   const displayName = profile ? `${profile.firstName}${profile.lastName ? ` ${profile.lastName}` : ""}` : "Account";

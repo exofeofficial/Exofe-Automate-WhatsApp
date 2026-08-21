@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Lock } from "lucide-react";
-import { clearToken } from "@/lib/auth";
+import { clearToken, goToMarketing } from "@/lib/auth";
 import type { TrialStatus } from "@/lib/trial";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -17,7 +17,7 @@ export default function TrialLockOverlay({ trial }: { trial: TrialStatus }) {
 
   const handleLogout = () => {
     clearToken();
-    router.push("/login");
+    goToMarketing(router);
   };
 
   return (

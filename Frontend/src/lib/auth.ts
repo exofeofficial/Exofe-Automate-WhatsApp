@@ -51,3 +51,16 @@ export function goToDashboard(router: { push: (href: string) => void }) {
     router.push("/dashboard");
   }
 }
+
+// Sends the browser back to the marketing site after logout — a full
+// navigation to NEXT_PUBLIC_MARKETING_URL (exofe.com in production) when
+// that's configured, the mirror image of goToDashboard above. Falls back
+// to a same-origin client-side push locally.
+export function goToMarketing(router: { push: (href: string) => void }) {
+  const marketingUrl = process.env.NEXT_PUBLIC_MARKETING_URL;
+  if (marketingUrl) {
+    window.location.href = marketingUrl;
+  } else {
+    router.push("/");
+  }
+}

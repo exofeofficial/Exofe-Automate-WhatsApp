@@ -4,14 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { usePathname } from "next/navigation";
 import {
   Bell,
-  Bot,
   Crown,
-  Grid3x3,
   HelpCircle,
-  LayoutGrid,
   LogOut,
   Moon,
   Plug,
@@ -25,23 +21,6 @@ import { clearToken, goToMarketing } from "@/lib/auth";
 import { getUserProfile, setUserProfile } from "@/lib/user";
 import { useTheme } from "@/components/dashboard/ThemeProvider";
 import { getMe, getNotifications, markNotificationsRead, type Notification } from "@/lib/api";
-import { NAV, flatNavItemsWithIcons, getActiveNavHref } from "@/components/dashboard/Sidebar";
-
-// Only the top-level links show up in the pill nav — a full flatten of NAV
-// (including the Automation group's children) wouldn't fit in one bar. The
-// account dropdown below still covers Team/Settings.
-const PILL_NAV = NAV.filter((entry) => entry.type === "link").slice(0, 6);
-
-// AI Assistant and Integrations sit past the first 6 links so they don't
-// make PILL_NAV's cut, but they're too central to leave in the account
-// dropdown only — icon-only slots at the end of the bar, same treatment
-// as the Dashboard icon on the left.
-const ICON_NAV = [
-  { label: "AI Assistant", href: "/dashboard/ai-assistant", icon: Bot },
-  { label: "Integrations", href: "/dashboard/integrations", icon: Plug },
-];
-
-const ALL_PAGES = flatNavItemsWithIcons();
 
 const POLL_INTERVAL_MS = 30_000;
 
@@ -67,10 +46,8 @@ const MENU_ITEMS = [
 
 export default function Topbar({ title }: { title: string }) {
   const router = useRouter();
-  const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
-  const [allPagesOpen, setAllPagesOpen] = useState(false);
   const [profile, setProfile] = useState<{ firstName: string; lastName?: string; email: string } | null>(null);
 
   const [notifOpen, setNotifOpen] = useState(false);
@@ -126,136 +103,15 @@ export default function Topbar({ title }: { title: string }) {
 
   const displayName = profile ? `${profile.firstName}${profile.lastName ? ` ${profile.lastName}` : ""}` : "Account";
   const initial = profile?.firstName?.[0]?.toUpperCase() ?? "?";
-  const activeHref = getActiveNavHref(pathname);
 
   return (
     <header className="relative z-20 flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
-      <div className="flex shrink-0 items-center gap-3">
+      <div className="flex min-w-0 shrink items-center gap-3">
+        {/* logo only shows here below lg, where the sidebar (which already
+            carries the logo) is hidden in favor of the bottom tab bar */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-icon.png" alt="" className="h-6 w-auto" />
-        <span className="hidden text-base font-bold tracking-tight text-foreground sm:inline">Exofe</span>
-      </div>
-
-      {/* dark pill nav — the primary navigation now that the sidebar is hidden.
-          The "All pages" trigger lives outside the overflow-x-auto nav on
-          purpose: a dropdown positioned inside a horizontally-scrolling
-          container gets its own overflow-y forced to auto by the browser
-          and clips vertically instead of floating over the page. */}
-      <div className="hidden min-w-0 items-center gap-1.5 lg:flex">
-        <nav className="flex min-w-0 items-center gap-0.5 overflow-x-auto rounded-full bg-[#171326] p-1.5 shadow-sm">
-          <Link
-            href="/dashboard"
-            aria-label="Dashboard"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/45 transition-colors hover:text-white"
-          >
-            <LayoutGrid className="h-4 w-4" strokeWidth={2} />
-          </Link>
-          {PILL_NAV.map((entry) => {
-            const isActive = entry.href === activeHref;
-            return (
-              <Link
-                key={entry.href}
-                href={entry.href}
-                className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-                  isActive ? "bg-[#c4b5fd] text-[#171326]" : "text-white/55 hover:text-white"
-                }`}
-              >
-                {entry.label}
-              </Link>
-            );
-          })}
-          <div className="mx-0.5 h-4 w-px shrink-0 bg-white/10" />
-          {ICON_NAV.map((entry) => {
-            const isActive = entry.href === activeHref;
-            const Icon = entry.icon;
-            return (
-              <Link
-                key={entry.href}
-                href={entry.href}
-                aria-label={entry.label}
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${
-                  isActive ? "bg-[#c4b5fd] text-[#171326]" : "text-white/45 hover:text-white"
-                }`}
-              >
-                <Icon className="h-4 w-4" strokeWidth={2} />
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="relative shrink-0 rounded-full bg-[#171326] p-1.5 shadow-sm">
-          <button
-            type="button"
-            onClick={() => setAllPagesOpen((v) => !v)}
-            aria-label="All pages"
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${
-              allPagesOpen ? "bg-[#c4b5fd] text-[#171326]" : "text-white/45 hover:text-white"
-            }`}
-          >
-            <Grid3x3 className="h-4 w-4" strokeWidth={2} />
-          </button>
-
-          <AnimatePresence>
-            {allPagesOpen && (
-              <>
-                <button
-                  type="button"
-                  aria-label="Close all pages"
-                  onClick={() => setAllPagesOpen(false)}
-                  className="fixed inset-0 z-30 cursor-default"
-                />
-                <motion.div
-                  initial={{ opacity: 0, y: -8, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.97 }}
-                  transition={{ duration: 0.15, ease: EASE }}
-                  className="absolute left-1/2 z-40 mt-3 w-[23rem] -translate-x-1/2 overflow-hidden rounded-2xl border border-ink/[.06] bg-surface p-3 shadow-xl"
-                >
-                  <p className="px-2 pb-2 pt-1 text-xs font-bold uppercase tracking-wide text-foreground/40">All pages</p>
-                  <div className="grid grid-cols-4 gap-1">
-                    {ALL_PAGES.map((item, i) => {
-                      const isActive = item.href === activeHref;
-                      const Icon = item.icon;
-                      return (
-                        <motion.div
-                          key={item.href}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.18, delay: i * 0.02, ease: EASE }}
-                        >
-                          <Link
-                            href={item.href}
-                            onClick={() => setAllPagesOpen(false)}
-                            className="flex flex-col items-center gap-1.5 rounded-xl px-1 py-2.5 text-center transition-colors hover:bg-ink/[.04]"
-                          >
-                            <motion.span
-                              whileHover={{ scale: 1.08 }}
-                              whileTap={{ scale: 0.95 }}
-                              className={`flex h-10 w-10 items-center justify-center rounded-xl transition-colors ${
-                                isActive
-                                  ? "bg-indigo-50 text-[#45157b] dark:bg-indigo-500/15 dark:text-[#c4b5fd]"
-                                  : "bg-ink/[.04] text-foreground/60"
-                              }`}
-                            >
-                              <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
-                            </motion.span>
-                            <span
-                              className={`text-[10.5px] leading-tight ${
-                                isActive ? "font-semibold text-[#45157b] dark:text-[#c4b5fd]" : "text-foreground/70"
-                              }`}
-                            >
-                              {item.label}
-                            </span>
-                          </Link>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
-        </div>
+        <img src="/logo-icon.png" alt="" className="h-6 w-auto lg:hidden" />
+        <h1 className="truncate text-lg font-bold tracking-tight text-foreground">{title}</h1>
       </div>
 
       <div className="flex shrink-0 items-center gap-1.5">

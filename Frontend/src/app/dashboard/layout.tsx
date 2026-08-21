@@ -67,7 +67,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <ThemeProvider>
       <div className="flex min-h-screen bg-gradient-to-b from-indigo-100 via-indigo-50/40 to-white dark:bg-background dark:bg-none">
-        <div className="hidden">
+        <div className="hidden lg:block">
           <Sidebar trial={trial} />
         </div>
 

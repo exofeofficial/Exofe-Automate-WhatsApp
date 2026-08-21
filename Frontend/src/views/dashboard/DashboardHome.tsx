@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, type Variants } from "framer-motion";
 import { ArrowUpRight, Bot, CheckCircle2, Clock, Inbox, MessageCircle, Package, Play, Wallet } from "lucide-react";
-import { getUserProfile } from "@/lib/user";
+import { getUserProfile, setUserProfile } from "@/lib/user";
 import {
   ApiError,
   getDashboardActivity,
   getDashboardSummary,
+  getMe,
   getTrialStatus,
   type ActivityItem,
   type DashboardSummary,
@@ -73,10 +74,21 @@ export default function DashboardHome() {
   const [selectedActivity, setSelectedActivity] = useState(0);
 
   useEffect(() => {
+    // Instant guess from the local cache (may be empty on a fresh
+    // subdomain — app.exofe.com never shares exofe.com's localStorage),
+    // then the real name from the backend once it resolves.
     const profile = getUserProfile();
     setFirstName(profile?.firstName ?? "there");
     setLastName(profile?.lastName ?? "");
     setNow(new Date());
+
+    getMe()
+      .then((me) => {
+        setFirstName(me.firstName);
+        setLastName(me.lastName);
+        setUserProfile(me);
+      })
+      .catch(() => {});
 
     getDashboardSummary()
       .then((res) => setSummary(res.summary))

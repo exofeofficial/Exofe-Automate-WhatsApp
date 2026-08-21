@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import CurrentUser, get_current_user
 from app.core.rate_limit import limiter
 from app.database.session import get_db
 from app.models.auth import (
@@ -11,6 +12,7 @@ from app.models.auth import (
     GoogleAuthRequest,
     InviteDetailsResponse,
     LoginRequest,
+    MeResponse,
     MessageResponse,
     OtpRequestBody,
     OtpVerifyBody,
@@ -19,6 +21,7 @@ from app.models.auth import (
     TokenResponse,
     VerifyEmailRequest,
 )
+from app.repositories import user_repository
 from app.services.auth_service import AuthError
 from app.services import auth_service
 
@@ -180,6 +183,20 @@ def accept_invite(request: Request, body: AcceptInviteRequest, db: DbSession):
         raise _handle_auth_error(exc)
 
     return TokenResponse(token=token)
+
+
+# ── GET /auth/me ──────────────────────────────────────────────────────────────
+# The real source of truth for the signed-in user's name — the frontend's
+# own localStorage cache is only a same-origin guess-from-email fallback,
+# which breaks the moment a session moves between exofe.com and
+# app.exofe.com (localStorage never crosses subdomains).
+
+@router.get("/me", response_model=MeResponse)
+def get_me(current: Annotated[CurrentUser, Depends(get_current_user)], db: DbSession):
+    user = user_repository.get_user_by_id(db, current.user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail={"message": "Account no longer exists"})
+    return MeResponse(first_name=user["first_name"], last_name=user["last_name"], email=user["email"])
 
 
 # ── POST /auth/logout ────────────────────────────────────────────────────────

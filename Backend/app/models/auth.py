@@ -138,6 +138,12 @@ class InviteDetailsResponse(_CamelModel):
     role: str
 
 
+class MeResponse(_CamelModel):
+    first_name: str
+    last_name: str
+    email: str
+
+
 class MessageResponse(BaseModel):
     message: str
 

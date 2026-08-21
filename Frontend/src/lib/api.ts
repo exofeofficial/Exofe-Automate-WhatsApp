@@ -336,6 +336,14 @@ export function resetPassword(email: string, code: string, newPassword: string) 
   });
 }
 
+// The real source of truth for the signed-in user's name — lib/user.ts's
+// localStorage cache is only a same-origin guess-from-email fallback for
+// the instant after login, before this resolves.
+// Expected: GET /auth/me -> 200 { firstName, lastName, email }
+export function getMe() {
+  return request<{ firstName: string; lastName: string; email: string }>("/auth/me");
+}
+
 // Team invite acceptance — the link from the invite email lands on
 // /accept-invite?token=..., which reads the invite details before asking
 // for a name/password, then logs the new member straight in.

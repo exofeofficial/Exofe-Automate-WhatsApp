@@ -22,9 +22,9 @@ import {
   UsersRound,
 } from "lucide-react";
 import { clearToken } from "@/lib/auth";
-import { getUserProfile } from "@/lib/user";
+import { getUserProfile, setUserProfile } from "@/lib/user";
 import { useTheme } from "@/components/dashboard/ThemeProvider";
-import { getNotifications, markNotificationsRead, type Notification } from "@/lib/api";
+import { getMe, getNotifications, markNotificationsRead, type Notification } from "@/lib/api";
 import { NAV, flatNavItemsWithIcons, getActiveNavHref } from "@/components/dashboard/Sidebar";
 
 // Only the top-level links show up in the pill nav — a full flatten of NAV
@@ -79,9 +79,17 @@ export default function Topbar({ title }: { title: string }) {
 
   // Reads localStorage, has to happen after mount so the server render
   // and first client render match (same pattern used across the
-  // dashboard for client only data).
+  // dashboard for client only data). That cache may be empty on a fresh
+  // subdomain — app.exofe.com never shares exofe.com's localStorage —
+  // so the real name follows right behind from the backend.
   useEffect(() => {
     setProfile(getUserProfile());
+    getMe()
+      .then((me) => {
+        setProfile(me);
+        setUserProfile(me);
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {

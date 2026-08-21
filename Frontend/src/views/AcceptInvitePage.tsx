@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion, type Variants } from "framer-motion";
 import { Eye, EyeOff, Loader2, MailWarning, UserPlus } from "lucide-react";
 import { ApiError, acceptInvite, getInviteDetails, type InviteDetails } from "@/lib/api";
-import { setToken } from "@/lib/auth";
+import { goToDashboard, setToken } from "@/lib/auth";
 import BrandLogo from "@/components/BrandLogo";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -73,7 +73,7 @@ export default function AcceptInvitePage() {
     try {
       const { token: authToken } = await acceptInvite({ token, firstName, lastName, password });
       setToken(authToken);
-      router.push("/dashboard");
+      goToDashboard(router);
     } catch (err) {
       setSubmitError(err instanceof ApiError ? err.message : "Couldn't complete setup. Please try again.");
       setSubmitting(false);

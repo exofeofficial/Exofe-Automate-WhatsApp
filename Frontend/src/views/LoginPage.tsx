@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion, type Variants } from "framer-motion";
 import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
 import { ApiError, googleAuth, login, requestOtp, verifyOtp } from "@/lib/api";
-import { setToken } from "@/lib/auth";
+import { goToDashboard, setToken } from "@/lib/auth";
 import { ensureUserProfile, setUserProfile } from "@/lib/user";
 import { decodeGoogleIdToken } from "@/lib/google";
 import BrandLogo from "@/components/BrandLogo";
@@ -65,7 +65,7 @@ export default function LoginPage() {
       const { token } = await login({ email, password });
       setToken(token);
       ensureUserProfile(email);
-      router.push("/dashboard");
+      goToDashboard(router);
     } catch (err) {
       setStatus("idle");
       setErrors({
@@ -110,7 +110,7 @@ export default function LoginPage() {
       const { token } = await verifyOtp(email, code);
       setToken(token);
       ensureUserProfile(email);
-      router.push("/dashboard");
+      goToDashboard(router);
     } catch (err) {
       setStatus("idle");
       setErrors({
@@ -126,7 +126,7 @@ export default function LoginPage() {
       setToken(token);
       const info = decodeGoogleIdToken(idToken);
       if (info) setUserProfile(info);
-      router.push("/dashboard");
+      goToDashboard(router);
     } catch (err) {
       setSocialNotice(err instanceof ApiError ? err.message : "Something went wrong.");
     }

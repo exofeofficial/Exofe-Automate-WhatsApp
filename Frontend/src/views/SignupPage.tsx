@@ -7,7 +7,7 @@ import { motion, type Variants } from "framer-motion";
 import { CheckCircle2, Eye, EyeOff, Loader2, MailCheck } from "lucide-react";
 import { ApiError, googleAuth, signUp, signUpWithProvider, verifyEmail, type SignUpPayload } from "@/lib/api";
 import { COUNTRIES, PHONE_PLACEHOLDER } from "@/lib/countries";
-import { setToken } from "@/lib/auth";
+import { goToDashboard, setToken } from "@/lib/auth";
 import { setUserProfile } from "@/lib/user";
 import { decodeGoogleIdToken } from "@/lib/google";
 import { fbEvent } from "@/lib/fbpixel";
@@ -114,7 +114,7 @@ export default function SignupPage() {
       // signup is withheld from storage until the email is confirmed.
       if (pendingToken) setToken(pendingToken);
       fbEvent("CompleteRegistration", { content_name: "Email Signup", status: true });
-      router.push("/dashboard");
+      goToDashboard(router);
     } catch (err) {
       setVerifyStatus("idle");
       setCode("");
@@ -177,7 +177,7 @@ export default function SignupPage() {
       const info = decodeGoogleIdToken(idToken);
       if (info) setUserProfile(info);
       fbEvent("CompleteRegistration", { content_name: "Google Signup", status: true });
-      router.push("/dashboard");
+      goToDashboard(router);
     } catch (err) {
       setSocialNotice(err instanceof ApiError ? err.message : "Something went wrong.");
     }

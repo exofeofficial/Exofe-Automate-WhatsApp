@@ -4,6 +4,9 @@
   "name": "exofe",
   "compatibility_date": "2026-07-20",
   "compatibility_flags": ["nodejs_compat"],
+  "routes": [
+    { "pattern": "app.exofe.com/*", "custom_domain": true }
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

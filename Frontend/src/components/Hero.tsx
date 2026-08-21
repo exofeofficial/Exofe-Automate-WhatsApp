@@ -53,7 +53,7 @@ export default function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useLayoutEffect(() => {
-    if (videoRef.current) videoRef.current.playbackRate = 0.5;
+    if (videoRef.current) videoRef.current.playbackRate = 0.75;
   }, []);
 
   useLayoutEffect(() => {
@@ -95,13 +95,13 @@ export default function Hero() {
           muted
           loop
           playsInline
-          className="absolute inset-0 h-full w-full object-cover brightness-[0.55] saturate-[0.8]"
+          className="absolute inset-0 h-full w-full object-cover brightness-[0.75] saturate-[0.95]"
         >
           <source src="/BV1.mp4" type="video/mp4" />
         </video>
 
         {/* dark overlay so the white text stays legible over any footage */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-black/80" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/65" />
 
         <motion.div
           ref={revealRef}

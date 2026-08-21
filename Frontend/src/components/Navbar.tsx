@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { Menu, Play, X } from "lucide-react";
-import BrandLogo from "@/components/BrandLogo";
 
 const NAV_LINKS = [
   { label: "Home", href: "#home" },
@@ -40,9 +39,10 @@ export default function Navbar() {
     setIsOpen(false);
   };
 
-  // hide on scroll down, reappear with a bg on scroll up, transparent at the top
+  // hide on scroll down, reappear on scroll up — the pill floats over the
+  // page at every scroll position, so it always carries its own shadow
+  // (no more "transparent at the top" state, there's no bar to blend in)
   const [hidden, setHidden] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const lastY = useRef(0);
   const { scrollY } = useScroll();
 
@@ -51,12 +51,10 @@ export default function Navbar() {
 
     if (latest < 80) {
       setHidden(false);
-      setScrolled(false);
     } else if (delta > 4) {
       setHidden(true);
     } else if (delta < -4) {
       setHidden(false);
-      setScrolled(true);
     }
 
     lastY.current = latest;
@@ -66,104 +64,88 @@ export default function Navbar() {
     <>
       <motion.header
         initial={{ y: -20, opacity: 0 }}
-        animate={{ y: isOpen || !hidden ? 0 : "-100%", opacity: 1 }}
+        animate={{ y: isOpen || !hidden ? 0 : "-120%", opacity: 1 }}
         transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className={`fixed top-0 z-50 w-full transition-colors duration-300 ${
-          scrolled ? "border-b border-black/[.06] bg-white/85 shadow-sm backdrop-blur-md" : "bg-transparent"
-        }`}
+        className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-3 sm:pt-4"
       >
-        <nav className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-6">
-        <BrandLogo />
-
-        <ul className="hidden items-center gap-9 lg:flex">
-          {NAV_LINKS.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                onClick={(e) => scrollToSection(e, link.href)}
-                className="relative block h-[20px] overflow-hidden text-[15px] font-medium"
-              >
-                <motion.span
-                  className="flex flex-col"
-                  initial={false}
-                  whileHover={{ y: -20 }}
-                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  <span className="leading-[20px] text-foreground/60">{link.label}</span>
-                  <span className="leading-[20px] font-semibold text-[#171326]">{link.label}</span>
-                </motion.span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-
-        <div className="hidden items-center gap-3 lg:flex">
-          <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
-            <Link
-              href="/demo"
-              className="shine-btn relative flex items-center gap-1.5 overflow-hidden rounded-xl border border-indigo-100 bg-indigo-50 px-3.5 py-2 text-xs font-semibold text-[#5B4FE9] transition-colors hover:bg-indigo-100"
-            >
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#5B4FE9]">
-                <Play className="ml-0.5 h-2 w-2 fill-white text-white" strokeWidth={0} />
-              </span>
-              Book a Demo
+        <div className="flex w-full max-w-3xl items-center gap-2">
+          <nav className="flex min-w-0 flex-1 items-center gap-1 rounded-full border border-black/[.06] bg-white/95 py-1.5 pl-1.5 pr-2 shadow-lg shadow-black/[.06] backdrop-blur-md">
+            {/* round icon-only logo */}
+            <Link href="/" aria-label="Exofe" className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/NAVlogo.jpg" alt="" className="h-full w-full object-cover" />
             </Link>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+
+            <ul className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 lg:flex">
+              {NAV_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    onClick={(e) => scrollToSection(e, link.href)}
+                    className="block whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium text-foreground/65 transition-colors hover:bg-black/[.04] hover:text-foreground"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            <button
+              type="button"
+              aria-label={isOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isOpen}
+              onClick={() => setIsOpen((prev) => !prev)}
+              className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-black/[.04] lg:hidden"
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {isOpen ? (
+                  <motion.span
+                    key="close"
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex"
+                  >
+                    <X className="h-5 w-5 text-foreground" strokeWidth={2} />
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="open"
+                    initial={{ rotate: 90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: -90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex"
+                  >
+                    <Menu className="h-5 w-5 text-foreground" strokeWidth={2} />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </button>
+          </nav>
+
+          <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="hidden shrink-0 lg:block">
             <Link
               href="/signup"
-              className="shine-btn relative flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-[#2a2350] to-[#171326] px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-indigo-900/25 transition-shadow hover:shadow-indigo-900/40"
+              className="shine-btn relative flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-b from-[#2a2350] to-[#171326] px-5 py-3 text-xs font-semibold text-white shadow-lg shadow-indigo-900/25 transition-shadow hover:shadow-indigo-900/40"
             >
               Try Exofe for Free
             </Link>
           </motion.div>
         </div>
-
-        <button
-          type="button"
-          aria-label={isOpen ? "Close menu" : "Open menu"}
-          aria-expanded={isOpen}
-          onClick={() => setIsOpen((prev) => !prev)}
-          className="relative z-50 flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-black/[.04] lg:hidden"
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            {isOpen ? (
-              <motion.span
-                key="close"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="flex"
-              >
-                <X className="h-5 w-5 text-foreground" strokeWidth={2} />
-              </motion.span>
-            ) : (
-              <motion.span
-                key="open"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="flex"
-              >
-                <Menu className="h-5 w-5 text-foreground" strokeWidth={2} />
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </button>
-      </nav>
+      </motion.header>
 
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden border-t border-black/[.06] bg-white lg:hidden"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-x-4 top-[4.75rem] z-40 overflow-hidden rounded-3xl border border-black/[.06] bg-white shadow-xl shadow-black/10 lg:hidden"
           >
-            <ul className="flex flex-col gap-1 px-6 py-4">
+            <ul className="flex flex-col gap-1 p-4">
               {NAV_LINKS.map((link, index) => (
                 <motion.li
                   key={link.href}
@@ -174,7 +156,7 @@ export default function Navbar() {
                   <Link
                     href={link.href}
                     onClick={(e) => scrollToSection(e, link.href)}
-                    className="block rounded-lg px-3 py-2.5 text-base font-medium text-foreground/70 transition-colors hover:bg-black/[.04] hover:text-foreground"
+                    className="block rounded-xl px-3 py-2.5 text-base font-medium text-foreground/70 transition-colors hover:bg-black/[.04] hover:text-foreground"
                   >
                     {link.label}
                   </Link>
@@ -208,10 +190,6 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
-      </motion.header>
-
-      {/* fixed header no longer sits in flow — reserve its height so content doesn't jump */}
-      <div className="h-20" />
     </>
   );
 }

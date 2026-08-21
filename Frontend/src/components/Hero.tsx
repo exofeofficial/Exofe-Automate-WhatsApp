@@ -1,12 +1,11 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { motion, type Variants } from "framer-motion";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
-import { ArrowRight, Play, Sparkles, Code2, Webhook } from "lucide-react";
+import { ArrowRight, ChevronDown, Play, Sparkles, Code2, Webhook } from "lucide-react";
 import { ShopifyIcon, WhatsAppIcon } from "@/components/dashboard/IntegrationIcons";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -23,62 +22,6 @@ const item: Variants = {
   hidden: { y: 14, opacity: 1 },
   show: { y: 0, opacity: 1, transition: { duration: 0.5, ease: EASE } },
 };
-
-/* GSAP text reveal: heading = SplitText chars (skewX + opacity), paragraph = word color fade */
-
-const PARA_DIM = "rgba(23,23,23,0.28)";
-const PARA_FULL = "rgba(23,23,23,0.62)";
-
-const PARAGRAPH_WORDS =
-  "Exofe connects your business, products, customers, and WhatsApp conversations into one intelligent commerce platform."
-    .split(" ")
-    .map((text) => ({ text }));
-
-function RevealWords({
-  words,
-  wordClass,
-  dimColor,
-  className,
-}: {
-  words: { text: string; italic?: boolean; breakAfter?: boolean }[];
-  wordClass: string;
-  dimColor: string;
-  className?: string;
-}) {
-  return (
-    <span className={className}>
-      {words.map((w, i) => (
-        <span key={i}>
-          <span className={`${wordClass}${w.italic ? " italic" : ""}`} style={{ color: dimColor }}>
-            {w.text}
-          </span>
-          {i < words.length - 1 && !w.breakAfter ? " " : ""}
-          {w.breakAfter && <br className="hidden sm:block" />}
-        </span>
-      ))}
-    </span>
-  );
-}
-
-function DashboardMockup() {
-  return (
-    <div className="relative mx-auto w-full max-w-[640px]" style={{ perspective: "1800px" }}>
-      {/* soft ambient shadow beneath the tilted card — separate blurred
-          blob reads better than a plain box-shadow once the card is
-          actually rotated in 3D */}
-      <div className="absolute inset-x-10 -bottom-6 h-20 rounded-full bg-[#45157b]/25 blur-3xl" />
-
-      <div
-        className="relative overflow-hidden rounded-2xl border border-black/[.06] bg-white shadow-[0_50px_100px_-25px_rgba(69,21,123,0.4)]"
-        style={{ transform: "rotateY(-10deg) rotateX(4deg) rotateZ(-1deg)", transformStyle: "preserve-3d" }}
-      >
-        <div className="relative aspect-[1744/902] w-full">
-          <Image src="/dashboard-preview.png" alt="Exofe dashboard" fill className="object-cover object-top" priority />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const INTEGRATIONS = [
   { label: "WhatsApp", render: () => <span className="flex h-7 w-7 items-center justify-center [&>svg]:h-full [&>svg]:w-full sm:h-9 sm:w-9 lg:h-11 lg:w-11"><WhatsAppIcon /></span> },
@@ -107,6 +50,11 @@ export default function Hero() {
   const revealRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useLayoutEffect(() => {
+    if (videoRef.current) videoRef.current.playbackRate = 0.5;
+  }, []);
 
   useLayoutEffect(() => {
     gsap.registerPlugin(SplitText);
@@ -122,19 +70,11 @@ export default function Hero() {
       split = new SplitText(headingRef.current, { type: "words, chars", wordsClass: "split-word" });
       gsap.set(split.chars, { transformPerspective: 400 });
 
-      gsap
-        .timeline()
-        .fromTo(
-          split.chars,
-          { skewX: 30, opacity: 0 },
-          { skewX: 0, opacity: 1, ease: "none", stagger: { each: 0.5 / split.chars.length, from: "start" } }
-        )
-        .fromTo(
-          ".reveal-word-para",
-          { color: PARA_DIM },
-          { color: PARA_FULL, stagger: 0.025, ease: "none" },
-          "<+=0.3"
-        );
+      gsap.fromTo(
+        split.chars,
+        { skewX: 30, opacity: 0 },
+        { skewX: 0, opacity: 1, ease: "none", stagger: { each: 0.5 / split.chars.length, from: "start" } }
+      );
     }, sectionRef);
 
     return () => {
@@ -144,30 +84,36 @@ export default function Hero() {
   }, []);
 
   return (
-    <section id="home" ref={sectionRef} className="relative flex min-h-[90vh] flex-col overflow-hidden bg-white scroll-mt-20">
-      {/* backdrop: soft glow, no dot particles */}
-      <div className="pointer-events-none absolute inset-0">
-        <motion.div
-          animate={{ opacity: [0.5, 0.8, 0.5] }}
-          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute right-[-10%] top-[10%] h-[42rem] w-[42rem] rounded-full bg-[radial-gradient(circle,_rgba(109,94,252,0.25)_0%,_rgba(217,70,239,0.12)_45%,_transparent_70%)] blur-2xl"
-        />
-        <div className="absolute left-[-15%] bottom-[-20%] h-96 w-96 rounded-full bg-sky-300/25 blur-3xl" />
-      </div>
+    <>
+      <section id="home" ref={sectionRef} className="relative flex h-screen min-h-[640px] flex-col overflow-hidden bg-[#171326] scroll-mt-20">
+        {/* fullscreen background video, dulled and slowed down so it reads
+            as ambient texture behind the text rather than competing for
+            attention */}
+        <video
+          ref={videoRef}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover brightness-[0.55] saturate-[0.8]"
+        >
+          <source src="/BV1.mp4" type="video/mp4" />
+        </video>
 
-      <motion.div
-        ref={revealRef}
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="relative mx-auto grid w-full max-w-[1600px] flex-1 content-center grid-cols-1 items-center gap-12 px-4 pt-16 sm:px-8 sm:pt-20 lg:grid-cols-2 lg:gap-8 lg:px-16 xl:px-24"
-      >
-        {/* left: copy */}
-        <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
+        {/* dark overlay so the white text stays legible over any footage */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-black/80" />
+
+        <motion.div
+          ref={revealRef}
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="relative z-10 mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-end px-4 pb-20 text-center sm:px-8 sm:pb-24"
+        >
           {/* badge */}
           <motion.div variants={item}>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-black/[.08] bg-white/70 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-foreground/60 shadow-sm backdrop-blur">
-              <Sparkles className="h-3 w-3 text-[#45157b]" strokeWidth={2.4} />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-white/80 backdrop-blur">
+              <Sparkles className="h-3 w-3 text-[#c4b5fd]" strokeWidth={2.4} />
               AI Commerce Automation
             </span>
           </motion.div>
@@ -176,26 +122,23 @@ export default function Hero() {
           <motion.h1
             ref={headingRef}
             variants={item}
-            className="mt-6 text-[2.4rem] font-medium leading-[1.08] tracking-tight text-foreground sm:text-6xl md:text-[4rem]"
+            className="mt-6 text-[2.4rem] font-medium leading-[1.08] tracking-tight text-white sm:text-6xl md:text-[4rem]"
             style={{ perspective: 400 }}
           >
-            Turn Every <span className="text-[#45157b]">Conversation</span> Into a{" "}
-            <span className="text-[#45157b]">Sale.</span>
+            Turn Every <span className="text-[#c4b5fd]">Conversation</span> Into a{" "}
+            <span className="text-[#c4b5fd]">Sale.</span>
           </motion.h1>
 
-          <motion.p variants={item} className="mt-6 max-w-xl text-sm leading-6 sm:text-base sm:leading-7">
-            <RevealWords words={PARAGRAPH_WORDS} wordClass="reveal-word-para" dimColor={PARA_DIM} />
+          <motion.p variants={item} className="mt-6 max-w-xl text-sm leading-6 text-white/70 sm:text-base sm:leading-7">
+            Exofe connects your business, products, customers, and WhatsApp conversations into one intelligent commerce platform.
           </motion.p>
 
           {/* CTAs */}
-          <motion.div
-            variants={item}
-            className="mt-9 flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row lg:justify-start"
-          >
+          <motion.div variants={item} className="mt-9 flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row">
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
               <Link
                 href="/signup"
-                className="shine-btn relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-b from-[#2a2350] to-[#171326] px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-900/25 transition-shadow hover:shadow-indigo-900/40 sm:w-auto"
+                className="shine-btn relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-[#c4b5fd] px-8 py-3.5 text-sm font-semibold text-[#171326] shadow-lg shadow-black/30 transition-shadow hover:shadow-black/50 sm:w-auto"
               >
                 Get Started Free
                 <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.4} />
@@ -204,42 +147,44 @@ export default function Hero() {
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
               <Link
                 href="/demo"
-                className="flex w-full items-center justify-center gap-2 rounded-full border border-black/[.12] bg-white/70 px-8 py-3.5 text-sm font-semibold text-foreground backdrop-blur transition-colors hover:border-black/25 hover:bg-white sm:w-auto"
+                className="flex w-full items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-8 py-3.5 text-sm font-semibold text-white backdrop-blur transition-colors hover:bg-white/20 sm:w-auto"
               >
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#171326]">
-                  <Play className="ml-0.5 h-2.5 w-2.5 fill-white text-white" strokeWidth={0} />
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white">
+                  <Play className="ml-0.5 h-2.5 w-2.5 fill-[#171326] text-[#171326]" strokeWidth={0} />
                 </span>
                 See How It Works
               </Link>
             </motion.div>
           </motion.div>
 
-          <motion.p variants={item} className="mt-4 text-xs text-foreground/45">
+          <motion.p variants={item} className="mt-4 text-xs text-white/50">
             No credit card required &middot; Setup in minutes
           </motion.p>
-        </div>
-
-        {/* right: dashboard mockup */}
-        <motion.div
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.9, delay: 0.4, ease: EASE }}
-          className="w-full"
-        >
-          <DashboardMockup />
         </motion.div>
-      </motion.div>
+
+        {/* scroll cue */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, y: [0, 6, 0] }}
+          transition={{ opacity: { delay: 1, duration: 0.6 }, y: { delay: 1, duration: 1.6, repeat: Infinity, ease: "easeInOut" } }}
+          className="absolute bottom-6 right-6 z-10 sm:bottom-8 sm:right-10"
+        >
+          <ChevronDown className="h-6 w-6 text-white/50" strokeWidth={2} />
+        </motion.div>
+      </section>
 
       {/* integrations row */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6, ease: EASE }}
-        className="relative z-10 mx-auto w-full max-w-[1600px] px-4 pb-20 pt-24 sm:px-8 sm:pt-28 lg:px-16 xl:px-24"
-      >
-        <IntegrationsRow />
-      </motion.div>
-    </section>
+      <div className="relative bg-white">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: EASE }}
+          className="relative z-10 mx-auto w-full max-w-[1600px] px-4 py-16 sm:px-8 sm:py-20 lg:px-16 xl:px-24"
+        >
+          <IntegrationsRow />
+        </motion.div>
+      </div>
+    </>
   );
 }
